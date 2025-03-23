@@ -6,27 +6,13 @@ Virtual Pantry: Create a digital copy of your real pantry at home.
 
 Add/Remove Items: Easily add new items when you return from the grocery store and remove them when they’re used up.
 
-Expiry Alerts: PantryPal scans your items daily and notifies you when any are close to their expiry date. You can customize the notification timeframe to suit your needs.
+- Future Features
+In a future update, this project will have a visual UI where you will have the following:
 
-How It Works
-Initial Setup: Start by adding all the items in your pantry to PantryPal.
+- Expiry Alerts: PantryPal scans your items daily and notifies you when any are close to their expiry date. You can customize the notification timeframe to suit your needs.
 
-Daily Updates: As you use items in your real pantry, remove them from PantryPal to keep your virtual pantry up-to-date.
+- Available to access via your browser in a home-server
 
-Expiry Notifications: PantryPal will alert you when items are nearing their expiry date, helping you use them before they go to waste.
+- AI Meal Suggestions: If you host a local LLM, you'll be able to use your available pantry items to get a dinner recommendation. If you don't host one, you'll be able to input your AI Provider Token and use that instead.
 
-Getting Started
-To get started with PantryPal, follow these steps:
-
-Clone the repository.
-
-Install the necessary dependencies.
-
-Run the application and start adding your pantry items.
-
-Contributing
-We welcome contributions! If you have any ideas or improvements, please feel free to open an issue or submit a pull request.
-
-License
-This project is licensed under the MIT License - see the LICENSE file for details.
-
+- Expiry Notifications: PantryPal will alert you when items are nearing their expiry date, helping you use them before they go to waste.
