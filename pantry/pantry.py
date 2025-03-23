@@ -7,6 +7,7 @@ from utils.pantry_exceptions import (
     InvalidItemName,
     InvaliExpiryDate,
     ItemNotFoundError,
+    QuantityError,
 )
 
 
@@ -15,29 +16,52 @@ class Pantry:
         self.available_categories = Categories.available_categories()
         self.pantry_db = pantry_db
 
-    def add_item(self, item_name, category, expiry_date):
-        self.validate_all_inputs(item_name, category, expiry_date)
+    def add_item(self, item_name: str, category: str, quantity: int, expiry_date: str):
+        self.validate_all_inputs(item_name, category, quantity, expiry_date)
+
+        pantry_item = self.get_specific_pantry_item(item_name, category, expiry_date)
+        if pantry_item:
+            self.pantry_db.update_item_in_db(
+                item_name, category, pantry_item[2] + quantity, expiry_date
+            )
+            return
 
         self.pantry_db.add_item_to_db(
-            item_name, category, expiry_date, datetime.today().strftime("%Y-%m-%d")
+            item_name,
+            category,
+            quantity,
+            expiry_date,
+            datetime.today().strftime("%Y-%m-%d"),
         )
 
-    def remove_item(self, item_name, category, expiry_date):
-        self.validate_all_inputs(item_name, category, expiry_date)
+    def remove_item(
+        self, item_name: str, category: str, quantity: int, expiry_date: str
+    ):
+        self.validate_all_inputs(item_name, category, quantity, expiry_date)
 
-        pantry_items = self.get_pantry_items()
-        if not pantry_items:
+        pantry_item = self.get_specific_pantry_item(item_name, category, expiry_date)
+        if not pantry_item:
             raise ItemNotFoundError(item_name)
 
-        for item in pantry_items:
-            if item[0] == item_name and item[1] == category and item[2] == expiry_date:
-                self.pantry_db.remove_item_from_db(item_name, category, expiry_date)
-            else:
-                raise ItemNotFoundError(item_name)
+        if pantry_item and pantry_item[2] >= quantity:
+            self.pantry_db.update_item_in_db(
+                item_name, category, pantry_item[2] - quantity, expiry_date
+            )
+            return
+        elif pantry_item and pantry_item[2] < quantity:
+            raise QuantityError(pantry_item[2], quantity)
+        else:
+            raise ItemNotFoundError(item_name)
 
-    def get_pantry_items(self):
+    def get_all_pantry_items(self):
         results = self.pantry_db.check_all_pantry_items()
         return results.fetchall()
+
+    def get_specific_pantry_item(self, item_name, category, expiry_date):
+        results = self.pantry_db.check_specific_pantry_item(
+            item_name, category, expiry_date
+        )
+        return results.fetchone()
 
     def validate_item_name(self, item_name):
         if not isinstance(item_name, str):
@@ -47,13 +71,21 @@ class Pantry:
         if category not in self.available_categories:
             raise CategoryNotFoundError(category, self.available_categories)
 
+    def validate_quantity(self, quantity):
+        if not isinstance(quantity, int):
+            raise ValueError("Quantity must be a positive number")
+
+        if quantity < 1:
+            raise ValueError("Quantity must be a positive number")
+
     def validate_date(self, date):
         try:
             datetime.strptime(date, "%Y-%m-%d")
         except Exception:
             raise InvaliExpiryDate(date)
 
-    def validate_all_inputs(self, item_name, category, expiry_date):
+    def validate_all_inputs(self, item_name, category, quantity, expiry_date):
         self.validate_item_name(item_name)
         self.validate_category(category)
+        self.validate_quantity(quantity)
         self.validate_date(expiry_date)
