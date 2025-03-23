@@ -1,12 +1,16 @@
 PantryPal
 PantryPal is a project designed to help you keep track of your pantry items and reduce food waste. We’ve all been there—finding that forgotten item buried deep in the pantry, only to discover it expired months ago. With PantryPal, you can stay on top of your pantry inventory and avoid those frustrating moments.
 
-Features
-Virtual Pantry: Create a digital copy of your real pantry at home.
+# Available Features
 
-Add/Remove Items: Easily add new items when you return from the grocery store and remove them when they’re used up.
+At this current stage, PantryPal is only available for CLI usage.
 
-- Future Features
+- Virtual Pantry: Create a digital copy of your real pantry at home.
+
+- Add/Remove Items: Easily add new items when you return from the grocery store and remove them when they’re used up.
+
+
+# Future Features
 In a future update, this project will have a visual UI where you will have the following:
 
 - Expiry Alerts: PantryPal scans your items daily and notifies you when any are close to their expiry date. You can customize the notification timeframe to suit your needs.
