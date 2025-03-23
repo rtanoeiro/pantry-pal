@@ -41,6 +41,12 @@ class TestPantry(unittest.TestCase):
         self.assertEqual(len(pantry_items), 1)
         self.assertEqual(pantry_items[0][2], 1)
 
+    def test_delete_item(self):
+        self.pantry.add_item("rice 1 kg", "grains", 1, "2025-12-01")
+        self.pantry.delete_item("rice 1 kg", "grains", "2025-12-01")
+
+        self.assertEqual(len(self.pantry.get_all_pantry_items()), 0)
+
     def test_remove_more_than_available(self):
         self.pantry.add_item("rice 1 kg", "grains", 1, "2025-12-01")
         pantry_items = self.pantry.get_all_pantry_items()

@@ -77,6 +77,24 @@ class PantryDB:
             cursor.execute(update_query, to_update_tuple)
             conn.commit()
 
+    def delete_item_in_db(self, item_name, category, expiry_date):
+        delete_query = """
+            DELETE FROM pantry
+            WHERE item_name = ?
+                AND category = ?
+                AND expiry_date = ?;
+        """
+        to_delete_tuple = (
+            item_name,
+            category,
+            expiry_date,
+        )
+
+        with self.__enter__() as conn:
+            cursor = conn.cursor()
+            cursor.execute(delete_query, to_delete_tuple)
+            conn.commit()
+
     def check_all_pantry_items(self):
         with self.__enter__() as conn:
             cursor = conn.cursor()

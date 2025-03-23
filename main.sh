@@ -12,9 +12,10 @@ show_menu() {
     printf "${GREEN}Welcome to PantryPal! What would you like to do today?${RESET}\n"
     printf "${YELLOW}1. Add an item${RESET}\n"
     printf "${YELLOW}2. Remove an item${RESET}\n"
-    printf "${YELLOW}3. Check Available Items${RESET}\n"
-    printf "${RED}4. Exit${RESET}\n"
-    printf "${BLUE}Enter your choice (1/2/3/4): ${RESET}"
+    printf "${YELLOW}3. Delete Items from table${RESET}\n"
+    printf "${YELLOW}4. Check Available Items${RESET}\n"
+    printf "${RED}5. Exit${RESET}\n"
+    printf "${BLUE}Enter your choice (1/2/3/4/5): ${RESET}"
 }
 
 # Function to add an item
@@ -47,6 +48,18 @@ remove_item() {
     python3 main.py remove "$item_name" "$category" "$quantity" "$expiry_date"
 }
 
+delete_item() {
+    printf "${GREEN}Enter the item name to delete: ${RESET}"
+    read item_name
+    printf "${GREEN}Enter the item category: ${RESET}"
+    read category
+    printf "${GREEN}Enter the expiry date (YYYY-MM-DD): ${RESET}"
+    read expiry_date
+
+    # Call the Python script for removing an item
+    python3 main.py delete "$item_name" "$category" "0" "$expiry_date"
+}
+
 # Function to check items
 check_items() {
     # Call the Python script for checking items
@@ -62,8 +75,10 @@ while true; do
     elif [[ $choice == 2 ]]; then
         remove_item
     elif [[ $choice == 3 ]]; then
-        check_items
+        delete_item
     elif [[ $choice == 4 ]]; then
+        check_items
+    elif [[ $choice == 5 ]]; then
         printf "${GREEN}Exiting PantryPal. Goodbye!${RESET}\n"
         break
     else

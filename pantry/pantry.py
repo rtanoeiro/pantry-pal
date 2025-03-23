@@ -53,7 +53,16 @@ class Pantry:
         else:
             raise ItemNotFoundError(item_name)
 
-    def get_all_pantry_items(self):
+    def delete_item(self, item_name: str, category: str, expiry_date: str):
+        self.validate_all_inputs(item_name, category, 1, expiry_date)
+
+        pantry_item = self.get_specific_pantry_item(item_name, category, expiry_date)
+        if not pantry_item:
+            raise ItemNotFoundError(item_name)
+
+        self.pantry_db.delete_item_in_db(item_name, category, expiry_date)
+
+    def show_all_pantry_items(self):
         results = self.pantry_db.check_all_pantry_items()
         header = f"| {'Item Name':<41}| {'Category':<21}| {'Quantity':<9}| {'Expiry Date':<12}|"
         separator = f"+{'-' * 42}+{'-' * 22}+{'-' * 10}+{'-' * 13}+"
@@ -64,6 +73,9 @@ class Pantry:
             # Print in a nice format:
             print(f"| {row[0]:<41}| {row[1]:<21}| {row[2]:<9}| {row[3]:<12}|")
             print(separator)
+
+    def get_all_pantry_items(self):
+        results = self.pantry_db.check_all_pantry_items()
         return results.fetchall()
 
     def get_specific_pantry_item(self, item_name, category, expiry_date):

@@ -18,9 +18,11 @@ def main():
         print(
             f" Trying to remove {quantity} item: {item_name}, Category: {category}, Expiry: {expiry_date}"
         )
-        my_pantry.add_item(item_name, category, quantity, expiry_date)
+        my_pantry.remove_item(item_name, category, quantity, expiry_date)
+    elif action == "delete":
+        my_pantry.delete_item(item_name, category, expiry_date)
     elif action == "check":
-        my_pantry.get_all_pantry_items()
+        my_pantry.show_all_pantry_items()
     else:
         print("Invalid option, try again")
 
