@@ -5,9 +5,11 @@ PantryPal is a project designed to help you keep track of your pantry items and 
 
 At this current stage, PantryPal is only available for CLI usage.
 
-- Virtual Pantry: Create a digital copy of your real pantry at home.
+To start using it, just run ```sh main.sh``` while inside the project directory. Once inside the tool, you can:
 
 - Add/Remove Items: Easily add new items when you return from the grocery store and remove them when they’re used up.
+
+- Check Pantry: Check current items available at your Pantry
 
 
 # Future Features
