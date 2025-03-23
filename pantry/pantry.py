@@ -13,8 +13,16 @@ class Pantry:
         if category not in self.available_categories:
             CategoryNotFoundError(category)
 
-        results = self.pantry_db.add_item_to_db(
+        self.pantry_db.add_item_to_db(
             item_name, category, expiry_date, datetime.today().strftime("%Y-%m-%d")
         )
 
-        return results
+    def remove_item(self, item_name, category, expiry_date):
+        if category not in self.available_categories:
+            CategoryNotFoundError(category)
+
+        self.pantry_db.remove_item_from_db(item_name, category, expiry_date)
+
+    def check_pantry_items(self):
+        results = self.pantry_db.check_all_pantry_items()
+        return results.fetchall()
