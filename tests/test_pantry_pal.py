@@ -6,6 +6,7 @@ from utils.pantry_exceptions import (
     CategoryNotFoundError,
     InvalidItemName,
     InvaliExpiryDate,
+    QuantityError,
 )
 from pantry.pantry_db import PantryDB
 
@@ -18,19 +19,40 @@ class TestPantry(unittest.TestCase):
 
     def test_add_item(self):
         self.pantry.add_item("rice 1 kg", "grains", 1, "2025-12-01")
-        pantry_items = self.pantry.get_pantry_items()
+        pantry_items = self.pantry.get_all_pantry_items()
 
         self.assertEqual(pantry_items[0][0], "rice 1 kg")
         self.assertEqual(pantry_items[0][1], "grains")
         self.assertEqual(pantry_items[0][2], 1)
-        self.assertEqual(pantry_items[0][2], "2025-12-01")
+        self.assertEqual(pantry_items[0][3], "2025-12-01")
 
     def test_remove_item(self):
         self.pantry.add_item("rice 1 kg", "grains", 1, "2025-12-01")
         self.pantry.remove_item("rice 1 kg", "grains", 1, "2025-12-01")
 
-        pantry_items = self.pantry.get_pantry_items()
-        self.assertEqual(len(pantry_items), 0)
+        pantry_items = self.pantry.get_all_pantry_items()
+        self.assertEqual(pantry_items[0][2], 0)
+
+    def test_remove_item_but_not_all(self):
+        self.pantry.add_item("rice 1 kg", "grains", 2, "2025-12-01")
+        self.pantry.remove_item("rice 1 kg", "grains", 1, "2025-12-01")
+
+        pantry_items = self.pantry.get_all_pantry_items()
+        self.assertEqual(len(pantry_items), 1)
+        self.assertEqual(pantry_items[0][2], 1)
+
+    def test_remove_more_than_available(self):
+        self.pantry.add_item("rice 1 kg", "grains", 1, "2025-12-01")
+        pantry_items = self.pantry.get_all_pantry_items()
+        self.assertRaises(
+            QuantityError,
+            self.pantry.remove_item,
+            "rice 1 kg",
+            "grains",
+            2,
+            "2025-12-01",
+        )
+        self.assertEqual(pantry_items[0][2], 1)
 
     def test_remove_item_doesnt_exist(self):
         self.assertRaises(
@@ -57,14 +79,14 @@ class TestPantry(unittest.TestCase):
         self.pantry.add_item("rice 2 kg", "grains", 2, "2025-12-01")
         self.pantry.add_item("rice 3 kg", "grains", 1, "2025-12-01")
 
-        pantry_items = self.pantry.get_pantry_items()
+        pantry_items = self.pantry.get_all_pantry_items()
         self.assertEqual(len(pantry_items), 3)
 
     def test_add_items_different_categories(self):
         self.pantry.add_item("rice 1 kg", "grains", 1, "2025-12-01")
         self.pantry.add_item("apple", "fruits", 3, "2025-12-01")
 
-        pantry_items = self.pantry.get_pantry_items()
+        pantry_items = self.pantry.get_all_pantry_items()
         self.assertEqual(len(pantry_items), 2)
 
     def test_add_item_invalid_expiry_date(self):
