@@ -43,3 +43,27 @@ class TestPantry(unittest.TestCase):
             "grain",
             "2025-12-01",
         )
+
+    def test_add_multiple_items(self):
+        self.pantry.add_item("rice 1 kg", "grains", "2025-12-01")
+        self.pantry.add_item("rice 2 kg", "grains", "2025-12-01")
+        self.pantry.add_item("rice 3 kg", "grains", "2025-12-01")
+
+        pantry_items = self.pantry.get_pantry_items()
+        self.assertEqual(len(pantry_items), 3)
+
+    def test_add_items_different_categories(self):
+        self.pantry.add_item("rice 1 kg", "grains", "2025-12-01")
+        self.pantry.add_item("apple", "fruits", "2025-12-01")
+
+        pantry_items = self.pantry.get_pantry_items()
+        self.assertEqual(len(pantry_items), 2)
+
+    def test_add_item_invalid_expiry_date(self):
+        self.assertRaises(
+            ValueError, self.pantry.add_item, "rice 1 kg", "grains", "2025-13-01"
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()
