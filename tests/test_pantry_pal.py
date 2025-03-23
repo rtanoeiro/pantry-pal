@@ -1,7 +1,12 @@
 import unittest
 
 from pantry.pantry import Pantry
-from utils.pantry_exceptions import ItemNotFoundError, CategoryNotFoundError
+from utils.pantry_exceptions import (
+    ItemNotFoundError,
+    CategoryNotFoundError,
+    InvalidItemName,
+    InvaliExpiryDate,
+)
 from pantry.pantry_db import PantryDB
 
 
@@ -61,7 +66,22 @@ class TestPantry(unittest.TestCase):
 
     def test_add_item_invalid_expiry_date(self):
         self.assertRaises(
-            ValueError, self.pantry.add_item, "rice 1 kg", "grains", "2025-13-01"
+            InvaliExpiryDate, self.pantry.add_item, "rice 1 kg", "grains", "2025-13-01"
+        )
+
+    def test_add_item_invalid_name(self):
+        self.assertRaises(
+            InvalidItemName, self.pantry.add_item, None, "grains", "2025-13-01"
+        )
+
+    def test_add_item_invalid_category_none(self):
+        self.assertRaises(
+            CategoryNotFoundError, self.pantry.add_item, "rice", None, "2025-13-01"
+        )
+
+    def test_add_item_invalid_date_none(self):
+        self.assertRaises(
+            InvaliExpiryDate, self.pantry.add_item, "rice", "grains", None
         )
 
 
