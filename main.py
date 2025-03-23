@@ -20,7 +20,7 @@ def main():
         )
         my_pantry.add_item(item_name, category, quantity, expiry_date)
     elif action == "check":
-        print("--------- All Available Items ---------")
+        print(f"+{'-' * 30} All Items {'-' * 30}+")
         my_pantry.get_all_pantry_items()
     else:
         print("Invalid option, try again")

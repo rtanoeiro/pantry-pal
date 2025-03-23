@@ -14,7 +14,7 @@ show_menu() {
     printf "${YELLOW}2. Remove an item${RESET}\n"
     printf "${YELLOW}3. Check Available Items${RESET}\n"
     printf "${RED}4. Exit${RESET}\n"
-    printf "${BLUE}Enter your choice (1/2/3): ${RESET}"
+    printf "${BLUE}Enter your choice (1/2/3/4): ${RESET}"
 }
 
 # Function to add an item

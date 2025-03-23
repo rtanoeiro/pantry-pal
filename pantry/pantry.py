@@ -55,6 +55,14 @@ class Pantry:
 
     def get_all_pantry_items(self):
         results = self.pantry_db.check_all_pantry_items()
+        print(
+            f"|{' ' * 10}Item Name{' ' * 10}| Category    | Quantity    | Expiry Date |"
+        )
+        print(f"+{'-' * 71}+")
+        for row in results.fetchall():
+            # Print in a nice format:
+            print(f"| {row[0]:<27} | {row[1]:<11} | {row[2]:<11} | {row[3]:<11} |")
+            print(f"+{'-' * 71}+")
         return results.fetchall()
 
     def get_specific_pantry_item(self, item_name, category, expiry_date):
