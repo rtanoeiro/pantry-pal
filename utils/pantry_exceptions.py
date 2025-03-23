@@ -6,7 +6,7 @@ class CategoryNotFoundError(Exception):
         super().__init__(f"Category '{self.category}' not found in the pantry.")
 
 
-class ItemDoesNotExistError(Exception):
+class ItemNotFoundError(Exception):
     """Raised when an item is expired."""
 
     def __init__(self, item_name):
