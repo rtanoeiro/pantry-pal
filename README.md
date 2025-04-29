@@ -22,3 +22,8 @@ In a future update, this project will have a visual UI where you will have the f
 - AI Meal Suggestions: If you host a local LLM, you'll be able to use your available pantry items to get a dinner recommendation. If you don't host one, you'll be able to input your AI Provider Token and use that instead.
 
 - Expiry Notifications: PantryPal will alert you when items are nearing their expiry date, helping you use them before they go to waste.
+
+## Contributing
+
+You can contribute to this project by helping on any of the things listed in the Future Update Section.
+
