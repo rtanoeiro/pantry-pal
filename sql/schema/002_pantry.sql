@@ -1,7 +1,7 @@
--- gooseUp
+-- +goose Up
 CREATE TABLE pantry (
-    id uuid NOT NULL PRIMARY KEY,
-    user_id uuid NOT NULL,
+    id text NOT NULL PRIMARY KEY,
+    user_id text NOT NULL,
     name text NOT NULL,
     quantity integer NOT NULL DEFAULT 1,
     added_at timestamp NOT NULL DEFAULT now(),
@@ -9,5 +9,5 @@ CREATE TABLE pantry (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
--- gooseDown
+-- +goose Down
 DROP TABLE pantry;
