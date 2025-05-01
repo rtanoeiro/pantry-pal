@@ -10,14 +10,14 @@ import (
 	"time"
 )
 
-const createUser = `-- name: createUser :one
+const createUser = `-- name: CreateUser :one
 INSERT INTO users (id, name, email, password_hash, created_at, updated_at)
 VALUES (?, ?, ?, ?, ?, ?)
 
 RETURNING id, name, email, password_hash, created_at, updated_at
 `
 
-type createUserParams struct {
+type CreateUserParams struct {
 	ID           string
 	Name         string
 	Email        string
@@ -26,7 +26,7 @@ type createUserParams struct {
 	UpdatedAt    time.Time
 }
 
-func (q *Queries) createUser(ctx context.Context, arg createUserParams) (User, error) {
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
 	row := q.db.QueryRowContext(ctx, createUser,
 		arg.ID,
 		arg.Name,
@@ -47,13 +47,33 @@ func (q *Queries) createUser(ctx context.Context, arg createUserParams) (User, e
 	return i, err
 }
 
-const getUserById = `-- name: getUserById :one
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT id, name, email, password_hash, created_at, updated_at
+FROM users
+WHERE email = ?
+`
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.PasswordHash,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getUserById = `-- name: GetUserById :one
 SELECT id, name, email, password_hash, created_at, updated_at
 FROM users
 WHERE id = ?
 `
 
-func (q *Queries) getUserById(ctx context.Context, id string) (User, error) {
+func (q *Queries) GetUserById(ctx context.Context, id string) (User, error) {
 	row := q.db.QueryRowContext(ctx, getUserById, id)
 	var i User
 	err := row.Scan(
@@ -67,8 +87,16 @@ func (q *Queries) getUserById(ctx context.Context, id string) (User, error) {
 	return i, err
 }
 
-const updateUserEmail = `-- name: updateUserEmail :exec
+const resetTable = `-- name: ResetTable :exec
+DELETE FROM users
+`
 
+func (q *Queries) ResetTable(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, resetTable)
+	return err
+}
+
+const updateUserEmail = `-- name: UpdateUserEmail :exec
 UPDATE users
 SET 
     email = ?
@@ -77,12 +105,12 @@ WHERE id = ?
 RETURNING id, name, email, password_hash, created_at, updated_at
 `
 
-type updateUserEmailParams struct {
+type UpdateUserEmailParams struct {
 	Email string
 	ID    string
 }
 
-func (q *Queries) updateUserEmail(ctx context.Context, arg updateUserEmailParams) error {
+func (q *Queries) UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams) error {
 	_, err := q.db.ExecContext(ctx, updateUserEmail, arg.Email, arg.ID)
 	return err
 }

@@ -9,7 +9,7 @@ import (
 	"context"
 )
 
-const addItem = `-- name: addItem :one
+const addItem = `-- name: AddItem :one
 INSERT INTO pantry (
     id, user_id, item_name, quantity, added_at, expiry_at
 ) VALUES (
@@ -18,7 +18,7 @@ INSERT INTO pantry (
 RETURNING id, user_id, item_name, quantity, added_at, expiry_at
 `
 
-type addItemParams struct {
+type AddItemParams struct {
 	ID       string
 	UserID   string
 	ItemName string
@@ -26,7 +26,7 @@ type addItemParams struct {
 	ExpiryAt string
 }
 
-func (q *Queries) addItem(ctx context.Context, arg addItemParams) (Pantry, error) {
+func (q *Queries) AddItem(ctx context.Context, arg AddItemParams) (Pantry, error) {
 	row := q.db.QueryRowContext(ctx, addItem,
 		arg.ID,
 		arg.UserID,
