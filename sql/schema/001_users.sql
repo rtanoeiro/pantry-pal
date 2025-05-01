@@ -1,4 +1,6 @@
 -- +goose Up
+PRAGMA foreign_keys = ON;
+
 CREATE TABLE users (
     id text NOT NULL PRIMARY KEY,
     name text NOT NULL,
@@ -10,3 +12,4 @@ CREATE TABLE users (
 
 -- +goose Down
 DROP TABLE users;
+DROP TRIGGER IF EXISTS remove_pantry_items;
