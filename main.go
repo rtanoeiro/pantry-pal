@@ -42,9 +42,14 @@ func main() {
 	httpServerMux := http.NewServeMux()
 	baseLoginPage := http.FileServer(http.Dir("static"))
 	httpServerMux.Handle("/", baseLoginPage)
+	httpServerMux.Handle("GET /api/reset", http.HandlerFunc(config.ResetUsers))
+
 	httpServerMux.Handle("POST /api/users", http.HandlerFunc(config.CreateUser))
 	httpServerMux.Handle("GET /api/users/{userInfo}", http.HandlerFunc(config.GetUserInfo))
-	httpServerMux.Handle("GET /api/reset", http.HandlerFunc(config.ResetUsers))
+
+	httpServerMux.Handle("POST /api/pantry", http.HandlerFunc(config.HandleNewItem))
+	httpServerMux.Handle("GET /api/pantry/{itemName}", http.HandlerFunc(config.GetItemByName))
+	//httpServerMux.Handle("GET /api/pantry/{userID}", http.HandlerFunc(config.GetAllUserItems))
 
 	httpServer := http.Server{
 		Handler: httpServerMux,

@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"database/sql"
 )
 
 const addItem = `-- name: AddItem :one
@@ -34,6 +35,144 @@ func (q *Queries) AddItem(ctx context.Context, arg AddItemParams) (Pantry, error
 		arg.Quantity,
 		arg.ExpiryAt,
 	)
+	var i Pantry
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.ItemName,
+		&i.Quantity,
+		&i.AddedAt,
+		&i.ExpiryAt,
+	)
+	return i, err
+}
+
+const findAllItemsByName = `-- name: FindAllItemsByName :many
+SELECT id, user_id, item_name, quantity, added_at, expiry_at
+FROM pantry
+WHERE user_id = ?
+    AND lower(item_name) LIKE '%' || ? || '%'
+ORDER BY added_at DESC
+`
+
+type FindAllItemsByNameParams struct {
+	UserID  string
+	Column2 sql.NullString
+}
+
+// Remember to lower the input from the UI
+func (q *Queries) FindAllItemsByName(ctx context.Context, arg FindAllItemsByNameParams) ([]Pantry, error) {
+	rows, err := q.db.QueryContext(ctx, findAllItemsByName, arg.UserID, arg.Column2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Pantry
+	for rows.Next() {
+		var i Pantry
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.ItemName,
+			&i.Quantity,
+			&i.AddedAt,
+			&i.ExpiryAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const findItemByName = `-- name: FindItemByName :many
+SELECT id, user_id, item_name, quantity, added_at, expiry_at
+FROM pantry
+WHERE user_id = ?
+    AND lower(item_name) = ?
+`
+
+type FindItemByNameParams struct {
+	UserID   string
+	ItemName string
+}
+
+// Remember to lower the input from the UI
+func (q *Queries) FindItemByName(ctx context.Context, arg FindItemByNameParams) ([]Pantry, error) {
+	rows, err := q.db.QueryContext(ctx, findItemByName, arg.UserID, arg.ItemName)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Pantry
+	for rows.Next() {
+		var i Pantry
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.ItemName,
+			&i.Quantity,
+			&i.AddedAt,
+			&i.ExpiryAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const removeItem = `-- name: RemoveItem :one
+DELETE FROM pantry
+WHERE id = ?
+RETURNING id, user_id, item_name, quantity, added_at, expiry_at
+`
+
+func (q *Queries) RemoveItem(ctx context.Context, id string) (Pantry, error) {
+	row := q.db.QueryRowContext(ctx, removeItem, id)
+	var i Pantry
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.ItemName,
+		&i.Quantity,
+		&i.AddedAt,
+		&i.ExpiryAt,
+	)
+	return i, err
+}
+
+const updateItemQuantity = `-- name: UpdateItemQuantity :one
+UPDATE pantry
+SET
+    quantity = ?
+WHERE id = ?
+    AND user_id = ?
+
+RETURNING id, user_id, item_name, quantity, added_at, expiry_at
+`
+
+type UpdateItemQuantityParams struct {
+	Quantity int64
+	ID       string
+	UserID   string
+}
+
+// What'll see in the UI is a list of items, so we can probably use ID
+func (q *Queries) UpdateItemQuantity(ctx context.Context, arg UpdateItemQuantityParams) (Pantry, error) {
+	row := q.db.QueryRowContext(ctx, updateItemQuantity, arg.Quantity, arg.ID, arg.UserID)
 	var i Pantry
 	err := row.Scan(
 		&i.ID,
