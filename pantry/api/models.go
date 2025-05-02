@@ -48,10 +48,3 @@ type AllItemsResponse struct {
 	AddedAt  string `json:"added_at"`
 	ExpiryAt string `json:"expiry_at"`
 }
-
-type AddItemResponse struct {
-	UserID   string `json:"user_id"`
-	ItemName string `json:"item_name"`
-	Quantity int64  `json:"quantity"`
-	ExpiryAt string `json:"expiry_at"`
-}

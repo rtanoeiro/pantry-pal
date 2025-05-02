@@ -87,13 +87,8 @@ func (config *Config) ItemAdd(writer http.ResponseWriter, request *http.Request,
 		respondWithError(writer, http.StatusInternalServerError, errUpdate.Error())
 		return
 	}
-	updateReponse := AddItemResponse{
-		UserID:   addedItem.UserID,
-		ItemName: addedItem.ItemName,
-		Quantity: addedItem.Quantity,
-		ExpiryAt: addedItem.ExpiryAt,
-	}
-	data, err := json.Marshal(updateReponse)
+
+	data, err := json.Marshal(addedItem)
 	if err != nil {
 		respondWithError(writer, http.StatusInternalServerError, err.Error())
 		return
@@ -116,12 +111,18 @@ func (config *Config) GetItemByName(writer http.ResponseWriter, request *http.Re
 		UserID:   user.ID,
 		ItemName: itemName,
 	}
-	_, errItem := config.Db.FindItemByName(request.Context(), findItem)
+	items, errItem := config.Db.FindItemByName(request.Context(), findItem)
 
 	if errItem != nil {
 		respondWithError(writer, http.StatusInternalServerError, errItem.Error())
 	}
 
+	data, err := json.Marshal(items)
+	if err != nil {
+		respondWithError(writer, http.StatusInternalServerError, err.Error())
+		return
+	}
+	respondWithJSON(writer, http.StatusOK, data)
 }
 
 func (config *Config) GetAllPantryItems(writer http.ResponseWriter, request *http.Request) {
