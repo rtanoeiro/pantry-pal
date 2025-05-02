@@ -18,7 +18,6 @@ SET
 WHERE id = ?
 RETURNING *;
 
-// #nosec G101 -- parameterized SQL, not hardcoded credentials
 -- name: UpdateUserPassword :exec
 UPDATE users
 SET 
