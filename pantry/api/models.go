@@ -34,7 +34,7 @@ type CreateUserResponse struct {
 }
 
 type UpdateItemResponse struct {
-	ItemID   string `json:"item_id" `
+	ItemID   string `json:"item_id"`
 	UserID   string `json:"user_id"`
 	ItemName string `json:"item_name"`
 	Quantity int64  `json:"quantity"`
