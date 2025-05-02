@@ -15,11 +15,11 @@ func (config *Config) HandleNewItem(writer http.ResponseWriter, request *http.Re
 	decoder := json.NewDecoder(request.Body)
 	item := ItemAdd{}
 	err := decoder.Decode(&item)
-	log.Printf("Received item \n- Name: %s\n- Quantity: %d", item.ItemName, item.Quantity)
 	if err != nil {
 		respondWithError(writer, http.StatusBadRequest, err.Error())
 		return
 	}
+	log.Printf("Received item \n- Name: %s\n- Quantity: %d", item.ItemName, item.Quantity)
 
 	findItem := database.FindItemByNameParams{
 		UserID:   item.UserID,
