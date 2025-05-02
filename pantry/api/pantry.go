@@ -45,7 +45,7 @@ func (config *Config) HandleNewItem(writer http.ResponseWriter, request *http.Re
 				ExpiryAt:          currentItem.ExpiryAt,
 			}
 			config.ItemUpdate(writer, request, toUpdate)
-			return
+			break
 		}
 	}
 	// if the function hasn't returned yet, the item is new, so we add it
