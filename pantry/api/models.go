@@ -40,6 +40,15 @@ type UpdateItemResponse struct {
 	ExpiryAt string `json:"expiry_at"`
 }
 
+type AllItemsResponse struct {
+	ID       string `json:"id"`
+	UserID   string `json:"user_id"`
+	ItemName string `json:"item_name"`
+	Quantity int64  `json:"email"`
+	AddedAt  string `json:"added_at"`
+	ExpiryAt string `json:"expiry_at"`
+}
+
 type AddItemResponse struct {
 	UserID   string `json:"user_id"`
 	ItemName string `json:"item_name"`

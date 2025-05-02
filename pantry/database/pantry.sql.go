@@ -7,7 +7,6 @@ package database
 
 import (
 	"context"
-	"database/sql"
 )
 
 const addItem = `-- name: AddItem :one
@@ -47,22 +46,21 @@ func (q *Queries) AddItem(ctx context.Context, arg AddItemParams) (Pantry, error
 	return i, err
 }
 
-const findAllItemsByName = `-- name: FindAllItemsByName :many
+const findItemByName = `-- name: FindItemByName :many
 SELECT id, user_id, item_name, quantity, added_at, expiry_at
 FROM pantry
 WHERE user_id = ?
-    AND lower(item_name) LIKE '%' || ? || '%'
-ORDER BY added_at DESC
+    AND lower(item_name) = ?
 `
 
-type FindAllItemsByNameParams struct {
-	UserID  string
-	Column2 sql.NullString
+type FindItemByNameParams struct {
+	UserID   string
+	ItemName string
 }
 
 // Remember to lower the input from the UI
-func (q *Queries) FindAllItemsByName(ctx context.Context, arg FindAllItemsByNameParams) ([]Pantry, error) {
-	rows, err := q.db.QueryContext(ctx, findAllItemsByName, arg.UserID, arg.Column2)
+func (q *Queries) FindItemByName(ctx context.Context, arg FindItemByNameParams) ([]Pantry, error) {
+	rows, err := q.db.QueryContext(ctx, findItemByName, arg.UserID, arg.ItemName)
 	if err != nil {
 		return nil, err
 	}
@@ -91,21 +89,15 @@ func (q *Queries) FindAllItemsByName(ctx context.Context, arg FindAllItemsByName
 	return items, nil
 }
 
-const findItemByName = `-- name: FindItemByName :many
+const getAllItems = `-- name: GetAllItems :many
 SELECT id, user_id, item_name, quantity, added_at, expiry_at
 FROM pantry
 WHERE user_id = ?
-    AND lower(item_name) = ?
+ORDER BY expiry_at DESC
 `
 
-type FindItemByNameParams struct {
-	UserID   string
-	ItemName string
-}
-
-// Remember to lower the input from the UI
-func (q *Queries) FindItemByName(ctx context.Context, arg FindItemByNameParams) ([]Pantry, error) {
-	rows, err := q.db.QueryContext(ctx, findItemByName, arg.UserID, arg.ItemName)
+func (q *Queries) GetAllItems(ctx context.Context, userID string) ([]Pantry, error) {
+	rows, err := q.db.QueryContext(ctx, getAllItems, userID)
 	if err != nil {
 		return nil, err
 	}

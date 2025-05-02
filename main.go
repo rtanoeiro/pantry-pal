@@ -49,6 +49,9 @@ func main() {
 
 	httpServerMux.Handle("POST /api/pantry", http.HandlerFunc(config.HandleNewItem))
 	httpServerMux.Handle("GET /api/pantry/{itemName}", http.HandlerFunc(config.GetItemByName))
+	httpServerMux.Handle("GET /api/pantry/", http.HandlerFunc(config.GetAllPantryItems))
+	httpServerMux.Handle("DELETE /api/pantry/{itemID}", http.HandlerFunc(config.DeleteItem))
+
 	//httpServerMux.Handle("GET /api/pantry/{userID}", http.HandlerFunc(config.GetAllUserItems))
 
 	httpServer := http.Server{

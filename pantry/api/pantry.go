@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"pantry-pal/pantry/database"
 
@@ -37,15 +38,16 @@ func (config *Config) HandleNewItem(writer http.ResponseWriter, request *http.Re
 				QuantityToAdd:     item.Quantity,
 				ExpiryAt:          currentItem.ExpiryAt,
 			}
-			config.UpdateItem(writer, request, toUpdate)
+			config.ItemUpdate(writer, request, toUpdate)
+			break
 		} else {
-			config.AddItem(writer, request, item)
+			config.ItemAdd(writer, request, item)
 		}
 	}
 
 }
 
-func (config *Config) UpdateItem(writer http.ResponseWriter, request *http.Request, toUpdate ItemUpdate) {
+func (config *Config) ItemUpdate(writer http.ResponseWriter, request *http.Request, toUpdate ItemUpdate) {
 
 	itemToUpdate := database.UpdateItemQuantityParams{
 		Quantity: toUpdate.QuantityAvailable + toUpdate.QuantityToAdd,
@@ -72,7 +74,7 @@ func (config *Config) UpdateItem(writer http.ResponseWriter, request *http.Reque
 
 }
 
-func (config *Config) AddItem(writer http.ResponseWriter, request *http.Request, toAdd ItemAdd) {
+func (config *Config) ItemAdd(writer http.ResponseWriter, request *http.Request, toAdd ItemAdd) {
 	itemToAdd := database.AddItemParams{
 		ID:       uuid.NewString(),
 		UserID:   toAdd.UserID,
@@ -120,4 +122,44 @@ func (config *Config) GetItemByName(writer http.ResponseWriter, request *http.Re
 		respondWithError(writer, http.StatusInternalServerError, errItem.Error())
 	}
 
+}
+
+func (config *Config) GetAllPantryItems(writer http.ResponseWriter, request *http.Request) {
+
+	decoder := json.NewDecoder(request.Body)
+	user := UserRequests{}
+	err := decoder.Decode(&user)
+
+	if err != nil {
+		respondWithError(writer, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	allPantryItems, errAll := config.Db.GetAllItems(request.Context(), user.ID)
+
+	if errAll != nil {
+		respondWithError(writer, http.StatusBadRequest, errAll.Error())
+		return
+	}
+
+	data, err := json.Marshal(allPantryItems)
+	if err != nil {
+		respondWithError(writer, http.StatusInternalServerError, err.Error())
+		return
+	}
+	respondWithJSON(writer, http.StatusOK, data)
+
+}
+
+func (config *Config) DeleteItem(writer http.ResponseWriter, request *http.Request) {
+	itemID := request.PathValue("itemID")
+
+	item, errRemove := config.Db.RemoveItem(request.Context(), itemID)
+
+	if errRemove != nil {
+		respondWithError(writer, http.StatusInternalServerError, errRemove.Error())
+		return
+	}
+	log.Printf("Successfully remove %d item(s) %s, with Expiry date at %s", item.Quantity, item.ItemName, item.ExpiryAt)
+	respondWithJSON(writer, http.StatusOK, []byte{})
 }

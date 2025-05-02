@@ -22,17 +22,16 @@ DELETE FROM pantry
 WHERE id = ?
 RETURNING *;
 
--- name: FindAllItemsByName :many
--- Remember to lower the input from the UI
-SELECT id, user_id, item_name, quantity, added_at, expiry_at
-FROM pantry
-WHERE user_id = ?
-    AND lower(item_name) LIKE '%' || ? || '%'
-ORDER BY added_at DESC;
-
 -- name: FindItemByName :many
 -- Remember to lower the input from the UI
 SELECT id, user_id, item_name, quantity, added_at, expiry_at
 FROM pantry
 WHERE user_id = ?
-    AND lower(item_name) = ?
+    AND lower(item_name) = ?;
+
+
+-- name: GetAllItems :many
+SELECT id, user_id, item_name, quantity, added_at, expiry_at
+FROM pantry
+WHERE user_id = ?
+ORDER BY expiry_at DESC;
