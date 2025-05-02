@@ -7,6 +7,8 @@ import (
 	"pantry-pal/pantry/database"
 	"time"
 
+	"context"
+
 	"github.com/google/uuid"
 )
 
@@ -30,16 +32,7 @@ func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Requ
 
 	info := request.PathValue("userInfo")
 	log.Println("Trying to get data from users with:", info)
-	infoType := IdOrEmail(info)
-
-	var user database.User
-	var errUser error
-
-	if infoType == "ID" {
-		user, errUser = config.Db.GetUserById(request.Context(), info)
-	} else {
-		user, errUser = config.Db.GetUserByEmail(request.Context(), info)
-	}
+	user, errUser := config.Db.GetUserByIdOrEmail(request.Context(), info)
 
 	if errUser != nil {
 		respondWithError(writer, http.StatusBadRequest, errUser.Error())
@@ -108,36 +101,32 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 
 }
 
-func (config *Config) UpdateUser(writer http.ResponseWriter, request *http.Request) {
-	var user interface{}
-	err := json.NewDecoder(request.Body).Decode(&user)
+func UpdateUser[T interface{}](writer http.ResponseWriter, request *http.Request, dbFunc func(context.Context, T) error) {
+	var updateParams T
+
+	err := json.NewDecoder(request.Body).Decode(&updateParams)
 	if err != nil {
 		respondWithError(writer, http.StatusBadRequest, err.Error())
 		return
 	}
+	errUpdate := dbFunc(request.Context(), updateParams)
 
-	switch value := user.(type) {
-	case database.UpdateUserEmailParams:
-		errUpdate := config.Db.UpdateUserEmail(request.Context(), value)
-		if errUpdate != nil {
-			respondWithError(writer, http.StatusInternalServerError, errUpdate.Error())
-			return
-		}
-	case database.UpdateUserNameParams:
-		errUpdate := config.Db.UpdateUserName(request.Context(), value)
-		if errUpdate != nil {
-			respondWithError(writer, http.StatusInternalServerError, errUpdate.Error())
-			return
-		}
-	case database.UpdateUserPasswordParams:
-		errUpdate := config.Db.UpdateUserPassword(request.Context(), value)
-		if errUpdate != nil {
-			respondWithError(writer, http.StatusInternalServerError, errUpdate.Error())
-			return
-		}
-	default:
-		respondWithError(writer, http.StatusBadRequest, "Invalid request payload")
+	if errUpdate != nil {
+		respondWithError(writer, http.StatusInternalServerError, errUpdate.Error())
 		return
 	}
-	respondWithJSON(writer, http.StatusOK, []byte{})
+
+	respondWithJSON(writer, http.StatusAccepted, []byte{})
+}
+
+func (config *Config) UpdateUserEmail(writer http.ResponseWriter, request *http.Request) {
+	UpdateUser(writer, request, config.Db.UpdateUserEmail)
+}
+
+func (config *Config) UpdateUserName(writer http.ResponseWriter, request *http.Request) {
+	UpdateUser(writer, request, config.Db.UpdateUserName)
+}
+
+func (config *Config) UpdateUserPassword(writer http.ResponseWriter, request *http.Request) {
+	UpdateUser(writer, request, config.Db.UpdateUserPassword)
 }
