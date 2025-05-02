@@ -101,7 +101,6 @@ UPDATE users
 SET 
     email = ?
 WHERE id = ?
-
 RETURNING id, name, email, password_hash, created_at, updated_at
 `
 
@@ -112,5 +111,42 @@ type UpdateUserEmailParams struct {
 
 func (q *Queries) UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams) error {
 	_, err := q.db.ExecContext(ctx, updateUserEmail, arg.Email, arg.ID)
+	return err
+}
+
+const updateUserName = `-- name: UpdateUserName :exec
+UPDATE users
+SET 
+    name = ?
+WHERE id = ?
+RETURNING id, name, email, password_hash, created_at, updated_at
+`
+
+type UpdateUserNameParams struct {
+	Name string
+	ID   string
+}
+
+func (q *Queries) UpdateUserName(ctx context.Context, arg UpdateUserNameParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserName, arg.Name, arg.ID)
+	return err
+}
+
+const updateUserPassword = `-- name: UpdateUserPassword :exec
+UPDATE users
+SET 
+    password_hash = ?
+WHERE id = ?
+
+RETURNING id, name, email, password_hash, created_at, updated_at
+`
+
+type UpdateUserPasswordParams struct {
+	PasswordHash string
+	ID           string
+}
+
+func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserPassword, arg.PasswordHash, arg.ID)
 	return err
 }

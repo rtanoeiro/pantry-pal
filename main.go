@@ -46,6 +46,7 @@ func main() {
 	httpServerMux.Handle("GET /api/reset", http.HandlerFunc(config.ResetUsers))
 
 	httpServerMux.Handle("POST /api/users", http.HandlerFunc(config.CreateUser))
+	httpServerMux.Handle("PATCH /api/users/{userID}/update", http.HandlerFunc(config.UpdateUser))
 	httpServerMux.Handle("GET /api/users/{userInfo}", http.HandlerFunc(config.GetUserInfo))
 
 	httpServerMux.Handle("POST /api/pantry", http.HandlerFunc(config.HandleNewItem))

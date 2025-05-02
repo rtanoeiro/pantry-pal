@@ -107,3 +107,37 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 	respondWithJSON(writer, http.StatusCreated, data)
 
 }
+
+func (config *Config) UpdateUser(writer http.ResponseWriter, request *http.Request) {
+	var user interface{}
+	err := json.NewDecoder(request.Body).Decode(&user)
+	if err != nil {
+		respondWithError(writer, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	switch value := user.(type) {
+	case database.UpdateUserEmailParams:
+		errUpdate := config.Db.UpdateUserEmail(request.Context(), value)
+		if errUpdate != nil {
+			respondWithError(writer, http.StatusInternalServerError, errUpdate.Error())
+			return
+		}
+	case database.UpdateUserNameParams:
+		errUpdate := config.Db.UpdateUserName(request.Context(), value)
+		if errUpdate != nil {
+			respondWithError(writer, http.StatusInternalServerError, errUpdate.Error())
+			return
+		}
+	case database.UpdateUserPasswordParams:
+		errUpdate := config.Db.UpdateUserPassword(request.Context(), value)
+		if errUpdate != nil {
+			respondWithError(writer, http.StatusInternalServerError, errUpdate.Error())
+			return
+		}
+	default:
+		respondWithError(writer, http.StatusBadRequest, "Invalid request payload")
+		return
+	}
+	respondWithJSON(writer, http.StatusOK, []byte{})
+}
