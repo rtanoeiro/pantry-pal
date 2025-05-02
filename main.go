@@ -8,6 +8,7 @@ import (
 	"os"
 	"pantry-pal/pantry/api"
 	"pantry-pal/pantry/database"
+	"time"
 
 	"github.com/joho/godotenv"
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
@@ -55,10 +56,11 @@ func main() {
 	//httpServerMux.Handle("GET /api/pantry/{userID}", http.HandlerFunc(config.GetAllUserItems))
 
 	httpServer := http.Server{
-		Handler: httpServerMux,
-		Addr:    ":" + port,
+		Handler:           httpServerMux,
+		Addr:              ":" + port,
+		ReadHeaderTimeout: 60 * time.Second,
 	}
 	fmt.Println("Server started on port", port)
 
-	httpServer.ListenAndServe()
+	_ = httpServer.ListenAndServe()
 }
