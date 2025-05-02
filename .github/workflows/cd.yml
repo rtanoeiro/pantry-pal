@@ -23,9 +23,9 @@ jobs:
     
     - name: Install goose
       run: go install github.com/pressly/goose/v3/cmd/goose@latest
-        
+    
     - name: build
-      run: ./scripts/build.sh
+      run: chmod +x ./scripts/build.sh && ./scripts/build.sh
     
     - name: Migrate DB
       run: ./scripts/migrate_up.sh    
