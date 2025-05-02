@@ -28,5 +28,5 @@ jobs:
       run: chmod +x ./scripts/build.sh && ./scripts/build.sh
     
     - name: Migrate DB
-      run: ./scripts/migrate_up.sh    
+      run: chmod +x  ./scripts/migrate_up.sh && ./scripts/migrate_up.sh
     
