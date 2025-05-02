@@ -23,7 +23,6 @@ WHERE id = ?
 RETURNING *;
 
 -- name: FindItemByName :many
--- Remember to lower the input from the UI
 SELECT id, user_id, item_name, quantity, added_at, expiry_at
 FROM pantry
 WHERE user_id = ?

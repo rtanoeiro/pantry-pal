@@ -12,10 +12,10 @@ type UserRequests struct {
 }
 
 type ItemAdd struct {
-	UserID   string
-	ItemName string
-	Quantity int64
-	ExpiryAt string
+	UserID   string `json:"user_id"`
+	ItemName string `json:"item_name"`
+	Quantity int64  `json:"quantity"`
+	ExpiryAt string `json:"expiry_at"`
 }
 
 type ItemUpdate struct {
@@ -34,6 +34,15 @@ type CreateUserResponse struct {
 }
 
 type UpdateItemResponse struct {
+	ItemID   string `json:"item_id"`
+	UserID   string `json:"user_id"`
+	ItemName string `json:"item_name"`
+	Quantity int64  `json:"quantity"`
+	ExpiryAt string `json:"expiry_at"`
+}
+
+type AddItemResponse struct {
+	ItemID   string `json:"item_id"`
 	UserID   string `json:"user_id"`
 	ItemName string `json:"item_name"`
 	Quantity int64  `json:"quantity"`
