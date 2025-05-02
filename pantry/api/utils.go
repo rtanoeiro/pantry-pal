@@ -8,13 +8,21 @@ import (
 func respondWithError(writer http.ResponseWriter, code int, msg string) {
 	writer.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	writer.WriteHeader(code)
-	writer.Write([]byte(msg))
+	_, errWriter := writer.Write([]byte(msg))
+
+	if errWriter != nil {
+		return
+	}
 }
 
 func respondWithJSON(writer http.ResponseWriter, code int, data []byte) {
 	writer.Header().Set("Content-Type", "application/json; charset=utf-8")
 	writer.WriteHeader(code)
-	writer.Write(data)
+	_, errWriter := writer.Write(data)
+
+	if errWriter != nil {
+		respondWithError(writer, http.StatusInternalServerError, errWriter.Error())
+	}
 }
 
 func IdOrEmail(url string) string {
