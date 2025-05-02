@@ -44,7 +44,7 @@ type AllItemsResponse struct {
 	ID       string `json:"id"`
 	UserID   string `json:"user_id"`
 	ItemName string `json:"item_name"`
-	Quantity int64  `json:"email"`
+	Quantity int64  `json:"quantity"`
 	AddedAt  string `json:"added_at"`
 	ExpiryAt string `json:"expiry_at"`
 }
