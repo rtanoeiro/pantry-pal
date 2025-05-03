@@ -38,9 +38,15 @@ func main() {
 
 	fmt.Println("Connected to the database successfully")
 	httpServerMux := http.NewServeMux()
-	baseLoginPage := http.FileServer(http.Dir("static"))
-	httpServerMux.Handle("/", baseLoginPage)
-	httpServerMux.Handle("GET /api/reset", http.HandlerFunc(config.ResetUsers))
+
+	// Reset - Used in dev for testing
+	httpServerMux.Handle("POST /api/reset", http.HandlerFunc(config.ResetUsers))
+
+	//Login
+	httpServerMux.Handle("POST /api/login", http.HandlerFunc(config.Login))
+	httpServerMux.HandleFunc("GET /api/login", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "static/index.html")
+	})
 
 	// Users endpoints
 	httpServerMux.Handle("POST /api/users", http.HandlerFunc(config.CreateUser))
