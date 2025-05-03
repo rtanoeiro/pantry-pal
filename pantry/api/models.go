@@ -1,9 +1,25 @@
 package api
 
+import "time"
+
 type UserAdd struct {
 	Name     string
 	Email    string
 	Password string
+}
+
+type UserLoginRequest struct {
+	Email    string
+	Password string
+}
+
+type UserLoginResponse struct {
+	ID        string    `json:"id"`
+	Name      string    `json:"name"`
+	UpdatedAt time.Time `json:"updated_at"`
+	CreatedAt time.Time `json:"created_at"`
+	Email     string    `json:"email"`
+	JWTToken  *string   `json:"token,omitempty"`
 }
 
 // Probably replacable once we add JWT and login

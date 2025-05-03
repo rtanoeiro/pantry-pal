@@ -71,11 +71,15 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 
+	hashedPassword, errPwd := HashPassword(user.Password)
+	if errPwd != nil {
+		respondWithError(writer, http.StatusInternalServerError, errPwd.Error())
+	}
 	createUser := database.CreateUserParams{
 		ID:           uuid.New().String(),
 		Email:        user.Email,
 		Name:         user.Name,
-		PasswordHash: user.Password,
+		PasswordHash: hashedPassword,
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),
 	}
@@ -108,6 +112,17 @@ func UpdateUser[T interface{}](writer http.ResponseWriter, request *http.Request
 	if err != nil {
 		respondWithError(writer, http.StatusBadRequest, err.Error())
 		return
+	}
+
+	switch params := any(updateParams).(type) {
+	case database.UpdateUserPasswordParams:
+		hashedPassword, errPWD := HashPassword(params.PasswordHash)
+		if errPWD != nil {
+			respondWithError(writer, http.StatusInternalServerError, errPWD.Error())
+			return
+		}
+		params.PasswordHash = hashedPassword
+		updateParams = any(params).(T)
 	}
 	errUpdate := dbFunc(request.Context(), updateParams)
 

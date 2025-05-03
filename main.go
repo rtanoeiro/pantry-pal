@@ -45,7 +45,7 @@ func main() {
 	//Login
 	httpServerMux.Handle("POST /api/login", http.HandlerFunc(config.Login))
 	httpServerMux.HandleFunc("GET /api/login", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "static/index.html")
+		http.ServeFile(w, r, "static/login.html")
 	})
 
 	// Users endpoints
