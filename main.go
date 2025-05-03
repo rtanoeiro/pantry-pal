@@ -22,21 +22,18 @@ func main() {
 
 	dbURL := os.Getenv("DATABASE_URL")
 	port := os.Getenv("PORT")
-	fmt.Println(dbURL)
+	jwtSecret := os.Getenv("JWT_SECRET")
+
 	newDB, dbError := sql.Open("libsql", dbURL)
 	if dbError != nil {
 		log.Fatal("Unable to open database. Closing app. Error: ", dbError)
 	}
 	defer newDB.Close()
 
-	errPing := newDB.Ping()
-	if errPing != nil {
-		log.Fatalf("Failed to ping the database: %v", errPing)
-	}
-
 	config := api.Config{
-		Db:  database.New(newDB),
-		Env: "dev",
+		Db:     database.New(newDB),
+		Env:    "dev",
+		Secret: jwtSecret,
 	}
 
 	fmt.Println("Connected to the database successfully")
@@ -45,19 +42,18 @@ func main() {
 	httpServerMux.Handle("/", baseLoginPage)
 	httpServerMux.Handle("GET /api/reset", http.HandlerFunc(config.ResetUsers))
 
+	// Users endpoints
 	httpServerMux.Handle("POST /api/users", http.HandlerFunc(config.CreateUser))
 	httpServerMux.Handle("PATCH /api/users/{userID}/email", http.HandlerFunc(config.UpdateUserEmail))
 	httpServerMux.Handle("PATCH /api/users/{userID}/name", http.HandlerFunc(config.UpdateUserName))
 	httpServerMux.Handle("PATCH /api/users/{userID}/password", http.HandlerFunc(config.UpdateUserPassword))
-
 	httpServerMux.Handle("GET /api/users/{userInfo}", http.HandlerFunc(config.GetUserInfo))
 
+	// Pantry endpoints
 	httpServerMux.Handle("POST /api/pantry", http.HandlerFunc(config.HandleNewItem))
 	httpServerMux.Handle("GET /api/pantry/{itemName}", http.HandlerFunc(config.GetItemByName))
 	httpServerMux.Handle("GET /api/pantry/", http.HandlerFunc(config.GetAllPantryItems))
 	httpServerMux.Handle("DELETE /api/pantry/{itemID}", http.HandlerFunc(config.DeleteItem))
-
-	//httpServerMux.Handle("GET /api/pantry/{userID}", http.HandlerFunc(config.GetAllUserItems))
 
 	httpServer := http.Server{
 		Handler:           httpServerMux,
