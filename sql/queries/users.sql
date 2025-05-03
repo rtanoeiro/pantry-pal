@@ -9,6 +9,7 @@ UPDATE users
 SET 
     email = ?
 WHERE id = ?
+
 RETURNING *;
 
 -- name: UpdateUserName :exec
@@ -16,6 +17,7 @@ UPDATE users
 SET 
     name = ?
 WHERE id = ?
+
 RETURNING *;
 
 -- name: UpdateUserPassword :exec

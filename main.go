@@ -50,10 +50,10 @@ func main() {
 
 	// Users endpoints
 	httpServerMux.Handle("POST /api/users", http.HandlerFunc(config.CreateUser))
-	httpServerMux.Handle("PATCH /api/users/{userID}/email", http.HandlerFunc(config.UpdateUserEmail))
-	httpServerMux.Handle("PATCH /api/users/{userID}/name", http.HandlerFunc(config.UpdateUserName))
-	httpServerMux.Handle("PATCH /api/users/{userID}/password", http.HandlerFunc(config.UpdateUserPassword))
-	httpServerMux.Handle("GET /api/users/{userInfo}", http.HandlerFunc(config.GetUserInfo))
+	httpServerMux.Handle("GET /api/users/", http.HandlerFunc(config.GetUserInfo))
+	httpServerMux.Handle("PATCH /api/users/email", http.HandlerFunc(config.UpdateUserEmail))
+	httpServerMux.Handle("PATCH /api/users/name", http.HandlerFunc(config.UpdateUserName))
+	httpServerMux.Handle("PATCH /api/users/password", http.HandlerFunc(config.UpdateUserPassword))
 
 	// Pantry endpoints
 	httpServerMux.Handle("POST /api/pantry", http.HandlerFunc(config.HandleNewItem))

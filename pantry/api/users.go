@@ -59,9 +59,13 @@ func GetUserFromToken(request *http.Request, writer http.ResponseWriter, config 
 
 func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Request) {
 
-	info := request.PathValue("userInfo")
-	log.Println("Trying to get data from users with:", info)
-	user, errUser := config.Db.GetUserByIdOrEmail(request.Context(), info)
+	user, errUser := GetUserFromToken(request, writer, config)
+	if errUser != nil {
+		respondWithError(writer, http.StatusUnauthorized, errUser.Error())
+		return
+	}
+
+	userData, errUser := config.Db.GetUserByIdOrEmail(request.Context(), user.ID)
 
 	if errUser != nil {
 		respondWithError(writer, http.StatusBadRequest, errUser.Error())
@@ -69,9 +73,9 @@ func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Requ
 	}
 
 	returnUser := CreateUserResponse{
-		ID:    user.ID,
-		Name:  user.Name,
-		Email: user.Email,
+		ID:    userData.ID,
+		Name:  userData.Name,
+		Email: userData.Email,
 	}
 	data, err := json.Marshal(returnUser)
 
@@ -134,9 +138,15 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 
 }
 
-func UpdateUser[T interface{}](writer http.ResponseWriter, request *http.Request, dbFunc func(context.Context, T) error) {
-	var updateParams T
+func UpdateUser[T interface{}](writer http.ResponseWriter, request *http.Request, dbFunc func(context.Context, T) error, config *Config) {
 
+	user, errUser := GetUserFromToken(request, writer, config)
+	if errUser != nil {
+		respondWithError(writer, http.StatusUnauthorized, errUser.Error())
+		return
+	}
+
+	var updateParams T
 	err := json.NewDecoder(request.Body).Decode(&updateParams)
 	if err != nil {
 		respondWithError(writer, http.StatusBadRequest, err.Error())
@@ -151,6 +161,13 @@ func UpdateUser[T interface{}](writer http.ResponseWriter, request *http.Request
 			return
 		}
 		params.PasswordHash = hashedPassword
+		params.ID = user.ID
+		updateParams = any(params).(T)
+	case database.UpdateUserEmailParams:
+		params.ID = user.ID
+		updateParams = any(params).(T)
+	case database.UpdateUserNameParams:
+		params.ID = user.ID
 		updateParams = any(params).(T)
 	}
 	errUpdate := dbFunc(request.Context(), updateParams)
@@ -164,13 +181,13 @@ func UpdateUser[T interface{}](writer http.ResponseWriter, request *http.Request
 }
 
 func (config *Config) UpdateUserEmail(writer http.ResponseWriter, request *http.Request) {
-	UpdateUser(writer, request, config.Db.UpdateUserEmail)
+	UpdateUser(writer, request, config.Db.UpdateUserEmail, config)
 }
 
 func (config *Config) UpdateUserName(writer http.ResponseWriter, request *http.Request) {
-	UpdateUser(writer, request, config.Db.UpdateUserName)
+	UpdateUser(writer, request, config.Db.UpdateUserName, config)
 }
 
 func (config *Config) UpdateUserPassword(writer http.ResponseWriter, request *http.Request) {
-	UpdateUser(writer, request, config.Db.UpdateUserPassword)
+	UpdateUser(writer, request, config.Db.UpdateUserPassword, config)
 }
