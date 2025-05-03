@@ -22,6 +22,7 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 	if errUser != nil {
 		respondWithError(writer, http.StatusInternalServerError, errUser.Error())
 		return
+		return
 	}
 	if CheckPasswordHash(loginRequest.Password, user.PasswordHash) != nil {
 		respondWithError(writer, http.StatusUnauthorized, "Wrong Password, try again")
