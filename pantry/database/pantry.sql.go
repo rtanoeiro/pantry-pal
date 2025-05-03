@@ -58,7 +58,6 @@ type FindItemByNameParams struct {
 	ItemName string
 }
 
-// Remember to lower the input from the UI
 func (q *Queries) FindItemByName(ctx context.Context, arg FindItemByNameParams) ([]Pantry, error) {
 	rows, err := q.db.QueryContext(ctx, findItemByName, arg.UserID, arg.ItemName)
 	if err != nil {

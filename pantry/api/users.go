@@ -13,12 +13,22 @@ import (
 )
 
 func (config *Config) ResetUsers(writer http.ResponseWriter, request *http.Request) {
+
+	user, errUser := GetUserFromToken(request, writer, config)
+	if errUser != nil {
+		respondWithError(writer, http.StatusUnauthorized, errUser.Error())
+		return
+	}
 	if config.Env != "dev" {
 		respondWithError(writer, http.StatusUnauthorized, "Unable to perform this action in this environment")
 		return
 	}
-	errReset := config.Db.ResetTable(request.Context())
+	if user.IsAdmin.Int64 == 0 {
+		respondWithError(writer, http.StatusUnauthorized, "User is not admin")
+		return
+	}
 
+	errReset := config.Db.ResetTable(request.Context())
 	if errReset != nil {
 		respondWithError(writer, http.StatusInternalServerError, errReset.Error())
 		return
@@ -26,6 +36,25 @@ func (config *Config) ResetUsers(writer http.ResponseWriter, request *http.Reque
 
 	respondWithJSON(writer, http.StatusAccepted, []byte{})
 
+}
+
+func GetUserFromToken(request *http.Request, writer http.ResponseWriter, config *Config) (database.User, error) {
+	token, errTk := GetBearerToken(request.Header)
+	log.Println("Token from header:", token)
+	if errTk != nil {
+		return database.User{}, errTk
+	}
+
+	userID, errJWT := ValidateJWT(token, config.Secret)
+	if errJWT != nil {
+		return database.User{}, errJWT
+	}
+
+	user, errUser := config.Db.GetUserByIdOrEmail(request.Context(), userID)
+	if errUser != nil {
+		return database.User{}, errUser
+	}
+	return user, nil
 }
 
 func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Request) {

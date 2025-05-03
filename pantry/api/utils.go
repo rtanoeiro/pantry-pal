@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -52,16 +51,28 @@ func MakeJWT(userID string, tokenSecret string, expiresIn time.Duration) (string
 	return token.SignedString([]byte(tokenSecret))
 }
 
-func ValidateJWT(tokenString, tokenSecret string) (uuid.UUID, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(tokenSecret), nil
-	})
+func ValidateJWT(tokenString, tokenSecret string) (string, error) {
+	token, err := jwt.ParseWithClaims(
+		tokenString,
+		&jwt.RegisteredClaims{},
+		func(token *jwt.Token) (interface{}, error) {
+			return []byte(tokenSecret), nil
+		},
+	)
 
-	if claims, ok := token.Claims.(*jwt.RegisteredClaims); ok && token.Valid {
-		id, err := uuid.Parse(claims.Subject)
-		return id, err
+	if err != nil {
+		return "", err
 	}
-	return uuid.Nil, err
+	if !token.Valid {
+		return "", errors.New("invalid token")
+	}
+	// subject is the userID setup in the JWT
+	subject, err := token.Claims.GetSubject()
+
+	if err != nil {
+		return "", err
+	}
+	return subject, nil
 }
 
 func GetBearerToken(headers http.Header) (string, error) {

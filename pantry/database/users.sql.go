@@ -14,7 +14,7 @@ const createUser = `-- name: CreateUser :one
 INSERT INTO users (id, name, email, password_hash, created_at, updated_at)
 VALUES (?, ?, ?, ?, ?, ?)
 
-RETURNING id, name, email, password_hash, created_at, updated_at
+RETURNING id, name, email, password_hash, created_at, updated_at, is_admin
 `
 
 type CreateUserParams struct {
@@ -43,12 +43,13 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.PasswordHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.IsAdmin,
 	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, name, email, password_hash, created_at, updated_at
+SELECT id, name, email, password_hash, created_at, updated_at, is_admin
 FROM users
 WHERE email = ?
 `
@@ -63,12 +64,13 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.PasswordHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.IsAdmin,
 	)
 	return i, err
 }
 
 const getUserByIdOrEmail = `-- name: GetUserByIdOrEmail :one
-SELECT id, name, email, password_hash, created_at, updated_at
+SELECT id, name, email, password_hash, created_at, updated_at, is_admin
 FROM users
 WHERE id = ?1
    OR email = ?1
@@ -84,6 +86,7 @@ func (q *Queries) GetUserByIdOrEmail(ctx context.Context, id string) (User, erro
 		&i.PasswordHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.IsAdmin,
 	)
 	return i, err
 }
@@ -97,12 +100,26 @@ func (q *Queries) ResetTable(ctx context.Context) error {
 	return err
 }
 
+const updateUserAdmin = `-- name: UpdateUserAdmin :exec
+UPDATE users
+SET 
+    is_admin = 1
+WHERE id = ?
+
+RETURNING id, name, email, password_hash, created_at, updated_at, is_admin
+`
+
+func (q *Queries) UpdateUserAdmin(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, updateUserAdmin, id)
+	return err
+}
+
 const updateUserEmail = `-- name: UpdateUserEmail :exec
 UPDATE users
 SET 
     email = ?
 WHERE id = ?
-RETURNING id, name, email, password_hash, created_at, updated_at
+RETURNING id, name, email, password_hash, created_at, updated_at, is_admin
 `
 
 type UpdateUserEmailParams struct {
@@ -120,7 +137,7 @@ UPDATE users
 SET 
     name = ?
 WHERE id = ?
-RETURNING id, name, email, password_hash, created_at, updated_at
+RETURNING id, name, email, password_hash, created_at, updated_at, is_admin
 `
 
 type UpdateUserNameParams struct {
@@ -139,7 +156,7 @@ SET
     password_hash = ?
 WHERE id = ?
 
-RETURNING id, name, email, password_hash, created_at, updated_at
+RETURNING id, name, email, password_hash, created_at, updated_at, is_admin
 `
 
 type UpdateUserPasswordParams struct {
