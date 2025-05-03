@@ -12,8 +12,14 @@ import (
 
 func (config *Config) HandleNewItem(writer http.ResponseWriter, request *http.Request) {
 
+	userID, errUser := GetUserIDFromToken(request, writer, config)
+	if errUser != nil {
+		respondWithError(writer, http.StatusUnauthorized, errUser.Error())
+		return
+	}
+
 	decoder := json.NewDecoder(request.Body)
-	item := ItemAdd{}
+	item := ItemAddRequest{}
 	err := decoder.Decode(&item)
 	if err != nil {
 		respondWithError(writer, http.StatusBadRequest, err.Error())
@@ -22,7 +28,7 @@ func (config *Config) HandleNewItem(writer http.ResponseWriter, request *http.Re
 	log.Printf("Received item \n- Name: %s\n- Quantity: %d", item.ItemName, item.Quantity)
 
 	findItem := database.FindItemByNameParams{
-		UserID:   item.UserID,
+		UserID:   userID,
 		ItemName: strings.ToLower(item.ItemName),
 	}
 	items, errItem := config.Db.FindItemByName(request.Context(), findItem)
@@ -38,23 +44,24 @@ func (config *Config) HandleNewItem(writer http.ResponseWriter, request *http.Re
 		if currentItem.ItemName == item.ItemName && currentItem.ExpiryAt == item.ExpiryAt {
 			toUpdate := ItemUpdate{
 				ItemID:            currentItem.ID,
-				UserID:            item.UserID,
+				UserID:            userID,
 				ItemName:          item.ItemName,
 				QuantityAvailable: currentItem.Quantity,
 				QuantityToAdd:     item.Quantity,
 				ExpiryAt:          currentItem.ExpiryAt,
 			}
 			config.ItemUpdate(writer, request, toUpdate)
-			break
+			return
 		}
 	}
 	// if the function hasn't returned yet, the item is new, so we add it
+	item.UserID = userID
 	config.ItemAdd(writer, request, item)
 
 }
 
 func (config *Config) ItemUpdate(writer http.ResponseWriter, request *http.Request, toUpdate ItemUpdate) {
-
+	log.Println("Updating item in pantry")
 	itemToUpdate := database.UpdateItemQuantityParams{
 		Quantity: toUpdate.QuantityAvailable + toUpdate.QuantityToAdd,
 		ID:       toUpdate.ItemID,
@@ -81,8 +88,8 @@ func (config *Config) ItemUpdate(writer http.ResponseWriter, request *http.Reque
 
 }
 
-func (config *Config) ItemAdd(writer http.ResponseWriter, request *http.Request, toAdd ItemAdd) {
-
+func (config *Config) ItemAdd(writer http.ResponseWriter, request *http.Request, toAdd ItemAddRequest) {
+	log.Println("Adding item to pantry")
 	itemToAdd := database.AddItemParams{
 		ID:       uuid.NewString(),
 		UserID:   toAdd.UserID,
@@ -90,13 +97,14 @@ func (config *Config) ItemAdd(writer http.ResponseWriter, request *http.Request,
 		Quantity: toAdd.Quantity,
 		ExpiryAt: toAdd.ExpiryAt,
 	}
+	log.Printf("Item to add: \n- UserID: %s \n- ItemName: %s \n- Quantity: %d \n- Expiry Date: %s", toAdd.UserID, toAdd.ItemName, toAdd.Quantity, toAdd.ExpiryAt)
 	addedItem, errUpdate := config.Db.AddItem(request.Context(), itemToAdd)
 	if errUpdate != nil {
 		respondWithError(writer, http.StatusInternalServerError, errUpdate.Error())
 		return
 	}
 
-	addResponse := AddItemResponse{
+	addResponse := ItemAddResponse{
 		ItemID:   addedItem.ID,
 		UserID:   toAdd.UserID,
 		ItemName: addedItem.ItemName,
@@ -175,7 +183,11 @@ func (config *Config) DeleteItem(writer http.ResponseWriter, request *http.Reque
 	itemID := request.PathValue("itemID")
 	log.Println("Trying to remove: ", itemID)
 
-	item, errRemove := config.Db.RemoveItem(request.Context(), itemID)
+	removeParams := database.RemoveItemParams{
+		ID:     itemID,
+		UserID: request.PathValue("userID"),
+	}
+	item, errRemove := config.Db.RemoveItem(request.Context(), removeParams)
 
 	if errRemove != nil {
 		respondWithError(writer, http.StatusInternalServerError, errRemove.Error())

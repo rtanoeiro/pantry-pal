@@ -119,6 +119,7 @@ UPDATE users
 SET 
     email = ?
 WHERE id = ?
+
 RETURNING id, name, email, password_hash, created_at, updated_at, is_admin
 `
 
@@ -137,6 +138,7 @@ UPDATE users
 SET 
     name = ?
 WHERE id = ?
+
 RETURNING id, name, email, password_hash, created_at, updated_at, is_admin
 `
 

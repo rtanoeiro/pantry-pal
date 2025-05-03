@@ -51,6 +51,7 @@ func main() {
 	// Users endpoints
 	httpServerMux.Handle("POST /api/users", http.HandlerFunc(config.CreateUser))
 	httpServerMux.Handle("GET /api/users/", http.HandlerFunc(config.GetUserInfo))
+	httpServerMux.Handle("POST /api/admin", http.HandlerFunc(config.UserAdmin))
 	httpServerMux.Handle("PATCH /api/users/email", http.HandlerFunc(config.UpdateUserEmail))
 	httpServerMux.Handle("PATCH /api/users/name", http.HandlerFunc(config.UpdateUserName))
 	httpServerMux.Handle("PATCH /api/users/password", http.HandlerFunc(config.UpdateUserPassword))
