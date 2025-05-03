@@ -12,6 +12,10 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 	decoder := json.NewDecoder(request.Body)
 	loginRequest := UserLoginRequest{}
 	err := decoder.Decode(&loginRequest)
+	if err != nil {
+		respondWithError(writer, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	user, errUser := config.Db.GetUserByEmail(request.Context(), loginRequest.Email)
 
