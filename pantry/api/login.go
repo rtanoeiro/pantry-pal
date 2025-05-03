@@ -41,7 +41,7 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 		Name:      user.Name,
 		Email:     user.Email,
 		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
 		JWTToken:  &userJWTToken,
 	}
 	data, err := json.Marshal(loginResponse)
