@@ -169,6 +169,8 @@ func UpdateUser[T interface{}](writer http.ResponseWriter, request *http.Request
 	case database.UpdateUserNameParams:
 		params.ID = user.ID
 		updateParams = any(params).(T)
+	default:
+		respondWithError(writer, http.StatusMethodNotAllowed, "Wrong Parameters in Request")
 	}
 	errUpdate := dbFunc(request.Context(), updateParams)
 
@@ -190,4 +192,19 @@ func (config *Config) UpdateUserName(writer http.ResponseWriter, request *http.R
 
 func (config *Config) UpdateUserPassword(writer http.ResponseWriter, request *http.Request) {
 	UpdateUser(writer, request, config.Db.UpdateUserPassword, config)
+}
+
+func (config *Config) UpdateUserAdmin(writer http.ResponseWriter, request *http.Request) {
+	user, errUser := GetUserFromToken(request, writer, config)
+	if errUser != nil {
+		respondWithError(writer, http.StatusUnauthorized, errUser.Error())
+		return
+	}
+
+	errADmin := config.Db.UpdateUserAdmin(request.Context(), user.ID)
+	if errADmin != nil {
+		respondWithError(writer, http.StatusInternalServerError, errADmin.Error())
+		return
+	}
+	respondWithJSON(writer, http.StatusOK, []byte("User successfully upgrarde to Admin"))
 }
