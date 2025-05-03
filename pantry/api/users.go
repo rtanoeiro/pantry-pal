@@ -96,6 +96,7 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 	hashedPassword, errPwd := HashPassword(user.Password)
 	if errPwd != nil {
 		respondWithError(writer, http.StatusInternalServerError, errPwd.Error())
+		return
 	}
 	createUser := database.CreateUserParams{
 		ID:           uuid.New().String(),
