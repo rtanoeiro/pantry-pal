@@ -58,7 +58,6 @@ type FindItemByNameParams struct {
 	ItemName string
 }
 
-// Remember to lower the input from the UI
 func (q *Queries) FindItemByName(ctx context.Context, arg FindItemByNameParams) ([]Pantry, error) {
 	rows, err := q.db.QueryContext(ctx, findItemByName, arg.UserID, arg.ItemName)
 	if err != nil {
@@ -129,11 +128,17 @@ func (q *Queries) GetAllItems(ctx context.Context, userID string) ([]Pantry, err
 const removeItem = `-- name: RemoveItem :one
 DELETE FROM pantry
 WHERE id = ?
+    and user_id = ?
 RETURNING id, user_id, item_name, quantity, added_at, expiry_at
 `
 
-func (q *Queries) RemoveItem(ctx context.Context, id string) (Pantry, error) {
-	row := q.db.QueryRowContext(ctx, removeItem, id)
+type RemoveItemParams struct {
+	ID     string
+	UserID string
+}
+
+func (q *Queries) RemoveItem(ctx context.Context, arg RemoveItemParams) (Pantry, error) {
+	row := q.db.QueryRowContext(ctx, removeItem, arg.ID, arg.UserID)
 	var i Pantry
 	err := row.Scan(
 		&i.ID,

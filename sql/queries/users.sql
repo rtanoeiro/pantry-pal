@@ -9,6 +9,7 @@ UPDATE users
 SET 
     email = ?
 WHERE id = ?
+
 RETURNING *;
 
 -- name: UpdateUserName :exec
@@ -16,6 +17,7 @@ UPDATE users
 SET 
     name = ?
 WHERE id = ?
+
 RETURNING *;
 
 -- name: UpdateUserPassword :exec
@@ -26,14 +28,22 @@ WHERE id = ?
 
 RETURNING *;
 
+-- name: UpdateUserAdmin :exec
+UPDATE users
+SET 
+    is_admin = 1
+WHERE id = ?
+
+RETURNING *;
+
 -- name: GetUserByIdOrEmail :one
-SELECT id, name, email, password_hash, created_at, updated_at
+SELECT id, name, email, password_hash, created_at, updated_at, is_admin
 FROM users
 WHERE id = ?1
    OR email = ?1;
 
 -- name: GetUserByEmail :one
-SELECT id, name, email, password_hash, created_at, updated_at
+SELECT id, name, email, password_hash, created_at, updated_at, is_admin
 FROM users
 WHERE email = ?;
 

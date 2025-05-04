@@ -7,9 +7,10 @@ CREATE TABLE users (
     email text NOT NULL,
     password_hash text NOT NULL,
     created_at timestamp NOT NULL,
-    updated_at timestamp NOT NULL
+    updated_at timestamp NOT NULL,
+    is_admin integer DEFAULT 0,
+    UNIQUE(email)
 );
 
 -- +goose Down
 DROP TABLE users;
-DROP TRIGGER IF EXISTS remove_pantry_items;

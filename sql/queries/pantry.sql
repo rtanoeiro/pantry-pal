@@ -20,6 +20,7 @@ RETURNING *;
 -- name: RemoveItem :one
 DELETE FROM pantry
 WHERE id = ?
+    and user_id = ?
 RETURNING *;
 
 -- name: FindItemByName :many

@@ -22,42 +22,45 @@ func main() {
 
 	dbURL := os.Getenv("DATABASE_URL")
 	port := os.Getenv("PORT")
-	fmt.Println(dbURL)
+	jwtSecret := os.Getenv("JWT_SECRET")
+
 	newDB, dbError := sql.Open("libsql", dbURL)
 	if dbError != nil {
 		log.Fatal("Unable to open database. Closing app. Error: ", dbError)
 	}
 	defer newDB.Close()
 
-	errPing := newDB.Ping()
-	if errPing != nil {
-		log.Fatalf("Failed to ping the database: %v", errPing)
-	}
-
 	config := api.Config{
-		Db:  database.New(newDB),
-		Env: "dev",
+		Db:     database.New(newDB),
+		Env:    "dev",
+		Secret: jwtSecret,
 	}
 
 	fmt.Println("Connected to the database successfully")
 	httpServerMux := http.NewServeMux()
-	baseLoginPage := http.FileServer(http.Dir("static"))
-	httpServerMux.Handle("/", baseLoginPage)
-	httpServerMux.Handle("GET /api/reset", http.HandlerFunc(config.ResetUsers))
 
+	// Reset - Used in dev for testing
+	httpServerMux.Handle("POST /api/reset", http.HandlerFunc(config.ResetUsers))
+
+	//Login
+	httpServerMux.Handle("POST /api/login", http.HandlerFunc(config.Login))
+	httpServerMux.HandleFunc("GET /api/login", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "static/login.html")
+	})
+
+	// Users endpoints
 	httpServerMux.Handle("POST /api/users", http.HandlerFunc(config.CreateUser))
-	httpServerMux.Handle("PATCH /api/users/{userID}/email", http.HandlerFunc(config.UpdateUserEmail))
-	httpServerMux.Handle("PATCH /api/users/{userID}/name", http.HandlerFunc(config.UpdateUserName))
-	httpServerMux.Handle("PATCH /api/users/{userID}/password", http.HandlerFunc(config.UpdateUserPassword))
+	httpServerMux.Handle("GET /api/users/", http.HandlerFunc(config.GetUserInfo))
+	httpServerMux.Handle("POST /api/admin", http.HandlerFunc(config.UserAdmin))
+	httpServerMux.Handle("PATCH /api/users/email", http.HandlerFunc(config.UpdateUserEmail))
+	httpServerMux.Handle("PATCH /api/users/name", http.HandlerFunc(config.UpdateUserName))
+	httpServerMux.Handle("PATCH /api/users/password", http.HandlerFunc(config.UpdateUserPassword))
 
-	httpServerMux.Handle("GET /api/users/{userInfo}", http.HandlerFunc(config.GetUserInfo))
-
+	// Pantry endpoints
 	httpServerMux.Handle("POST /api/pantry", http.HandlerFunc(config.HandleNewItem))
 	httpServerMux.Handle("GET /api/pantry/{itemName}", http.HandlerFunc(config.GetItemByName))
 	httpServerMux.Handle("GET /api/pantry/", http.HandlerFunc(config.GetAllPantryItems))
 	httpServerMux.Handle("DELETE /api/pantry/{itemID}", http.HandlerFunc(config.DeleteItem))
-
-	//httpServerMux.Handle("GET /api/pantry/{userID}", http.HandlerFunc(config.GetAllUserItems))
 
 	httpServer := http.Server{
 		Handler:           httpServerMux,

@@ -13,12 +13,14 @@ import (
 )
 
 func (config *Config) ResetUsers(writer http.ResponseWriter, request *http.Request) {
+
+	// Update to check for admin privileges?
 	if config.Env != "dev" {
 		respondWithError(writer, http.StatusUnauthorized, "Unable to perform this action in this environment")
 		return
 	}
-	errReset := config.Db.ResetTable(request.Context())
 
+	errReset := config.Db.ResetTable(request.Context())
 	if errReset != nil {
 		respondWithError(writer, http.StatusInternalServerError, errReset.Error())
 		return
@@ -28,11 +30,31 @@ func (config *Config) ResetUsers(writer http.ResponseWriter, request *http.Reque
 
 }
 
+func GetUserIDFromToken(request *http.Request, writer http.ResponseWriter, config *Config) (string, error) {
+	token, errTk := GetBearerToken(request.Header)
+	log.Println("Token from header:", token)
+	if errTk != nil {
+		return "", errTk
+	}
+
+	userID, errJWT := ValidateJWT(token, config.Secret)
+	if errJWT != nil {
+		return "", errJWT
+	}
+	log.Println("User ID from token:", userID)
+
+	return userID, nil
+}
+
 func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Request) {
 
-	info := request.PathValue("userInfo")
-	log.Println("Trying to get data from users with:", info)
-	user, errUser := config.Db.GetUserByIdOrEmail(request.Context(), info)
+	userID, errUser := GetUserIDFromToken(request, writer, config)
+	if errUser != nil {
+		respondWithError(writer, http.StatusUnauthorized, errUser.Error())
+		return
+	}
+
+	userData, errUser := config.Db.GetUserByIdOrEmail(request.Context(), userID)
 
 	if errUser != nil {
 		respondWithError(writer, http.StatusBadRequest, errUser.Error())
@@ -40,9 +62,9 @@ func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Requ
 	}
 
 	returnUser := CreateUserResponse{
-		ID:    user.ID,
-		Name:  user.Name,
-		Email: user.Email,
+		ID:    userData.ID,
+		Name:  userData.Name,
+		Email: userData.Email,
 	}
 	data, err := json.Marshal(returnUser)
 
@@ -57,7 +79,7 @@ func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Requ
 func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Request) {
 
 	decoder := json.NewDecoder(request.Body)
-	user := UserAdd{}
+	user := CreateUserRequest{}
 	err := decoder.Decode(&user)
 
 	if err != nil {
@@ -71,11 +93,16 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 
+	hashedPassword, errPwd := HashPassword(user.Password)
+	if errPwd != nil {
+		respondWithError(writer, http.StatusInternalServerError, errPwd.Error())
+		return
+	}
 	createUser := database.CreateUserParams{
 		ID:           uuid.New().String(),
 		Email:        user.Email,
 		Name:         user.Name,
-		PasswordHash: user.Password,
+		PasswordHash: hashedPassword,
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),
 	}
@@ -101,13 +128,44 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 
 }
 
-func UpdateUser[T interface{}](writer http.ResponseWriter, request *http.Request, dbFunc func(context.Context, T) error) {
-	var updateParams T
+func UpdateUser[T interface{}](writer http.ResponseWriter, request *http.Request, dbFunc func(context.Context, T) error, config *Config) {
 
+	userID, errUser := GetUserIDFromToken(request, writer, config)
+	if errUser != nil {
+		respondWithError(writer, http.StatusUnauthorized, errUser.Error())
+		return
+	}
+	log.Println("User ID from token on Update User Call:", userID)
+
+	var updateParams T
 	err := json.NewDecoder(request.Body).Decode(&updateParams)
 	if err != nil {
 		respondWithError(writer, http.StatusBadRequest, err.Error())
 		return
+	}
+
+	switch params := any(updateParams).(type) {
+	case database.UpdateUserPasswordParams:
+		log.Println("Updating user password")
+		hashedPassword, errPWD := HashPassword(params.PasswordHash)
+		if errPWD != nil {
+			respondWithError(writer, http.StatusInternalServerError, errPWD.Error())
+			return
+		}
+		params.PasswordHash = hashedPassword
+		params.ID = userID
+		updateParams = any(params).(T)
+	case database.UpdateUserEmailParams:
+		log.Println("Updating user email")
+		params.ID = userID
+		updateParams = any(params).(T)
+	case database.UpdateUserNameParams:
+		log.Println("Updating user name")
+		params.ID = userID
+		updateParams = any(params).(T)
+	default:
+		log.Println("Wrong parameters in request")
+		respondWithError(writer, http.StatusMethodNotAllowed, "Wrong Parameters in Request")
 	}
 	errUpdate := dbFunc(request.Context(), updateParams)
 
@@ -120,13 +178,30 @@ func UpdateUser[T interface{}](writer http.ResponseWriter, request *http.Request
 }
 
 func (config *Config) UpdateUserEmail(writer http.ResponseWriter, request *http.Request) {
-	UpdateUser(writer, request, config.Db.UpdateUserEmail)
+	UpdateUser(writer, request, config.Db.UpdateUserEmail, config)
 }
 
 func (config *Config) UpdateUserName(writer http.ResponseWriter, request *http.Request) {
-	UpdateUser(writer, request, config.Db.UpdateUserName)
+	UpdateUser(writer, request, config.Db.UpdateUserName, config)
 }
 
 func (config *Config) UpdateUserPassword(writer http.ResponseWriter, request *http.Request) {
-	UpdateUser(writer, request, config.Db.UpdateUserPassword)
+	UpdateUser(writer, request, config.Db.UpdateUserPassword, config)
+}
+
+func (config *Config) UserAdmin(writer http.ResponseWriter, request *http.Request) {
+	log.Println("User Admin endpoint called")
+	userID, errUser := GetUserIDFromToken(request, writer, config)
+	if errUser != nil {
+		respondWithError(writer, http.StatusUnauthorized, errUser.Error())
+		return
+	}
+
+	log.Println("User ID from token:", userID)
+	errADmin := config.Db.UpdateUserAdmin(request.Context(), userID)
+	if errADmin != nil {
+		respondWithError(writer, http.StatusInternalServerError, errADmin.Error())
+		return
+	}
+	respondWithJSON(writer, http.StatusOK, []byte("User successfully upgraded to Admin"))
 }
