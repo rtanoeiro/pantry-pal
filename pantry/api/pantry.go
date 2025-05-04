@@ -180,12 +180,19 @@ func (config *Config) GetAllPantryItems(writer http.ResponseWriter, request *htt
 }
 
 func (config *Config) DeleteItem(writer http.ResponseWriter, request *http.Request) {
+
+	userID, errUser := GetUserIDFromToken(request, writer, config)
+	if errUser != nil {
+		respondWithError(writer, http.StatusUnauthorized, errUser.Error())
+		return
+	}
+
 	itemID := request.PathValue("itemID")
 	log.Println("Trying to remove: ", itemID)
 
 	removeParams := database.RemoveItemParams{
 		ID:     itemID,
-		UserID: request.PathValue("userID"),
+		UserID: userID,
 	}
 	item, errRemove := config.Db.RemoveItem(request.Context(), removeParams)
 
