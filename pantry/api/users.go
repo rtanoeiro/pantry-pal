@@ -203,5 +203,5 @@ func (config *Config) UserAdmin(writer http.ResponseWriter, request *http.Reques
 		respondWithError(writer, http.StatusInternalServerError, errADmin.Error())
 		return
 	}
-	respondWithJSON(writer, http.StatusOK, []byte("User successfully upgrarde to Admin"))
+	respondWithJSON(writer, http.StatusOK, []byte("User successfully upgraded to Admin"))
 }
