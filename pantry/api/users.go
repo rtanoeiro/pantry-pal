@@ -79,7 +79,7 @@ func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Requ
 func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Request) {
 
 	decoder := json.NewDecoder(request.Body)
-	user := UserAdd{}
+	user := CreateUserRequest{}
 	err := decoder.Decode(&user)
 
 	if err != nil {

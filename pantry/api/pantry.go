@@ -19,7 +19,7 @@ func (config *Config) HandleNewItem(writer http.ResponseWriter, request *http.Re
 	}
 
 	decoder := json.NewDecoder(request.Body)
-	item := ItemAddRequest{}
+	item := AddItemRequest{}
 	err := decoder.Decode(&item)
 	if err != nil {
 		respondWithError(writer, http.StatusBadRequest, err.Error())
@@ -42,7 +42,7 @@ func (config *Config) HandleNewItem(writer http.ResponseWriter, request *http.Re
 
 	for _, currentItem := range items {
 		if currentItem.ItemName == item.ItemName && currentItem.ExpiryAt == item.ExpiryAt {
-			toUpdate := ItemUpdate{
+			toUpdate := UpdateItemRequest{
 				ItemID:            currentItem.ID,
 				UserID:            userID,
 				ItemName:          item.ItemName,
@@ -60,7 +60,7 @@ func (config *Config) HandleNewItem(writer http.ResponseWriter, request *http.Re
 
 }
 
-func (config *Config) ItemUpdate(writer http.ResponseWriter, request *http.Request, toUpdate ItemUpdate) {
+func (config *Config) ItemUpdate(writer http.ResponseWriter, request *http.Request, toUpdate UpdateItemRequest) {
 	log.Println("Updating item in pantry")
 	itemToUpdate := database.UpdateItemQuantityParams{
 		Quantity: toUpdate.QuantityAvailable + toUpdate.QuantityToAdd,
@@ -88,7 +88,7 @@ func (config *Config) ItemUpdate(writer http.ResponseWriter, request *http.Reque
 
 }
 
-func (config *Config) ItemAdd(writer http.ResponseWriter, request *http.Request, toAdd ItemAddRequest) {
+func (config *Config) ItemAdd(writer http.ResponseWriter, request *http.Request, toAdd AddItemRequest) {
 	log.Println("Adding item to pantry")
 	itemToAdd := database.AddItemParams{
 		ID:       uuid.NewString(),
@@ -104,7 +104,7 @@ func (config *Config) ItemAdd(writer http.ResponseWriter, request *http.Request,
 		return
 	}
 
-	addResponse := ItemAddResponse{
+	addResponse := AddItemResponse{
 		ItemID:   addedItem.ID,
 		UserID:   toAdd.UserID,
 		ItemName: addedItem.ItemName,
@@ -123,16 +123,14 @@ func (config *Config) ItemAdd(writer http.ResponseWriter, request *http.Request,
 func (config *Config) GetItemByName(writer http.ResponseWriter, request *http.Request) {
 	itemName := request.PathValue("itemName")
 
-	decoder := json.NewDecoder(request.Body)
-	user := UserRequests{}
-	err := decoder.Decode(&user)
-
-	if err != nil {
-		respondWithError(writer, http.StatusBadRequest, err.Error())
+	userID, errUser := GetUserIDFromToken(request, writer, config)
+	if errUser != nil {
+		respondWithError(writer, http.StatusUnauthorized, errUser.Error())
+		return
 	}
 
 	findItem := database.FindItemByNameParams{
-		UserID:   user.ID,
+		UserID:   userID,
 		ItemName: itemName,
 	}
 	items, errItem := config.Db.FindItemByName(request.Context(), findItem)
@@ -151,17 +149,13 @@ func (config *Config) GetItemByName(writer http.ResponseWriter, request *http.Re
 
 func (config *Config) GetAllPantryItems(writer http.ResponseWriter, request *http.Request) {
 
-	decoder := json.NewDecoder(request.Body)
-	user := UserRequests{}
-	err := decoder.Decode(&user)
-
-	if err != nil {
-		respondWithError(writer, http.StatusBadRequest, err.Error())
+	userID, errUser := GetUserIDFromToken(request, writer, config)
+	if errUser != nil {
+		respondWithError(writer, http.StatusUnauthorized, errUser.Error())
 		return
 	}
 
-	allPantryItems, errAll := config.Db.GetAllItems(request.Context(), user.ID)
-
+	allPantryItems, errAll := config.Db.GetAllItems(request.Context(), userID)
 	if errAll != nil {
 		respondWithError(writer, http.StatusBadRequest, errAll.Error())
 		return

@@ -10,7 +10,7 @@ import (
 func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 
 	decoder := json.NewDecoder(request.Body)
-	loginRequest := UserLoginRequest{}
+	loginRequest := LoginUserRequest{}
 	err := decoder.Decode(&loginRequest)
 	if err != nil {
 		respondWithError(writer, http.StatusBadRequest, err.Error())
@@ -36,7 +36,7 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 	}
 	log.Println("JWT Token Created with Success during login:", userJWTToken)
 
-	loginResponse := UserLoginResponse{
+	loginResponse := LoginUserResponse{
 		ID:        user.ID,
 		Name:      user.Name,
 		Email:     user.Email,
