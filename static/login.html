@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -63,20 +64,29 @@
     button:hover {
       background-color: #219150;
     }
+
+    .error-message {
+      color: #e74c3c;
+      margin-top: 10px;
+      text-align: center;
+    }
   </style>
 </head>
+
 <body>
   <h1>Pantry Pal</h1>
   <p>Welcome! Please log in to access your pantry.</p>
 
-  <form action="/api/login" method="post">
-    <label for="E-mail">Username</label>
+  <form id="loginForm" action="/api/login" method="post">
+    <label for="email">Username</label>
     <input type="text" id="email" name="email" required>
 
     <label for="password">Password</label>
     <input type="password" id="password" name="password" required>
 
     <button type="submit">Login</button>
+    <div id="errorMessage" class="error-message"></div>
   </form>
 </body>
+
 </html>

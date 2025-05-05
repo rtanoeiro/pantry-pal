@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"time"
@@ -9,21 +8,19 @@ import (
 
 func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 
-	decoder := json.NewDecoder(request.Body)
-	loginRequest := LoginUserRequest{}
-	err := decoder.Decode(&loginRequest)
-	if err != nil {
-		respondWithError(writer, http.StatusBadRequest, err.Error())
-		return
-	}
+	email := request.FormValue("email")
+	password := request.FormValue("password")
 
-	user, errUser := config.Db.GetUserByEmail(request.Context(), loginRequest.Email)
+	log.Println("Email from form:", email)
+	log.Println("Password from form:", password)
+
+	user, errUser := config.Db.GetUserByEmail(request.Context(), email)
 
 	if errUser != nil {
 		respondWithError(writer, http.StatusInternalServerError, errUser.Error())
 		return
 	}
-	if CheckPasswordHash(loginRequest.Password, user.PasswordHash) != nil {
+	if CheckPasswordHash(password, user.PasswordHash) != nil {
 		respondWithError(writer, http.StatusUnauthorized, "Wrong Password, try again")
 		return
 	}
@@ -36,18 +33,12 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 	}
 	log.Println("JWT Token Created with Success during login:", userJWTToken)
 
-	loginResponse := LoginUserResponse{
-		ID:        user.ID,
-		Name:      user.Name,
-		Email:     user.Email,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-		JWTToken:  &userJWTToken,
-	}
-	data, err := json.Marshal(loginResponse)
-	if err != nil {
-		respondWithError(writer, http.StatusInternalServerError, err.Error())
-		return
-	}
-	respondWithJSON(writer, http.StatusOK, data)
+	http.SetCookie(writer, &http.Cookie{
+		Name:     "JWTToken",
+		Value:    userJWTToken,
+		Expires:  time.Now().Add(6 * time.Hour),
+		HttpOnly: true,
+	})
+
+	http.Redirect(writer, request, "/home", http.StatusFound) // Redirect to /home
 }

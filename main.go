@@ -43,10 +43,13 @@ func main() {
 	httpServerMux.Handle("POST /api/reset", http.HandlerFunc(config.ResetUsers))
 
 	//Login
-	httpServerMux.Handle("POST /api/login", http.HandlerFunc(config.Login))
-	httpServerMux.HandleFunc("GET /api/login", func(w http.ResponseWriter, r *http.Request) {
+	httpServerMux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "static/login.html")
 	})
+	httpServerMux.HandleFunc("GET /home", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "static/home.html")
+	})
+	httpServerMux.Handle("POST /api/login", http.HandlerFunc(config.Login))
 
 	// Users endpoints
 	httpServerMux.Handle("POST /api/users", http.HandlerFunc(config.CreateUser))
