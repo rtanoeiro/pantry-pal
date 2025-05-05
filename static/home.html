@@ -186,20 +186,22 @@
         <div class="search-bar">
           <input type="text" id="searchInput" placeholder="Search for items...">
           <button id="searchButton">Search</button>
+          <!-- Current items will be populated dinamically in backend as a list -->
         </div>
       </div>
 
       <div class="items-section">
         <h2 class="section-title">Items Expiring Soon</h2>
         <ul class="item-list" id="expiringItemsList">
-          <!-- Items will be populated by JavaScript -->
+          <!-- Items will be populated dinamically in backend as a list -->
+
         </ul>
       </div>
 
       <div class="shopping-list-section">
         <h2 class="section-title">Shopping List</h2>
         <ul class="shopping-list" id="shoppingList">
-          <!-- Shopping items will be populated by JavaScript -->
+          <!-- Shopping items will be populated dinamically in backend as a list -->
         </ul>
       </div>
     </div>
@@ -209,153 +211,24 @@
         <h2 class="section-title">Pantry Stats</h2>
         <div class="stat-card">
           <p class="stat-title">Total Items</p>
-          <p class="stat-value" id="totalItems">0</p>
+          <p class="stat-value" id="totalItems">{totalNumItems}</p>
         </div>
         <div class="stat-card">
           <p class="stat-title">Expiring Soon</p>
-          <p class="stat-value" id="expiringSoon">0</p>
+          <p class="stat-value" id="expiringSoon">{numExpiringSoon}</p>
         </div>
         <div class="stat-card">
           <p class="stat-title">Categories</p>
-          <p class="stat-value" id="categoriesCount">0</p>
+          <p class="stat-value" id="categoriesCount">{numCategories}</p>
         </div>
         <div class="stat-card">
           <p class="stat-title">Shopping List Items</p>
-          <p class="stat-value" id="shoppingListCount">0</p>
+          <p class="stat-value" id="shoppingListCount">{numItemsShoppingList}</p>
         </div>
       </div>
     </div>
   </div>
 
-  <script>
-    // Check authentication
-    document.addEventListener('DOMContentLoaded', function () {
-      const JWTToken = localStorage.getItem('JWTToken');
-      if (!JWTToken) {
-        window.location.href = '/api/login';  // Route path
-        return;
-      }
-
-      // Load data from API
-      loadPantryData();
-      loadShoppingList();
-      loadStats();
-
-      // Set up event listeners
-      document.getElementById('pantryButton').addEventListener('click', function () {
-        // Implement pantry view functionality
-        console.log('Pantry button clicked');
-      });
-
-      document.getElementById('accountButton').addEventListener('click', function () {
-        // Implement account view functionality
-        console.log('Account button clicked');
-      });
-
-      document.getElementById('addItemButton').addEventListener('click', function () {
-        // Implement add item functionality
-        console.log('Add item button clicked');
-        // This would typically open a modal or new page
-      });
-
-      document.getElementById('searchButton').addEventListener('click', function () {
-        const searchTerm = document.getElementById('searchInput').value;
-        searchItems(searchTerm);
-      });
-    });
-
-    // Example functions that would call your backend API
-    async function loadPantryData() {
-      try {
-        // This would be replaced with your actual API call
-        const response = await fetch('/api/items/expiring', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-          }
-        });
-        const data = await response.json();
-
-        const itemsList = document.getElementById('expiringItemsList');
-        itemsList.innerHTML = '';
-
-        data.items.forEach(item => {
-          const li = document.createElement('li');
-          li.className = 'item';
-          li.innerHTML = `
-            <span>${item.name} (Expires: ${item.expiryDate})</span>
-            <span>Qty: ${item.quantity}</span>
-          `;
-          itemsList.appendChild(li);
-        });
-      } catch (error) {
-        console.error('Error loading pantry data:', error);
-      }
-    }
-
-    async function loadShoppingList() {
-      try {
-        // This would be replaced with your actual API call
-        const response = await fetch('/api/shopping-list', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-          }
-        });
-        const data = await response.json();
-
-        const shoppingList = document.getElementById('shoppingList');
-        shoppingList.innerHTML = '';
-
-        data.items.forEach(item => {
-          const li = document.createElement('li');
-          li.className = 'shopping-item';
-          li.innerHTML = `
-            <span>${item.name}</span>
-            <span>Qty: ${item.quantity}</span>
-          `;
-          shoppingList.appendChild(li);
-        });
-      } catch (error) {
-        console.error('Error loading shopping list:', error);
-      }
-    }
-
-    async function loadStats() {
-      try {
-        // This would be replaced with your actual API call
-        const response = await fetch('/api/stats', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-          }
-        });
-        const data = await response.json();
-
-        document.getElementById('totalItems').textContent = data.totalItems;
-        document.getElementById('expiringSoon').textContent = data.expiringSoon;
-        document.getElementById('categoriesCount').textContent = data.categoriesCount;
-        document.getElementById('shoppingListCount').textContent = data.shoppingListCount;
-      } catch (error) {
-        console.error('Error loading stats:', error);
-      }
-    }
-
-    async function searchItems(term) {
-      try {
-        // This would be replaced with your actual API call
-        const response = await fetch(`/api/items/search?q=${encodeURIComponent(term)}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-          }
-        });
-        const data = await response.json();
-
-        // Here you would typically display search results
-        console.log('Search results:', data);
-        alert(`Found ${data.items.length} items matching "${term}"`);
-      } catch (error) {
-        console.error('Error searching items:', error);
-      }
-    }
-  </script>
 </body>
 
 </html>

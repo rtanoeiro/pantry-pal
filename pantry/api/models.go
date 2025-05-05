@@ -14,11 +14,6 @@ type CreateUserResponse struct {
 	Email string `json:"email"`
 }
 
-type LoginUserRequest struct {
-	Email    string
-	Password string
-}
-
 type LoginUserResponse struct {
 	ID        string    `json:"id"`
 	Name      string    `json:"name"`

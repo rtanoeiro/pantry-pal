@@ -87,39 +87,6 @@
     <button type="submit">Login</button>
     <div id="errorMessage" class="error-message"></div>
   </form>
-
-  <script>
-    document.getElementById('loginForm').addEventListener('submit', async function (e) {
-      e.preventDefault();
-
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const errorMessage = document.getElementById('errorMessage');
-
-      try {
-        const response = await fetch('/api/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email, password })
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          // Save token or user data if needed
-          localStorage.setItem('JWTToken', data.JWTToken);
-          // Redirect to homepage
-          window.location.href = '/home';  // Route path
-        } else {
-          errorMessage.textContent = data.message || 'Wrong password or username';
-        }
-      } catch (error) {
-        errorMessage.textContent = 'An error occurred. Please try again.';
-      }
-    });
-  </script>
 </body>
 
 </html>

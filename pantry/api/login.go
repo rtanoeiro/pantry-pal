@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"time"
@@ -9,24 +8,19 @@ import (
 
 func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 
-	userRequest := LoginUserRequest{}
+	email := request.FormValue("email")
+	password := request.FormValue("password")
 
-	err := json.NewDecoder(request.Body).Decode(&userRequest)
-	if err != nil {
-		http.Error(writer, "Invalid request body", http.StatusBadRequest)
-		return
-	}
+	log.Println("Email from form:", email)
+	log.Println("Password from form:", password)
 
-	log.Println("Email from form:", userRequest.Email)
-	log.Println("Password from form:", userRequest.Password)
-
-	user, errUser := config.Db.GetUserByEmail(request.Context(), userRequest.Email)
+	user, errUser := config.Db.GetUserByEmail(request.Context(), email)
 
 	if errUser != nil {
 		respondWithError(writer, http.StatusInternalServerError, errUser.Error())
 		return
 	}
-	if CheckPasswordHash(userRequest.Password, user.PasswordHash) != nil {
+	if CheckPasswordHash(password, user.PasswordHash) != nil {
 		respondWithError(writer, http.StatusUnauthorized, "Wrong Password, try again")
 		return
 	}
@@ -39,19 +33,12 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 	}
 	log.Println("JWT Token Created with Success during login:", userJWTToken)
 
-	loginResponse := LoginUserResponse{
-		ID:        user.ID,
-		Name:      user.Name,
-		Email:     user.Email,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-		//JWTToken:  &userJWTToken,
-	}
+	http.SetCookie(writer, &http.Cookie{
+		Name:     "JWTToken",
+		Value:    userJWTToken,
+		Expires:  time.Now().Add(6 * time.Hour),
+		HttpOnly: true,
+	})
 
-	data, err := json.Marshal(loginResponse)
-	if err != nil {
-		respondWithError(writer, http.StatusInternalServerError, err.Error())
-		return
-	}
-	respondWithJSON(writer, http.StatusOK, data)
+	http.Redirect(writer, request, "/home", http.StatusFound) // Redirect to /home
 }
