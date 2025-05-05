@@ -9,21 +9,24 @@ import (
 
 func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 
-	decoder := json.NewDecoder(request.Body)
-	loginRequest := LoginUserRequest{}
-	err := decoder.Decode(&loginRequest)
+	userRequest := LoginUserRequest{}
+
+	err := json.NewDecoder(request.Body).Decode(&userRequest)
 	if err != nil {
-		respondWithError(writer, http.StatusBadRequest, err.Error())
+		http.Error(writer, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	user, errUser := config.Db.GetUserByEmail(request.Context(), loginRequest.Email)
+	log.Println("Email from form:", userRequest.Email)
+	log.Println("Password from form:", userRequest.Password)
+
+	user, errUser := config.Db.GetUserByEmail(request.Context(), userRequest.Email)
 
 	if errUser != nil {
 		respondWithError(writer, http.StatusInternalServerError, errUser.Error())
 		return
 	}
-	if CheckPasswordHash(loginRequest.Password, user.PasswordHash) != nil {
+	if CheckPasswordHash(userRequest.Password, user.PasswordHash) != nil {
 		respondWithError(writer, http.StatusUnauthorized, "Wrong Password, try again")
 		return
 	}
@@ -42,8 +45,9 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 		Email:     user.Email,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
-		JWTToken:  &userJWTToken,
+		//JWTToken:  &userJWTToken,
 	}
+
 	data, err := json.Marshal(loginResponse)
 	if err != nil {
 		respondWithError(writer, http.StatusInternalServerError, err.Error())

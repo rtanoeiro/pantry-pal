@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pantry Pal - Home</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+
+    .header {
+      background-color: #27ae60;
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .header-buttons {
+      display: flex;
+      gap: 15px;
+    }
+
+    .header-button {
+      background-color: #219150;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .header-button:hover {
+      background-color: #1e8449;
+    }
+
+    .container {
+      display: flex;
+      padding: 20px;
+      gap: 20px;
+    }
+
+    .main-content {
+      flex: 3;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .sidebar {
+      flex: 1;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-section {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-bar {
+      display: flex;
+      margin-bottom: 15px;
+    }
+
+    .search-bar input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px 0 0 4px;
+    }
+
+    .search-bar button {
+      padding: 10px 15px;
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 0 4px 4px 0;
+      cursor: pointer;
+    }
+
+    .add-item-button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-bottom: 15px;
+    }
+
+    .add-item-button:hover {
+      background-color: #2980b9;
+    }
+
+    .items-section,
+    .shopping-list-section {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .section-title {
+      margin-top: 0;
+      color: #2c3e50;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+
+    .item-list,
+    .shopping-list {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .item,
+    .shopping-item {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .item:last-child,
+    .shopping-item:last-child {
+      border-bottom: none;
+    }
+
+    .stats-section {
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    .stat-title {
+      font-size: 14px;
+      color: #7f8c8d;
+      margin: 0 0 5px 0;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #2c3e50;
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <h1>Pantry Pal</h1>
+    <div class="header-buttons">
+      <button class="header-button" id="pantryButton">My Pantry</button>
+      <button class="header-button" id="accountButton">Account</button>
+      <button class="header-button" id="logoutButton">Logout</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="main-content">
+      <div class="search-section">
+        <button class="add-item-button" id="addItemButton">+ Add New Item</button>
+        <div class="search-bar">
+          <input type="text" id="searchInput" placeholder="Search for items...">
+          <button id="searchButton">Search</button>
+        </div>
+      </div>
+
+      <div class="items-section">
+        <h2 class="section-title">Items Expiring Soon</h2>
+        <ul class="item-list" id="expiringItemsList">
+          <!-- Items will be populated by JavaScript -->
+        </ul>
+      </div>
+
+      <div class="shopping-list-section">
+        <h2 class="section-title">Shopping List</h2>
+        <ul class="shopping-list" id="shoppingList">
+          <!-- Shopping items will be populated by JavaScript -->
+        </ul>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <div class="stats-section">
+        <h2 class="section-title">Pantry Stats</h2>
+        <div class="stat-card">
+          <p class="stat-title">Total Items</p>
+          <p class="stat-value" id="totalItems">0</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-title">Expiring Soon</p>
+          <p class="stat-value" id="expiringSoon">0</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-title">Categories</p>
+          <p class="stat-value" id="categoriesCount">0</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-title">Shopping List Items</p>
+          <p class="stat-value" id="shoppingListCount">0</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Check authentication
+    document.addEventListener('DOMContentLoaded', function () {
+      const JWTToken = localStorage.getItem('JWTToken');
+      if (!JWTToken) {
+        window.location.href = '/api/login';  // Route path
+        return;
+      }
+
+      // Load data from API
+      loadPantryData();
+      loadShoppingList();
+      loadStats();
+
+      // Set up event listeners
+      document.getElementById('pantryButton').addEventListener('click', function () {
+        // Implement pantry view functionality
+        console.log('Pantry button clicked');
+      });
+
+      document.getElementById('accountButton').addEventListener('click', function () {
+        // Implement account view functionality
+        console.log('Account button clicked');
+      });
+
+      document.getElementById('addItemButton').addEventListener('click', function () {
+        // Implement add item functionality
+        console.log('Add item button clicked');
+        // This would typically open a modal or new page
+      });
+
+      document.getElementById('searchButton').addEventListener('click', function () {
+        const searchTerm = document.getElementById('searchInput').value;
+        searchItems(searchTerm);
+      });
+    });
+
+    // Example functions that would call your backend API
+    async function loadPantryData() {
+      try {
+        // This would be replaced with your actual API call
+        const response = await fetch('/api/items/expiring', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          }
+        });
+        const data = await response.json();
+
+        const itemsList = document.getElementById('expiringItemsList');
+        itemsList.innerHTML = '';
+
+        data.items.forEach(item => {
+          const li = document.createElement('li');
+          li.className = 'item';
+          li.innerHTML = `
+            <span>${item.name} (Expires: ${item.expiryDate})</span>
+            <span>Qty: ${item.quantity}</span>
+          `;
+          itemsList.appendChild(li);
+        });
+      } catch (error) {
+        console.error('Error loading pantry data:', error);
+      }
+    }
+
+    async function loadShoppingList() {
+      try {
+        // This would be replaced with your actual API call
+        const response = await fetch('/api/shopping-list', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          }
+        });
+        const data = await response.json();
+
+        const shoppingList = document.getElementById('shoppingList');
+        shoppingList.innerHTML = '';
+
+        data.items.forEach(item => {
+          const li = document.createElement('li');
+          li.className = 'shopping-item';
+          li.innerHTML = `
+            <span>${item.name}</span>
+            <span>Qty: ${item.quantity}</span>
+          `;
+          shoppingList.appendChild(li);
+        });
+      } catch (error) {
+        console.error('Error loading shopping list:', error);
+      }
+    }
+
+    async function loadStats() {
+      try {
+        // This would be replaced with your actual API call
+        const response = await fetch('/api/stats', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          }
+        });
+        const data = await response.json();
+
+        document.getElementById('totalItems').textContent = data.totalItems;
+        document.getElementById('expiringSoon').textContent = data.expiringSoon;
+        document.getElementById('categoriesCount').textContent = data.categoriesCount;
+        document.getElementById('shoppingListCount').textContent = data.shoppingListCount;
+      } catch (error) {
+        console.error('Error loading stats:', error);
+      }
+    }
+
+    async function searchItems(term) {
+      try {
+        // This would be replaced with your actual API call
+        const response = await fetch(`/api/items/search?q=${encodeURIComponent(term)}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          }
+        });
+        const data = await response.json();
+
+        // Here you would typically display search results
+        console.log('Search results:', data);
+        alert(`Found ${data.items.length} items matching "${term}"`);
+      } catch (error) {
+        console.error('Error searching items:', error);
+      }
+    }
+  </script>
+</body>
+
+</html>
