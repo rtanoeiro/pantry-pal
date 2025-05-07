@@ -3,94 +3,23 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Pantry Pal - Sign Up</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        h1 {
-            color: #2c3e50;
-        }
-
-        p {
-            color: #34495e;
-            margin-bottom: 20px;
-        }
-
-        form {
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            min-width: 300px;
-        }
-
-        label {
-            display: block;
-            margin: 10px 0 5px;
-            font-weight: bold;
-        }
-
-        input[type="text"],
-        input[type="password"] {
-            width: 100%;
-            padding: 10px;
-            box-sizing: border-box;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #27ae60;
-            border: none;
-            color: white;
-            font-size: 16px;
-            border-radius: 4px;
-            margin-bottom: 10px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #219150;
-        }
-
-        .error-message {
-            color: #e74c3c;
-            margin-top: 10px;
-            text-align: center;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Pantry Pal</title>
 </head>
 
 <body>
-    <h1>Pantry Pal</h1>
-    <p>Welcome! Please Insert an Email and Password to register an account.</p>
-
-    <form id="signupForm" action="/api/users" method="post">
-        <label for="email">E-mail</label>
-        <input type="text" id="email" name="email" required>
-
-        <label for="name">Name</label>
+    <h2>Sign Up</h2>
+    <form id="signupForm" action="api/user" method="POST">
+        <label for="name">Name:</label>
         <input type="text" id="name" name="name" required>
-
-        <label for="password">Password</label>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+        <label for="password">Password:</label>
         <input type="password" id="password" name="password" required>
-
-        <button type="submit">Register Account</button>
-
-        <button type="submit" onclick="window.location.href='/';">Back to Login Page</button>
+        <button type="submit">Sign Up</button>
     </form>
+    <br>
+    <button onclick="window.location.href='/'">Back to Login</button>
+</body>
 
 </html>
