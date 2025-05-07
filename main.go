@@ -46,6 +46,10 @@ func main() {
 	httpServerMux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "static/login.html")
 	})
+	httpServerMux.HandleFunc("GET /api/signup", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "static/signup.html")
+	})
+
 	httpServerMux.HandleFunc("GET /home", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "static/home.html")
 	})

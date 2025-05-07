@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"strings"
@@ -11,13 +12,13 @@ import (
 )
 
 func respondWithError(writer http.ResponseWriter, code int, msg string) {
-	writer.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	writer.WriteHeader(code)
-	_, errWriter := writer.Write([]byte(msg))
 
-	if errWriter != nil {
-		return
+	errorReturn := ErrorResponse{
+		ErrorMessage: msg,
 	}
+	data, _ := json.Marshal(errorReturn)
+
+	respondWithJSON(writer, code, data)
 }
 
 func respondWithJSON(writer http.ResponseWriter, code int, data []byte) {
