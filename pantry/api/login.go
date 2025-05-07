@@ -14,10 +14,10 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 	log.Println("Email from form:", email)
 	log.Println("Password from form:", password)
 
-	user, errUser := config.Db.GetUserByEmail(request.Context(), email)
+	user, errEmail := config.Db.GetUserByEmail(request.Context(), email)
 
-	if errUser != nil {
-		respondWithError(writer, http.StatusInternalServerError, errUser.Error())
+	if errEmail != nil {
+		respondWithError(writer, http.StatusInternalServerError, errEmail.Error())
 		return
 	}
 	if CheckPasswordHash(password, user.PasswordHash) != nil {

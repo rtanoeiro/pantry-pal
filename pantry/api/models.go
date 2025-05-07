@@ -2,6 +2,7 @@ package api
 
 import "time"
 
+// To be used when we use javascript
 type CreateUserRequest struct {
 	Name     string
 	Email    string
@@ -12,6 +13,12 @@ type CreateUserResponse struct {
 	ID    string `json:"id"`
 	Name  string `json:"name"`
 	Email string `json:"email"`
+}
+
+// To be used when we use javascript
+type LoginUserRequest struct {
+	Email    string
+	Password string
 }
 
 type LoginUserResponse struct {
@@ -53,4 +60,8 @@ type UpdateItemResponse struct {
 	ItemName string `json:"item_name"`
 	Quantity int64  `json:"quantity"`
 	ExpiryAt string `json:"expiry_at"`
+}
+
+type ErrorResponse struct {
+	ErrorMessage string
 }

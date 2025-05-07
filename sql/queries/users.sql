@@ -36,11 +36,15 @@ WHERE id = ?
 
 RETURNING *;
 
--- name: GetUserByIdOrEmail :one
+-- name: GetUserById :one
 SELECT id, name, email, password_hash, created_at, updated_at, is_admin
 FROM users
-WHERE id = ?1
-   OR email = ?1;
+WHERE id = ?;
+
+-- name: GetUserByName :one
+SELECT id, name, email, password_hash, created_at, updated_at, is_admin
+FROM users
+WHERE name = ?;
 
 -- name: GetUserByEmail :one
 SELECT id, name, email, password_hash, created_at, updated_at, is_admin

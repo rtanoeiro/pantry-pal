@@ -53,8 +53,7 @@ func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Requ
 		respondWithError(writer, http.StatusUnauthorized, errUser.Error())
 		return
 	}
-
-	userData, errUser := config.Db.GetUserByIdOrEmail(request.Context(), userID)
+	userData, errUser := config.Db.GetUserById(request.Context(), userID)
 
 	if errUser != nil {
 		respondWithError(writer, http.StatusBadRequest, errUser.Error())
@@ -78,30 +77,34 @@ func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Requ
 
 func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Request) {
 
-	decoder := json.NewDecoder(request.Body)
-	user := CreateUserRequest{}
-	err := decoder.Decode(&user)
+	email := request.FormValue("email")
+	name := request.FormValue("name")
+	password := request.FormValue("password")
 
-	if err != nil {
-		respondWithError(writer, http.StatusBadRequest, err.Error())
+	log.Println("Email from form:", email)
+	log.Println("Name from form: ", name)
+	log.Println("Password from form:", password)
+
+	if email == "" || password == "" || name == "" {
+		respondWithError(writer, http.StatusBadRequest, "Please provide all 3 information in order to register")
+		return
 	}
-
-	_, userError := config.Db.GetUserByEmail(request.Context(), user.Email)
+	_, userError := config.Db.GetUserByEmail(request.Context(), email)
 
 	if userError == nil {
-		respondWithError(writer, http.StatusInternalServerError, "User already exists")
+		respondWithError(writer, http.StatusConflict, "User already exists")
 		return
 	}
 
-	hashedPassword, errPwd := HashPassword(user.Password)
+	hashedPassword, errPwd := HashPassword(password)
 	if errPwd != nil {
 		respondWithError(writer, http.StatusInternalServerError, errPwd.Error())
 		return
 	}
 	createUser := database.CreateUserParams{
 		ID:           uuid.New().String(),
-		Email:        user.Email,
-		Name:         user.Name,
+		Email:        email,
+		Name:         name,
 		PasswordHash: hashedPassword,
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),
@@ -113,18 +116,7 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 	}
 	log.Printf("User added with success - UserID:%s \n-Name:%s\n-Email: %s", userAdd.ID, userAdd.Name, userAdd.Email)
 
-	returnUser := CreateUserResponse{
-		ID:    userAdd.ID,
-		Name:  userAdd.Name,
-		Email: userAdd.Email,
-	}
-	data, err := json.Marshal(returnUser)
-
-	if err != nil {
-		respondWithError(writer, http.StatusInternalServerError, err.Error())
-		return
-	}
-	respondWithJSON(writer, http.StatusCreated, data)
+	http.Redirect(writer, request, "/", http.StatusFound) // Redirect to /home
 
 }
 
