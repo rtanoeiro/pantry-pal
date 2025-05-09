@@ -1,29 +1,46 @@
-PantryPal
-PantryPal is a project designed to help you keep track of your pantry items and reduce food waste. We’ve all been there—finding that forgotten item buried deep in the pantry, only to discover it expired months ago. With PantryPal, you can stay on top of your pantry inventory and avoid those frustrating moments.
+# PantryPal - Self-Hosted Virtual Pantry & Grocery Planner
 
-# Available Features
+PantryPal is a comprehensive, user-friendly application designed to help you manage your pantry efficiently and reduce food waste. It offers a wide range of functionalities, including tracking items, managing expiry dates, integrating with shopping carts, generating recipes, and providing AI-powered meal suggestions.
 
-At this current stage, PantryPal is only available for CLI usage.
+## Features Overview
 
-To start using it, just run ```sh main.sh``` while inside the project directory. Once inside the tool, you can:
+### Core Features
+- **Pantry Management**: Add, remove, or update items in your virtual pantry.
+- **Expiry Tracking**: Monitor items as they approach their expiration date with configurable alerts.
+- **Shopping Cart Integration**: Sync your cart with the pantry to track what's on hand and plan your shopping list.
+- **Recipe Suggestions**: Search and filter recipes based on available ingredients. Generate meal plans using your pantry items.
+- **AI-Powered Meal Planning**: Use your local AI model (LLM) or access an external AI provider to get personalized recipe recommendations.
 
-- Add/Remove Items: Easily add new items when you return from the grocery store and remove them when they’re used up.
+### Advanced Features
+- **Multi-User Support**: Collaborate with friends and family by sharing pantries and managing recipes collectively.
+- **Dark Mode**: Choose between light or dark user interfaces for a personalized experience.
+- **Admin Panel**: Manage users, permissions, and system settings from one central location.
 
-- Check Pantry: Check current items available at your Pantry
+## Getting Started
+
+### Prerequisites
+2. Have Docker installed if you're setting up the application on a server.
+
+### Installation
+
+#### Option 1: Docker (Recommended)
+Run these commands to set up PantryPal:
+
+```bash
+
+docker pull mrramonster/pantrypal:latest
+docker run -d -p PORT-CHOICE:PORT-CHOICE --name pantry-pal \
+          --env-file .env \
+          mrramonster/pantrypal:latest
+```
+
+### Option 2: Binary
+
+Pull the repository and run the script at scripts/start_server.sh. The server should start at the designed port on your env file.
 
 
-# Future Features
-In a future update, this project will have a visual UI where you will have the following:
+### Contributing
 
-- Expiry Alerts: PantryPal scans your items daily and notifies you when any are close to their expiry date. You can customize the notification timeframe to suit your needs.
+Whenever you're contributing to new features, make sure all tests are passing, then open a PR with a clear description of your changes.
 
-- Available to access via your browser in a home-server
-
-- AI Meal Suggestions: If you host a local LLM, you'll be able to use your available pantry items to get a dinner recommendation. If you don't host one, you'll be able to input your AI Provider Token and use that instead.
-
-- Expiry Notifications: PantryPal will alert you when items are nearing their expiry date, helping you use them before they go to waste.
-
-## Contributing
-
-You can contribute to this project by helping on any of the things listed in the Future Update Section.
-
+For issues, please create one detailing the error with screenshots, if possible.
