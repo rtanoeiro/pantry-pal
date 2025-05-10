@@ -94,8 +94,5 @@ func checkDate(givenDate string) bool {
 		return false
 	}
 	results := formattedDate.Compare(time.Now())
-	if results == -1 {
-		return false
-	}
-	return true
+	return results != -1
 }
