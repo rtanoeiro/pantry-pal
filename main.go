@@ -53,6 +53,7 @@ func main() {
 		http.ServeFile(w, r, "static/home.html")
 	})
 	httpServerMux.Handle("POST /login", http.HandlerFunc(config.Login))
+	httpServerMux.Handle("GET /logout", http.HandlerFunc(config.Logout))
 
 	// Users endpoints
 	httpServerMux.Handle("POST /users", http.HandlerFunc(config.CreateUser))

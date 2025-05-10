@@ -18,7 +18,7 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 	user, errEmail := config.Db.GetUserByEmail(request.Context(), email)
 
 	if errEmail != nil {
-		respondWithError(writer, http.StatusInternalServerError, errEmail.Error())
+		respondWithError(writer, http.StatusInternalServerError, "Invalid Email")
 		return
 	}
 	if CheckPasswordHash(password, user.PasswordHash) != nil {
@@ -61,7 +61,17 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 		Expires:  time.Now().Add(6 * time.Hour),
 		HttpOnly: true,
 	})
-
+	writer.Header().Add("HX-Redirect", "/home")
 	respondWithJSON(writer, http.StatusOK, data)
-	http.Redirect(writer, request, "/home", http.StatusFound) // Redirect to /home
+}
+
+func (config *Config) Logout(writer http.ResponseWriter, request *http.Request) {
+
+	http.SetCookie(writer, &http.Cookie{
+		Name:     "JWTToken",
+		Value:    "",
+		Expires:  time.Now().Add(6 * time.Hour),
+		HttpOnly: true,
+	})
+	writer.Header().Add("HX-Redirect", "/")
 }
