@@ -1,0 +1,88 @@
+/* styles.css */
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f4f4f4;
+}
+
+.login-container,
+.signup-container {
+    padding: 30px;
+    /* Increased padding */
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: white;
+}
+
+.form-group {
+    margin-bottom: 10px;
+}
+
+input[type="email"],
+input[type="password"],
+input[type="name"] {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+button {
+    padding: 10px 15px;
+    background-color: #28a745;
+    color: white;
+    border: 2px solid #28a745;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+.error-message {
+    color: red;
+    margin-top: 10px;
+}
+
+.main-container {
+    display: flex;
+    justify-content: space-between;
+    /* Adjusts spacing between elements */
+}
+
+.left-section {
+    width: 50%;
+    /* Or adjust as needed */
+    padding-right: 20px;
+    /* Adds some space between left and right sections */
+}
+
+.right-section {
+    width: 48%;
+    /* Adjust based on your design needs */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    /* Aligns the stats to the right */
+}
+
+/* Additional styling for better layout */
+body,
+html {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.main-container {
+    width: 100%;
+    padding: 20px;
+}
+
+.left-section,
+.right-section {
+    padding: 10px;
+}
