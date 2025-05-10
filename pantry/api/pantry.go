@@ -67,6 +67,11 @@ func (config *Config) ItemUpdate(writer http.ResponseWriter, request *http.Reque
 		ID:       toUpdate.ItemID,
 		UserID:   toUpdate.UserID,
 	}
+
+	if itemToUpdate.Quantity < 0 {
+		respondWithError(writer, http.StatusForbidden, "unable to remove more items than available")
+		return
+	}
 	updatedItem, errUpdate := config.Db.UpdateItemQuantity(request.Context(), itemToUpdate)
 	if errUpdate != nil {
 		respondWithError(writer, http.StatusInternalServerError, errUpdate.Error())
@@ -90,6 +95,11 @@ func (config *Config) ItemUpdate(writer http.ResponseWriter, request *http.Reque
 
 func (config *Config) ItemAdd(writer http.ResponseWriter, request *http.Request, toAdd AddItemRequest) {
 	log.Println("Adding item to pantry")
+
+	if toAdd.Quantity < 0 {
+		respondWithError(writer, http.StatusForbidden, "unable to add negative items")
+		return
+	}
 	itemToAdd := database.AddItemParams{
 		ID:       uuid.NewString(),
 		UserID:   toAdd.UserID,
