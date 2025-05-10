@@ -24,11 +24,7 @@ func respondWithError(writer http.ResponseWriter, code int, msg string) {
 func respondWithJSON(writer http.ResponseWriter, code int, data []byte) {
 	writer.Header().Set("Content-Type", "application/json; charset=utf-8")
 	writer.WriteHeader(code)
-	_, errWriter := writer.Write(data)
-
-	if errWriter != nil {
-		respondWithError(writer, http.StatusInternalServerError, errWriter.Error())
-	}
+	writer.Write(data)
 }
 
 func HashPassword(password string) (string, error) {
