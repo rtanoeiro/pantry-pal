@@ -1,18 +1,18 @@
+{{ define "index" }}
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login - Pantry Pal</title>
-    <link rel="stylesheet" href="styles.css" />
-    <!-- Link to the external CSS file -->
+    <link rel="stylesheet" href="css/styles.css"/>
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   </head>
 
   <body>
     <div class="login-container">
       <h2>Login</h2>
-      <form hx-post="/login" hx-on:htmx:after-request="this.reset()">
+      <form id="loginForm">
         <div class="form-group">
           <label for="email">Email:</label>
           <input type="email" id="email" name="email" required />
@@ -21,20 +21,18 @@
           <label for="password">Password:</label>
           <input type="password" id="password" name="password" required />
         </div>
-        <div class="error-login">
-          <p></p>
+        <div id="error-login"> 
+          <p>{{ template "errorMessage" }}</p>
         </div>
-        <button id="login-submit">Login</button>
+        <button id="login-submit" hx-post="/login" hx-target="#error-login">Login</button>
       </form>
       <br />
-      <button
-        id="signup"
-        hx-get="/signup"
-        hx-target=".login-container"
-        hx-swap="outerHTML"
-      >
-        Sign Up
-      </button>
+      <button hx-get="/signup" hx-target="body">Sign Up</button>
     </div>
   </body>
 </html>
+{{ end }}
+
+{{ define "errorMessage" }}
+    {{ .ErrorMessage.ErrorMessage}}
+{{ end }}

@@ -31,28 +31,22 @@ func main() {
 	defer newDB.Close()
 
 	config := api.Config{
-		Db:     database.New(newDB),
-		Env:    "dev",
-		Secret: jwtSecret,
+		Db:       database.New(newDB),
+		Renderer: api.MyTemplates(),
+		Env:      "dev",
+		Secret:   jwtSecret,
 	}
 
-	fmt.Println("Connected to the database successfully")
 	httpServerMux := http.NewServeMux()
 
 	// Reset - Used in dev for testing
 	httpServerMux.Handle("POST /reset", http.HandlerFunc(config.ResetUsers))
 
 	//Login
-	httpServerMux.Handle("GET /", http.FileServer(http.Dir("static")))
-	httpServerMux.HandleFunc("GET /signup", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "static/signup.html")
-	})
-
-	// After Login Pages
-	httpServerMux.HandleFunc("GET /home", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "static/home.html")
-	})
+	httpServerMux.Handle("GET /", http.HandlerFunc(config.Index))
+	httpServerMux.Handle("GET /signup", http.HandlerFunc(config.SignUp))
 	httpServerMux.Handle("POST /login", http.HandlerFunc(config.Login))
+	httpServerMux.Handle("GET /home", http.HandlerFunc(config.Home))
 	httpServerMux.Handle("GET /logout", http.HandlerFunc(config.Logout))
 
 	// Users endpoints

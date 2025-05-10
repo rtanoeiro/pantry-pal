@@ -1,6 +1,13 @@
 package api
 
-import "time"
+import (
+	"text/template"
+	"time"
+)
+
+type Templates struct {
+	templates *template.Template
+}
 
 // To be used when we use javascript
 type CreateUserRequest struct {

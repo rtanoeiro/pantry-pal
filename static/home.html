@@ -1,13 +1,11 @@
+{{ define "home" }}
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <link rel="stylesheet" type="text/css" href="static/css/styles.css" />
-    <!-- Link to the external CSS file -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pantry Pal - Home</title>
-    <link rel="stylesheet" href="styles.css" />
-
+    <link rel="stylesheet" href="css/styles.css"/>
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   </head>
 
@@ -38,7 +36,7 @@
           hx-get="/pantry"
           hx-swap="innerHTML"
         >
-          {numItems}
+          {template "numItems"}
         </p>
         <p class="stat-title">Expiring Soon</p>
         <p class="stat-value" id="expiringSoon">{numExpiringSoon}</p>
@@ -50,3 +48,20 @@
     </div>
   </body>
 </html>
+{{ end }}
+
+{{ define "numItems" }}
+  {{ .NumItems }}
+{{ end }}
+
+{{ define "numExpiringSoon" }}
+  {{ .NumExpiringSoon }}
+{{ end }}
+
+{{ define "numCategories" }}
+  {{ .NumCategories }}
+{{ end }}
+
+{{ define "numItemsShoppingList" }}
+  {{ .NumItemsShoppingList }}
+{{ end }}

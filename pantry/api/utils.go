@@ -1,24 +1,30 @@
 package api
 
 import (
-	"encoding/json"
+	"context"
 	"errors"
+	"io"
 	"net/http"
 	"strings"
+	"text/template"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func respondWithError(writer http.ResponseWriter, code int, msg string) {
+func (tmplt *Templates) Render(writer io.Writer, name string, data interface{}, ctx context.Context) error {
+	return tmplt.templates.ExecuteTemplate(writer, name, data)
+}
 
-	errorReturn := ErrorResponse{
-		ErrorMessage: msg,
+func MyTemplates() *Templates {
+	return &Templates{
+		templates: template.Must(template.ParseGlob("static/*.html")),
 	}
-	data, _ := json.Marshal(errorReturn)
+}
 
-	respondWithJSON(writer, code, data)
+func respondWithError(writer http.ResponseWriter, code int, msg string) {
+	respondWithJSON(writer, code, []byte(msg))
 }
 
 func respondWithJSON(writer http.ResponseWriter, code int, data []byte) {
