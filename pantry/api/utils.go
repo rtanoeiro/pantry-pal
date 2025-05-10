@@ -84,3 +84,18 @@ func GetBearerToken(headers http.Header) (string, error) {
 	}
 	return "", errors.New("invalid authorization header format")
 }
+
+func checkDate(givenDate string) bool {
+
+	dateLayout := "2025-01-01"
+	formattedDate, errParse := time.Parse(givenDate, dateLayout)
+
+	if errParse != nil {
+		return false
+	}
+	results := formattedDate.Compare(time.Now())
+	if results == -1 {
+		return false
+	}
+	return true
+}

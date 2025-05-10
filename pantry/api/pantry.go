@@ -107,6 +107,11 @@ func (config *Config) ItemAdd(writer http.ResponseWriter, request *http.Request,
 		Quantity: toAdd.Quantity,
 		ExpiryAt: toAdd.ExpiryAt,
 	}
+
+	if !checkDate(toAdd.ExpiryAt) {
+		respondWithError(writer, http.StatusForbidden, "Invalid Date. Please send in the Format YYYY-MM-DD or Date is already expired")
+		return
+	}
 	log.Printf("Item to add: \n- UserID: %s \n- ItemName: %s \n- Quantity: %d \n- Expiry Date: %s", toAdd.UserID, toAdd.ItemName, toAdd.Quantity, toAdd.ExpiryAt)
 	addedItem, errUpdate := config.Db.AddItem(request.Context(), itemToAdd)
 	if errUpdate != nil {
