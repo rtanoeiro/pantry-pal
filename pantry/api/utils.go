@@ -1,34 +1,36 @@
 package api
 
 import (
-	"encoding/json"
+	"context"
 	"errors"
+	"io"
 	"net/http"
 	"strings"
+	"text/template"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func respondWithError(writer http.ResponseWriter, code int, msg string) {
+func (tmplt *Templates) Render(writer io.Writer, name string, data interface{}, ctx context.Context) error {
+	return tmplt.templates.ExecuteTemplate(writer, name, data)
+}
 
-	errorReturn := ErrorResponse{
-		ErrorMessage: msg,
+func MyTemplates() *Templates {
+	return &Templates{
+		templates: template.Must(template.ParseGlob("static/*.html")),
 	}
-	data, _ := json.Marshal(errorReturn)
+}
 
-	respondWithJSON(writer, code, data)
+func respondWithError(writer http.ResponseWriter, code int, msg string) {
+	respondWithJSON(writer, code, []byte(msg))
 }
 
 func respondWithJSON(writer http.ResponseWriter, code int, data []byte) {
 	writer.Header().Set("Content-Type", "application/json; charset=utf-8")
 	writer.WriteHeader(code)
-	_, errWriter := writer.Write(data)
-
-	if errWriter != nil {
-		respondWithError(writer, http.StatusInternalServerError, errWriter.Error())
-	}
+	writer.Write(data)
 }
 
 func HashPassword(password string) (string, error) {
@@ -87,4 +89,16 @@ func GetBearerToken(headers http.Header) (string, error) {
 		return parts[1], nil
 	}
 	return "", errors.New("invalid authorization header format")
+}
+
+func checkDate(givenDate string) bool {
+
+	dateLayout := "2006-01-02"
+	formattedDate, errParse := time.Parse(dateLayout, givenDate)
+
+	if errParse != nil {
+		return false
+	}
+	results := formattedDate.Compare(time.Now())
+	return results != -1
 }

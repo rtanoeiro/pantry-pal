@@ -67,6 +67,11 @@ func (config *Config) ItemUpdate(writer http.ResponseWriter, request *http.Reque
 		ID:       toUpdate.ItemID,
 		UserID:   toUpdate.UserID,
 	}
+
+	if itemToUpdate.Quantity < 0 {
+		respondWithError(writer, http.StatusForbidden, "unable to remove more items than available")
+		return
+	}
 	updatedItem, errUpdate := config.Db.UpdateItemQuantity(request.Context(), itemToUpdate)
 	if errUpdate != nil {
 		respondWithError(writer, http.StatusInternalServerError, errUpdate.Error())
@@ -90,12 +95,22 @@ func (config *Config) ItemUpdate(writer http.ResponseWriter, request *http.Reque
 
 func (config *Config) ItemAdd(writer http.ResponseWriter, request *http.Request, toAdd AddItemRequest) {
 	log.Println("Adding item to pantry")
+
+	if toAdd.Quantity < 0 {
+		respondWithError(writer, http.StatusForbidden, "unable to add negative items")
+		return
+	}
 	itemToAdd := database.AddItemParams{
 		ID:       uuid.NewString(),
 		UserID:   toAdd.UserID,
 		ItemName: toAdd.ItemName,
 		Quantity: toAdd.Quantity,
 		ExpiryAt: toAdd.ExpiryAt,
+	}
+
+	if !checkDate(toAdd.ExpiryAt) {
+		respondWithError(writer, http.StatusForbidden, "Invalid Date. Please send in the Format YYYY-MM-DD or Date is already expired")
+		return
 	}
 	log.Printf("Item to add: \n- UserID: %s \n- ItemName: %s \n- Quantity: %d \n- Expiry Date: %s", toAdd.UserID, toAdd.ItemName, toAdd.Quantity, toAdd.ExpiryAt)
 	addedItem, errUpdate := config.Db.AddItem(request.Context(), itemToAdd)
