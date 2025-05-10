@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"time"
@@ -40,5 +41,27 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 		HttpOnly: true,
 	})
 
+	loginResponse := LoginUserResponse{
+		ID:        user.ID,
+		Name:      user.Name,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+		JWTToken:  &userJWTToken,
+	}
+
+	data, err := json.Marshal(loginResponse)
+	if err != nil {
+		respondWithError(writer, http.StatusInternalServerError, err.Error())
+		return
+	}
+	http.SetCookie(writer, &http.Cookie{
+		Name:     "JWTToken",
+		Value:    userJWTToken,
+		Expires:  time.Now().Add(6 * time.Hour),
+		HttpOnly: true,
+	})
+
+	respondWithJSON(writer, http.StatusOK, data)
 	http.Redirect(writer, request, "/home", http.StatusFound) // Redirect to /home
 }
