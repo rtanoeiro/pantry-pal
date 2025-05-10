@@ -5,21 +5,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - Pantry Pal</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Link to the external CSS file -->
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 </head>
 
 <body>
-    <h2>Sign Up</h2>
-    <form id="signupForm" action="api/user" method="POST">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required>
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-        <button type="submit">Sign Up</button>
-    </form>
-    <br>
-    <button onclick="window.location.href='/'">Back to Login</button>
+    <div class="signup-container">
+        <h2>Sign Up</h2>
+        <form id="signupForm" action="user" method="POST">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="name" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <button type="submit">Sign Up</button>
+        </form>
+        <br>
+        <button onclick="window.location.href='/'">Back to Login</button>
 </body>
 
 </html>
