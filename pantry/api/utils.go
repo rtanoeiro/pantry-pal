@@ -87,8 +87,8 @@ func GetBearerToken(headers http.Header) (string, error) {
 
 func checkDate(givenDate string) bool {
 
-	dateLayout := "2025-01-01"
-	formattedDate, errParse := time.Parse(givenDate, dateLayout)
+	dateLayout := "2006-01-02"
+	formattedDate, errParse := time.Parse(dateLayout, givenDate)
 
 	if errParse != nil {
 		return false
