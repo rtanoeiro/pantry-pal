@@ -6,7 +6,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pantry Pal - Home</title>
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="/css/styles.css">
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 </head>
 
@@ -32,7 +32,7 @@
       <h2 class="section-title">Pantry Stats</h2>
       <p class="sxtat-title">Total Items</p>
       <p class="stat-value" id="totalItems" hx-get="/pantry" hx-swap="innerHTML">
-        {template "numItems"}
+        {{template "numItems"}}
       </p>
       <p class="stat-title">Expiring Soon</p>
       <p class="stat-value" id="expiringSoon">{numExpiringSoon}</p>

@@ -7,14 +7,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - Pantry Pal</title>
-    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="/css/styles.css">
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 </head>
 
 <body>
     <div class="signup-container">
         <h2>Sign Up</h2>
-        <form id="signupForm" action="user" method="POST">
+        <form id="signupForm" action="users" method="POST">
             <div class="form-group">
                 <label for="name">Name:</label>
                 <input type="name" id="name" name="name" required>
@@ -31,7 +31,7 @@
             <button type="submit">Sign Up</button>
         </form>
         <br>
-        <button onclick="window.location.href='/'">Back to Login</button>
+        <button hx-get="/">Back to Login</button>
 </body>
 
 </html>

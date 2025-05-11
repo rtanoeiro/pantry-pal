@@ -7,6 +7,9 @@ import (
 )
 
 func (config *Config) Index(writer http.ResponseWriter, request *http.Request) {
+
+	writer.Header().Set("HX-Replace-Url", "/")
+	writer.Header().Set("HX-Redirect", "/")
 	config.Renderer.Render(writer, "index", nil, request.Context())
 }
 
@@ -46,35 +49,38 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 		Expires:  time.Now().Add(6 * time.Hour),
 		HttpOnly: true,
 	})
+	config.Home(writer, request)
+	log.Println("User logged in with success. Redirecting to Home Page...")
 
-	writer.Header().Add("HX-Redirect", "/home")
 }
 
 func (config *Config) Logout(writer http.ResponseWriter, request *http.Request) {
 
-	log.Println("User logged out")
 	http.SetCookie(writer, &http.Cookie{
 		Name:     "JWTToken",
 		Value:    "",
 		Expires:  time.Now().Add(6 * time.Hour),
 		HttpOnly: true,
 	})
-	writer.Header().Add("HX-Redirect", "/")
-	writer.Header().Add("HX-Replace-Url", "/")
+	config.Index(writer, request)
+	log.Println("User logged out")
+
 }
 
 func (config *Config) SignUp(writer http.ResponseWriter, request *http.Request) {
 
+	writer.Header().Set("HX-Replace-Url", "/signup")
+	writer.Header().Set("HX-Redirect", "/signup")
 	config.Renderer.Render(writer, "signup", "", request.Context())
-	writer.Header().Add("HX-Replace-Url", "/signup")
-	writer.Header().Add("HX-Redirect", "/signup")
+	log.Println("User entered SignUp Page...")
 
 }
 
 func (config *Config) Home(writer http.ResponseWriter, request *http.Request) {
 
+	writer.Header().Set("HX-Replace-Url", "/home")
+	writer.Header().Set("HX-Redirect", "/home")
 	config.Renderer.Render(writer, "home", "", request.Context())
-	writer.Header().Add("HX-Replace-Url", "/home")
-	writer.Header().Add("HX-Redirect", "/home")
+	log.Println("User entered Home Page...")
 
 }
