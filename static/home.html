@@ -1,67 +1,64 @@
 {{ define "home" }}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pantry Pal - Home</title>
-    <link rel="stylesheet" href="css/styles.css"/>
-    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
-  </head>
 
-  <body>
-    <div class="main-container">
-      <!-- Left Section -->
-      <div class="left-section">
-        <h1>Pantry Pal</h1>
-        <button class="header-button" id="pantryButton">My Pantry</button>
-        <button class="header-button" id="accountButton">Account</button>
-        <button class="header-button" id="logoutButton" hx-get="/logout">
-          Logout
-        </button>
-        <button class="add-item-button" id="addItemButton">
-          + Add New Item
-        </button>
-        <input type="text" id="searchInput" placeholder="Search for items..." />
-        <button id="searchButton">Search</button>
-      </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pantry Pal - Home</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+</head>
 
-      <!-- Right Section -->
-      <div class="right-section">
-        <h2 class="section-title">Pantry Stats</h2>
-        <p class="sxtat-title">Total Items</p>
-        <p
-          class="stat-value"
-          id="totalItems"
-          hx-get="/pantry"
-          hx-swap="innerHTML"
-        >
-          {template "numItems"}
-        </p>
-        <p class="stat-title">Expiring Soon</p>
-        <p class="stat-value" id="expiringSoon">{numExpiringSoon}</p>
-        <p class="stat-title">Categories</p>
-        <p class="stat-value" id="categoriesCount">{numCategories}</p>
-        <p class="stat-title">Shopping List Items</p>
-        <p class="stat-value" id="shoppingListCount">{numItemsShoppingList}</p>
-      </div>
+<body>
+  <div class="main-container">
+    <!-- Left Section -->
+    <div class="left-section">
+      <h1>Pantry Pal</h1>
+      <button class="header-button" id="pantryButton">My Pantry</button>
+      <button class="header-button" id="accountButton">Account</button>
+      <button class="header-button" id="logoutButton" hx-get="/logout">
+        Logout
+      </button>
+      <button class="add-item-button" id="addItemButton">
+        + Add New Item
+      </button>
+      <input type="text" id="searchInput" placeholder="Search for items..." />
+      <button id="searchButton">Search</button>
     </div>
-  </body>
+
+    <!-- Right Section -->
+    <div class="right-section">
+      <h2 class="section-title">Pantry Stats</h2>
+      <p class="sxtat-title">Total Items</p>
+      <p class="stat-value" id="totalItems" hx-get="/pantry" hx-swap="innerHTML">
+        {template "numItems"}
+      </p>
+      <p class="stat-title">Expiring Soon</p>
+      <p class="stat-value" id="expiringSoon">{numExpiringSoon}</p>
+      <p class="stat-title">Categories</p>
+      <p class="stat-value" id="categoriesCount">{numCategories}</p>
+      <p class="stat-title">Shopping List Items</p>
+      <p class="stat-value" id="shoppingListCount">{numItemsShoppingList}</p>
+    </div>
+  </div>
+</body>
+
 </html>
 {{ end }}
 
 {{ define "numItems" }}
-  {{ .NumItems }}
+{{ .NumItems }}
 {{ end }}
 
 {{ define "numExpiringSoon" }}
-  {{ .NumExpiringSoon }}
+{{ .NumExpiringSoon }}
 {{ end }}
 
 {{ define "numCategories" }}
-  {{ .NumCategories }}
+{{ .NumCategories }}
 {{ end }}
 
 {{ define "numItemsShoppingList" }}
-  {{ .NumItemsShoppingList }}
+{{ .NumItemsShoppingList }}
 {{ end }}
