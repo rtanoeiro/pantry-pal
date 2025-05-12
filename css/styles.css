@@ -11,7 +11,8 @@ body {
 
 .login-container,
 .signup-container,
-.account-container {
+.account-container,
+.main-container {
     padding: 30px;
     /* Increased padding */
     border: 1px solid #ccc;
@@ -25,9 +26,12 @@ body {
 
 input[type="email"],
 input[type="password"],
-input[type="name"] {
+input[type="name"],
+input[type="text"] {
     width: 100%;
     padding: 8px;
+    margin-bottom: 10px;
+    margin-bottom: 10px;
     box-sizing: border-box;
 }
 
