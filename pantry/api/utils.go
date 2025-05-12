@@ -1,11 +1,11 @@
 package api
 
 import (
-	"context"
+	"encoding/json"
 	"errors"
 	"io"
+	"log"
 	"net/http"
-	"strings"
 	"text/template"
 	"time"
 
@@ -13,7 +13,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (tmplt *Templates) Render(writer io.Writer, name string, data interface{}, ctx context.Context) error {
+func (tmplt *Templates) Render(writer io.Writer, name string, data interface{}) error {
 	return tmplt.templates.ExecuteTemplate(writer, name, data)
 }
 
@@ -23,14 +23,11 @@ func MyTemplates() *Templates {
 	}
 }
 
-func respondWithError(writer http.ResponseWriter, code int, msg string) {
-	respondWithJSON(writer, code, []byte(msg))
-}
-
-func respondWithJSON(writer http.ResponseWriter, code int, data []byte) {
+func respondWithJSON(writer http.ResponseWriter, code int, data interface{}) {
 	writer.Header().Set("Content-Type", "application/json; charset=utf-8")
 	writer.WriteHeader(code)
-	writer.Write(data)
+	results, _ := json.Marshal(data)
+	writer.Write(results)
 }
 
 func HashPassword(password string) (string, error) {
@@ -78,17 +75,17 @@ func ValidateJWT(tokenString, tokenSecret string) (string, error) {
 	return subject, nil
 }
 
-func GetBearerToken(headers http.Header) (string, error) {
-	authHeader := headers.Get("Authorization")
-	if authHeader == "" {
-		return "", errors.New("authorization header missing")
+func GetJWTFromCookie(request *http.Request) (string, error) {
+
+	jwtToken, errorJwt := request.Cookie("JWTToken")
+	if errorJwt != nil {
+		return "", errorJwt
 	}
 
-	parts := strings.Fields(authHeader)
-	if len(parts) == 2 && parts[0] == "Bearer" {
-		return parts[1], nil
-	}
-	return "", errors.New("invalid authorization header format")
+	log.Println("JWTToken Name:", jwtToken.Name)
+	log.Println("JWTToken Value:", jwtToken.Value)
+
+	return jwtToken.Value, nil
 }
 
 func checkDate(givenDate string) bool {
