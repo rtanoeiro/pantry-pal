@@ -12,25 +12,37 @@
 
 <body>
   <div class="main-container">
-    <!-- Left Section -->
+
     <div class="left-section">
-      <h1>Pantry Pal</h1>
-      <button class="header-button" id="pantryButton">My Pantry</button>
-      <button class="header-button" id="accountButton">Account</button>
-      <button class="header-button" id="logoutButton" hx-get="/logout">
-        Logout
-      </button>
-      <button class="add-item-button" id="addItemButton">
-        + Add New Item
-      </button>
-      <input type="text" id="searchInput" placeholder="Search for items..." />
-      <button id="searchButton">Search</button>
+      <h1 class="header">Pantry Pal</h1>
+      <div class="welcome-message">
+        <p>Welcome, {{ .UserName }}!</p>
+      </div>
+      <div class="top-buttons">
+        <button class="header-button" id="pantryButton">My Pantry</button>
+        <button class="header-button" id="accountButton" hx-get="/user">Account</button>
+        <button class="header-button" id="logoutButton" hx-get="/logout">Logout</button>
+      </div>
+
+      <div class="action-section">
+        Name: <input type="text" id="searchInput" placeholder="Item Name" />
+        Quantity: <input type="number" id="quantityInput" placeholder="Quantity" />
+        Expiration Date: <input type="date" id="expirationDateInput" />
+        <button class="add-item-button" id="addItemButton">+ Add New Item</button>
+      </div>
+    </div>
+
+    <div class="middle-section">
+      <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Search for items..." />
+        <button class="searchButton" id="searchButton">Search</button>
+      </div>
     </div>
 
     <!-- Right Section -->
     <div class="right-section" id="right-section" hx-get="/pantry_stats" hx-target="#right-section" hx-swap="outerHTML"
       hx-trigger="load">
-      {{ template "pantry_stats" .}}
+      {{ template "pantryStats" .}}
     </div>
   </div>
 </body>
@@ -38,16 +50,19 @@
 </html>
 {{ end }}
 
-{{ block "pantry_stats" . }}
-<h2 class="section-title">Pantry Stats</h2>
-<p class="sxtat-title">Total Items</p>
-<p class="stat-value" id="totalItems">
-  {{ .NumItems }}
-</p>
-<p class=" stat-title">Expiring Soon</p>
-<p class="stat-value" id="expiringSoon">
-  {{ .ExpiringSoon }}
-</p>
-<p class=" stat-title">Shopping List</p>
-<p class="stat-value" id="shoppingListCount"> {{ .ShoppingList }}</p>
-{{ end }}
+{{ block "pantryStats" . }}
+<div class="stat-block">
+  <p class="stat-title">Total Items</p>
+  <p class="stat-value" id="totalItems">{{ .NumItems }}</p>
+</div>
+
+<div class="stat-block">
+  <p class="stat-title">Expiring Soon</p>
+  <p class="stat-value" id="expiringSoon">{{ .ExpiringSoon }}</p>
+</div>
+
+<div class="stat-block">
+  <p class="stat-title">Shopping List</p>
+  <p class="stat-value" id="shoppingListCount">{{ .ShoppingList }}</p>
+</div>
+{{end}}

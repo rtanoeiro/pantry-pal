@@ -239,17 +239,11 @@ func (config *Config) GetPantryStats(writer http.ResponseWriter, request *http.R
 			ExpiryAt: item.ExpiryAt,
 		}
 	}
-	pantryStats := PantryStats{
-		NumItems:     int(totalItems),
-		ExpiringSoon: expiringSoonItems,
-		ShoppingList: []ItemShopping{},
+	pantryStats := map[string]interface{}{
+		"NumItems":     int(totalItems),
+		"ExpiringSoon": expiringSoonItems,
+		"ShoppingList": []ItemShopping{},
 	}
 	log.Println("Current Pantry Stats: ", pantryStats)
-
-	data, err := json.Marshal(pantryStats)
-	if err != nil {
-		respondWithJSON(writer, http.StatusInternalServerError, err.Error())
-		return
-	}
-	respondWithJSON(writer, http.StatusOK, data)
+	config.Renderer.Render(writer, "pantryStats", pantryStats)
 }

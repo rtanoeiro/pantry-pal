@@ -48,6 +48,8 @@ func GetUserIDFromToken(request *http.Request, writer http.ResponseWriter, confi
 
 func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Request) {
 
+	log.Println("User Info endpoint called")
+	writer.Header().Set("HX-Replace-Url", "/user")
 	userID, errUser := GetUserIDFromToken(request, writer, config)
 	if errUser != nil {
 		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
@@ -65,13 +67,7 @@ func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Requ
 		Name:  userData.Name,
 		Email: userData.Email,
 	}
-	data, err := json.Marshal(returnUser)
-
-	if err != nil {
-		respondWithJSON(writer, http.StatusInternalServerError, err.Error())
-		return
-	}
-	respondWithJSON(writer, http.StatusCreated, data)
+	config.Renderer.Render(writer, "userInfo", returnUser)
 
 }
 

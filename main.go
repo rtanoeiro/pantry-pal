@@ -53,7 +53,7 @@ func main() {
 	httpServerMux.Handle("GET /logout", http.HandlerFunc(config.Logout))
 
 	// Users endpoints
-	httpServerMux.Handle("GET /users/", http.HandlerFunc(config.GetUserInfo))
+	httpServerMux.Handle("GET /user", http.HandlerFunc(config.GetUserInfo))
 	httpServerMux.Handle("POST /admin", http.HandlerFunc(config.UserAdmin))
 	httpServerMux.Handle("PATCH /users/email", http.HandlerFunc(config.UpdateUserEmail))
 	httpServerMux.Handle("PATCH /users/name", http.HandlerFunc(config.UpdateUserName))
