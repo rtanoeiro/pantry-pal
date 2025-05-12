@@ -39,11 +39,13 @@ func main() {
 
 	httpServerMux := http.NewServeMux()
 
+	httpServerMux.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("css"))))
+
 	// Reset - Used in dev for testing
 	httpServerMux.Handle("POST /reset", http.HandlerFunc(config.ResetUsers))
 
 	//Login
-	httpServerMux.Handle("GET /", http.HandlerFunc(config.Index))
+	httpServerMux.Handle("/", http.HandlerFunc(config.Index))
 	httpServerMux.Handle("POST /login", http.HandlerFunc(config.Login))
 	httpServerMux.Handle("GET /signup", http.HandlerFunc(config.SignUp))
 	httpServerMux.Handle("POST /signup", http.HandlerFunc(config.CreateUser))
