@@ -41,6 +41,11 @@ Pull the repository and run the script at scripts/start_server.sh. The server sh
 
 ### Contributing
 
+Necessary Tools for Dev:
+
+- [sqlc](https://docs.sqlc.dev/en/latest/overview/install.html) - Used to generate safe sql
+- [air](https://github.com/air-verse/air) - Used to automatically build/start your webserver uppon changes on files
+
 Whenever you're contributing to new features, make sure all tests are passing, then open a PR with a clear description of your changes.
 
 For issues, please create one detailing the error with screenshots, if possible.
