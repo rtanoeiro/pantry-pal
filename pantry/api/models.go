@@ -69,6 +69,20 @@ type UpdateItemResponse struct {
 	ExpiryAt string `json:"expiry_at"`
 }
 
-type ErrorResponse struct {
-	ErrorMessage string
+// To Be used in HomePage
+type PantryItem struct {
+	ItemName string `json:"item_id"`
+	Quantity int    `json:"quantity"`
+	ExpiryAt string `json:"expiry_at"`
+}
+
+type ItemShopping struct {
+	ItemName string `json:"item_id"`
+	Quantity int    `json:"quantity"`
+}
+
+type PantryStats struct {
+	NumItems     int
+	ExpiringSoon []PantryItem
+	ShoppingList []ItemShopping
 }
