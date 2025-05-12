@@ -1,4 +1,4 @@
-{{ define "index" }}
+{{ block "index" . }}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -6,7 +6,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login - Pantry Pal</title>
-  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="static/styles.css">
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 </head>
 
@@ -22,9 +22,7 @@
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required />
       </div>
-      <div id="error-login">
-        <p>{{ template "errorMessage" }}</p>
-      </div>
+      <div id="error-login" style="color: red">{{ template "errorLogin" .}}</div>
       <button id="login-submit" hx-post="/login" hx-target="#error-login">Login</button>
     </form>
     <br />
@@ -35,6 +33,6 @@
 </html>
 {{ end }}
 
-{{ define "errorMessage" }}
-{{ .ErrorMessage.ErrorMessage}}
+{{ block "errorLogin" .}}
+{{ .Message }}
 {{ end }}

@@ -28,18 +28,9 @@
     </div>
 
     <!-- Right Section -->
-    <div class="right-section">
-      <h2 class="section-title">Pantry Stats</h2>
-      <p class="sxtat-title">Total Items</p>
-      <p class="stat-value" id="totalItems" hx-get="/pantry" hx-swap="innerHTML">
-        {{template "numItems"}}
-      </p>
-      <p class="stat-title">Expiring Soon</p>
-      <p class="stat-value" id="expiringSoon">{numExpiringSoon}</p>
-      <p class="stat-title">Categories</p>
-      <p class="stat-value" id="categoriesCount">{numCategories}</p>
-      <p class="stat-title">Shopping List Items</p>
-      <p class="stat-value" id="shoppingListCount">{numItemsShoppingList}</p>
+    <div class="right-section" id="right-section" hx-get="/pantry_stats" hx-target="#right-section" hx-swap="outerHTML"
+      hx-trigger="load">
+      {{ template "pantry_stats" .}}
     </div>
   </div>
 </body>
@@ -47,18 +38,16 @@
 </html>
 {{ end }}
 
-{{ define "numItems" }}
-{{ .NumItems }}
-{{ end }}
-
-{{ define "numExpiringSoon" }}
-{{ .NumExpiringSoon }}
-{{ end }}
-
-{{ define "numCategories" }}
-{{ .NumCategories }}
-{{ end }}
-
-{{ define "numItemsShoppingList" }}
-{{ .NumItemsShoppingList }}
+{{ block "pantry_stats" . }}
+<h2 class="section-title">Pantry Stats</h2>
+<p class="sxtat-title">Total Items</p>
+<p class="stat-value" id="totalItems">
+  {{ .NumItems }}
+</p>
+<p class=" stat-title">Expiring Soon</p>
+<p class="stat-value" id="expiringSoon">
+  {{ .ExpiringSoon }}
+</p>
+<p class=" stat-title">Shopping List</p>
+<p class="stat-value" id="shoppingListCount"> {{ .ShoppingList }}</p>
 {{ end }}
