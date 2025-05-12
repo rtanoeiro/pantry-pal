@@ -1,7 +1,7 @@
 package api
 
 import (
-	"text/template"
+	"html/template"
 	"time"
 )
 

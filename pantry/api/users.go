@@ -88,8 +88,7 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 	_, userError := config.Db.GetUserByEmail(request.Context(), email)
 
 	if userError == nil {
-		respondWithJSON(writer, http.StatusOK, "User already exists")
-		config.Renderer.Render(writer, "signup", []byte("User already exists"))
+		config.Renderer.Render(writer, "signup", CreateErrorMessageInterfaces("User already exists"))
 		return
 	}
 
@@ -112,8 +111,7 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 	log.Printf("User added with success - UserID:%s \n-Name:%s\n-Email: %s", userAdd.ID, userAdd.Name, userAdd.Email)
-
-	http.Redirect(writer, request, "/", http.StatusFound) // Redirect to /home
+	config.Index(writer, request)
 
 }
 
@@ -146,6 +144,13 @@ func UpdateUser[T interface{}](writer http.ResponseWriter, request *http.Request
 		updateParams = any(params).(T)
 	case database.UpdateUserEmailParams:
 		log.Println("Updating user email")
+		_, userError := config.Db.GetUserByEmail(request.Context(), params.Email)
+
+		// Make that onto the My Account Endpoint
+		if userError == nil {
+			config.Renderer.Render(writer, "TOBEDEFINED", CreateErrorMessageInterfaces("User already exists"))
+			return
+		}
 		params.ID = userID
 		updateParams = any(params).(T)
 	case database.UpdateUserNameParams:

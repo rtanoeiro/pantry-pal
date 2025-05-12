@@ -3,10 +3,10 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"html/template"
 	"io"
 	"log"
 	"net/http"
-	"text/template"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -18,8 +18,9 @@ func (tmplt *Templates) Render(writer io.Writer, name string, data interface{}) 
 }
 
 func MyTemplates() *Templates {
+	templates, _ := template.ParseGlob("static/*.html")
 	return &Templates{
-		templates: template.Must(template.ParseGlob("static/*.html")),
+		templates: templates,
 	}
 }
 
@@ -28,6 +29,12 @@ func respondWithJSON(writer http.ResponseWriter, code int, data interface{}) {
 	writer.WriteHeader(code)
 	results, _ := json.Marshal(data)
 	writer.Write(results)
+}
+
+func CreateErrorMessageInterfaces(message string) map[string]interface{} {
+	return map[string]interface{}{
+		"Message": message,
+	}
 }
 
 func HashPassword(password string) (string, error) {
