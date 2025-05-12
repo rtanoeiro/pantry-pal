@@ -13,7 +13,7 @@
 <body>
   <div class="login-container">
     <h2>Login</h2>
-    <form id="loginForm">
+    <form id="loginForm" hx-post="/login" hx-swap="innerHTML" hx-target="#error-login">
       <div class="form-group">
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" required />
@@ -22,17 +22,19 @@
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required />
       </div>
-      <div id="error-login" style="color: red">{{ template "errorLogin" .}}</div>
-      <button id="login-submit" hx-post="/login" hx-target="#error-login">Login</button>
+      <div id="error-login" style="color: red; margin-bottom: 10px;"></div>
+      <button id="login-submit">Login</button>
     </form>
     <br />
-    <button id="signupButton" hx-get="/signup">Sign Up</button>
+    <button id="signupButton" hx-get="/signup" hx-target="body">Sign Up</button>
   </div>
 </body>
 
 </html>
 {{ end }}
 
-{{ block "errorLogin" .}}
+{{ block "errorLogin" . }}
+{{ if .Message }}
 {{ .Message }}
+{{ end }}
 {{ end }}
