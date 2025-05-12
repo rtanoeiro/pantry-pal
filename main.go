@@ -44,13 +44,13 @@ func main() {
 
 	//Login
 	httpServerMux.Handle("GET /", http.HandlerFunc(config.Index))
-	httpServerMux.Handle("GET /signup", http.HandlerFunc(config.SignUp))
 	httpServerMux.Handle("POST /login", http.HandlerFunc(config.Login))
+	httpServerMux.Handle("GET /signup", http.HandlerFunc(config.SignUp))
+	httpServerMux.Handle("POST /signup", http.HandlerFunc(config.CreateUser))
 	httpServerMux.Handle("GET /home", http.HandlerFunc(config.Home))
 	httpServerMux.Handle("GET /logout", http.HandlerFunc(config.Logout))
 
 	// Users endpoints
-	httpServerMux.Handle("POST /users", http.HandlerFunc(config.CreateUser))
 	httpServerMux.Handle("GET /users/", http.HandlerFunc(config.GetUserInfo))
 	httpServerMux.Handle("POST /admin", http.HandlerFunc(config.UserAdmin))
 	httpServerMux.Handle("PATCH /users/email", http.HandlerFunc(config.UpdateUserEmail))
@@ -61,6 +61,7 @@ func main() {
 	httpServerMux.Handle("POST /pantry", http.HandlerFunc(config.HandleNewItem))
 	httpServerMux.Handle("GET /pantry/{itemName}", http.HandlerFunc(config.GetItemByName))
 	httpServerMux.Handle("GET /pantry/", http.HandlerFunc(config.GetAllPantryItems))
+	httpServerMux.Handle("GET /pantry_stats", http.HandlerFunc(config.GetPantryStats))
 	httpServerMux.Handle("DELETE /pantry/{itemID}", http.HandlerFunc(config.DeleteItem))
 
 	httpServer := http.Server{
