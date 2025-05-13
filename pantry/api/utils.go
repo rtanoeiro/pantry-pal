@@ -5,7 +5,6 @@ import (
 	"errors"
 	"html/template"
 	"io"
-	"log"
 	"net/http"
 	"time"
 
@@ -88,10 +87,6 @@ func GetJWTFromCookie(request *http.Request) (string, error) {
 	if errorJwt != nil {
 		return "", errorJwt
 	}
-
-	log.Println("JWTToken Name:", jwtToken.Name)
-	log.Println("JWTToken Value:", jwtToken.Value)
-
 	return jwtToken.Value, nil
 }
 

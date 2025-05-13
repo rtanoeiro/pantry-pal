@@ -1,4 +1,4 @@
-{{ define "user" }}
+{{ block "user" . }}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -9,36 +9,33 @@
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 
-<body>
+<body hx-boost="true">
     <div class="account-container">
         <h1>Account Settings</h1>
 
-        <!-- Photo Upload Section -->
-        <div>
-            <label for="photoUpload">Upload Profile Photo:</label>
-            <input type="file" id="photoUpload" name="photoUpload">
-        </div>
-
         <!-- Account Details Form -->
-        <form id="accountForm">
+        <form id="nameForm" hx-post="/user/name" hx-target="body" hx-swap="outerHTML">
             <div class="form-group">
-
-                <label id="name" for="name">Name:</label>
-                <input type="text" id="name" name="name" required>
-                <button class="button" type="submit">Update Name</button>
+                <label for="name-input">Name: {{.Name}}</label>
+                <input type="text" id="name-input" name="name" required>
+                <button id="button-name">Update Name</button>
             </div>
+        </form>
 
+        <form id="emailForm" hx-post="/user/email" hx-target="body" hx-swap="innerHTML">
+            <!-- Email Update Section -->
             <div class="form-group">
-                <label id="email" for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
-                <button class="button" type="submit">Update Email</button>
+                <label for="email-input">Email: {{.Email}}</label>
+                <input type="email" id="email-input" name="email" required>
+                <button id="button-email" type="submit">Update Email</button>
             </div>
+        </form>
 
+        <form id="passwordForm" hx-post="/user/password" hx-target="body" hx-swap="innerHTML">
             <div class="form-group">
-
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password">
-                <button type="button">Update Password</button>
+                <label for="password-input">Password:</label>
+                <input type="password" id="password-input" name="password">
+                <button id="button-password">Update Password</button>
             </div>
         </form>
 
@@ -46,6 +43,12 @@
         <div>
             <button>Make Admin</button>
         </div>
+
+        <div>
+            <button hx-get="/home" hx-target="body">Back to Home Page</button>
+        </div>
+
+        <div id="error-message" style="color: red; margin-top: 10px;">{{.ErrorUpdate}}</div>
     </div>
 </body>
 

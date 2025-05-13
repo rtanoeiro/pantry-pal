@@ -1,13 +1,10 @@
 package api
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"pantry-pal/pantry/database"
 	"time"
-
-	"context"
 
 	"github.com/google/uuid"
 )
@@ -32,7 +29,6 @@ func (config *Config) ResetUsers(writer http.ResponseWriter, request *http.Reque
 
 func GetUserIDFromToken(request *http.Request, writer http.ResponseWriter, config *Config) (string, error) {
 	token, errTk := GetJWTFromCookie(request)
-	log.Println("Token from header:", token)
 	if errTk != nil {
 		return "", errTk
 	}
@@ -54,7 +50,6 @@ func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Requ
 		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
 		return
 	}
-	writer.Header().Set("HX-Replace-Url", "/user")
 	userData, errUser := config.Db.GetUserById(request.Context(), userID)
 
 	if errUser != nil {
@@ -62,13 +57,12 @@ func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	returnUser := CreateUserResponse{
-		ID:    userData.ID,
-		Name:  userData.Name,
-		Email: userData.Email,
+	returnUser := map[string]interface{}{
+		"ID":    userData.ID,
+		"Name":  userData.Name,
+		"Email": userData.Email,
 	}
 	config.Renderer.Render(writer, "user", returnUser)
-
 }
 
 func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Request) {
@@ -111,7 +105,7 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 
 }
 
-func UpdateUser[T interface{}](writer http.ResponseWriter, request *http.Request, dbFunc func(context.Context, T) error, config *Config) {
+func UpdateUser(writer http.ResponseWriter, request *http.Request, updateType, updateData string, config *Config) {
 
 	userID, errUser := GetUserIDFromToken(request, writer, config)
 	if errUser != nil {
@@ -120,63 +114,61 @@ func UpdateUser[T interface{}](writer http.ResponseWriter, request *http.Request
 	}
 	log.Println("User ID from token on Update User Call:", userID)
 
-	var updateParams T
-	err := json.NewDecoder(request.Body).Decode(&updateParams)
-	if err != nil {
-		respondWithJSON(writer, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	switch params := any(updateParams).(type) {
-	case database.UpdateUserPasswordParams:
+	switch updateType {
+	case "password":
 		log.Println("Updating user password")
-		hashedPassword, errPWD := HashPassword(params.PasswordHash)
+		hashedPassword, errPWD := HashPassword(updateData)
 		if errPWD != nil {
 			respondWithJSON(writer, http.StatusInternalServerError, errPWD.Error())
 			return
 		}
-		params.PasswordHash = hashedPassword
-		params.ID = userID
-		updateParams = any(params).(T)
-	case database.UpdateUserEmailParams:
-		log.Println("Updating user email")
-		_, userError := config.Db.GetUserByEmail(request.Context(), params.Email)
-
-		// Make that onto the My Account Endpoint
-		if userError == nil {
-			config.Renderer.Render(writer, "TOBEDEFINED", CreateErrorMessageInterfaces("User already exists"))
-			return
+		data := database.UpdateUserPasswordParams{
+			PasswordHash: hashedPassword,
+			ID:           userID,
 		}
-		params.ID = userID
-		updateParams = any(params).(T)
-	case database.UpdateUserNameParams:
+		config.Db.UpdateUserPassword(request.Context(), data)
+		writer.Header().Set("HX-Redirect", "/user")
+	case "email":
+		log.Println("Updating user email")
+		//_, userError := config.Db.GetUserByEmail(request.Context(), updateData)
+		// Make that onto the My Account Endpoint
+		data := database.UpdateUserEmailParams{
+			Email: updateData,
+			ID:    userID,
+		}
+		_ = config.Db.UpdateUserEmail(request.Context(), data)
+		writer.Header().Set("HX-Redirect", "/user")
+
+	case "name":
 		log.Println("Updating user name")
-		params.ID = userID
-		updateParams = any(params).(T)
+		data := database.UpdateUserNameParams{
+			Name: updateData,
+			ID:   userID,
+		}
+		_ = config.Db.UpdateUserName(request.Context(), data)
+		writer.Header().Set("HX-Redirect", "/user")
 	default:
 		log.Println("Wrong parameters in request")
-		respondWithJSON(writer, http.StatusMethodNotAllowed, "Wrong Parameters in Request")
+		writer.Header().Set("HX-Redirect", "/user")
 	}
-	errUpdate := dbFunc(request.Context(), updateParams)
-
-	if errUpdate != nil {
-		respondWithJSON(writer, http.StatusInternalServerError, errUpdate.Error())
-		return
-	}
-
-	respondWithJSON(writer, http.StatusAccepted, []byte{})
 }
 
 func (config *Config) UpdateUserEmail(writer http.ResponseWriter, request *http.Request) {
-	UpdateUser(writer, request, config.Db.UpdateUserEmail, config)
+	log.Println("Update User Email endpoint called")
+	email := request.FormValue("email")
+	UpdateUser(writer, request, "email", email, config)
 }
 
 func (config *Config) UpdateUserName(writer http.ResponseWriter, request *http.Request) {
-	UpdateUser(writer, request, config.Db.UpdateUserName, config)
+	log.Println("Update User Name endpoint called")
+	name := request.FormValue("name")
+	UpdateUser(writer, request, "name", name, config)
 }
 
 func (config *Config) UpdateUserPassword(writer http.ResponseWriter, request *http.Request) {
-	UpdateUser(writer, request, config.Db.UpdateUserPassword, config)
+	log.Println("Update User Password endpoint called")
+	password := request.FormValue("password")
+	UpdateUser(writer, request, "password", password, config)
 }
 
 func (config *Config) UserAdmin(writer http.ResponseWriter, request *http.Request) {

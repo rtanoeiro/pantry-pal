@@ -10,7 +10,7 @@
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 </head>
 
-<body>
+<body hx-boost="true">
   <div class="main-container">
 
     <div class="left-section">
@@ -20,7 +20,8 @@
       </div>
       <div class="top-buttons">
         <button class="header-button" id="pantryButton">My Pantry</button>
-        <button class="header-button" id="accountButton" hx-get="/user" hx-target="body">Account</button>
+        <button class="header-button" id="accountButton" hx-get="/user" hx-target="body"
+          hx-push-url="/user">Account</button>
         <button class="header-button" id="logoutButton" hx-get="/logout">Logout</button>
       </div>
 
