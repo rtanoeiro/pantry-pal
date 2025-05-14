@@ -39,18 +39,49 @@
         </form>
 
         <div>
-            <button class="body-button" id="button-admin">Make Admin</button>
-        </div>
-
-        <div>
             <button class="body-button" id="button-home" hx-get="/home" hx-target="body" hx-swap="innerHTML">Back to
                 Home Page</button>
         </div>
 
-        <div class="success-message">{{ .SuccessMessage }}</div>
-        <div class="error-message">{{ .ErrorMessage }}</div>
-    </div>
+        {{ template "Admin" . }}
+        {{ template "ResponseMessage" . }}
+
 </body>
 
 </html>
+{{ end }}
+
+
+{{ block "Admin" .}}
+<div id="users-container" class="users-container">
+    {{ if .IsAdmin }}
+    <div class="user-list">
+        <h2>Current Registered Users</h2>
+        <ul>
+            {{ range .Users }}
+            <li>{{ .Name }} - {{ .Email }}</li>
+            <button class="body-button" hx-delete="/user/{{ .UserID }}" hx-target="#users-container"
+                hx-swap="innerHTML">Delete</button>
+            {{ if not .UserAdmin }}
+            <button class="body-button" hx-post="/user/admin/{{ .UserID }}" hx-target="#users-container"
+                hx-swap="innerHTML">Make
+                Admin</button>
+            {{ else }}
+            <button class="body-button" hx-delete="/user/admin/{{ .UserID }}" hx-target="#users-container"
+                hx-swap="innerHTML">Remove
+                Admin</button>
+            {{ end }}
+            {{ end }}
+        </ul>
+    </div>
+    {{ end }}
+
+</div>
+{{end}}
+
+{{ block "ResponseMessage" .}}
+<div id="response-message">
+    <div class="success-message">{{ .SuccessMessage }}</div>
+    <div class="error-message">{{ .ErrorMessage }}</div>
+</div>
 {{ end }}

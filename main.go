@@ -54,7 +54,8 @@ func main() {
 
 	// Users endpoints
 	httpServerMux.Handle("GET /user", http.HandlerFunc(config.GetUserInfo))
-	httpServerMux.Handle("POST /admin", http.HandlerFunc(config.UserAdmin))
+	httpServerMux.Handle("POST /user/admin/{userID}", http.HandlerFunc(config.AddUserAdmin))
+	httpServerMux.Handle("DELETE /user/admin/{userID}", http.HandlerFunc(config.RemoveUserAdmin))
 	httpServerMux.Handle("POST /user/email", http.HandlerFunc(config.UpdateUserEmail))
 	httpServerMux.Handle("POST /user/name", http.HandlerFunc(config.UpdateUserName))
 	httpServerMux.Handle("POST /user/password", http.HandlerFunc(config.UpdateUserPassword))

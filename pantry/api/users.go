@@ -57,10 +57,30 @@ func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
+	var usersSlice []User
 	returnUser := map[string]interface{}{
+		"UserID":    userData.ID,
 		"UserName":  userData.Name,
 		"UserEmail": userData.Email,
+		"IsAdmin":   userData.IsAdmin.Valid,
+		"Users":     []User{},
 	}
+
+	if userData.IsAdmin.Int64 == 1 {
+		allOtherUsers, _ := config.Db.GetAllUsers(request.Context(), userData.ID)
+		for _, user := range allOtherUsers {
+			usersSlice = append(usersSlice, User{
+				UserID:    user.ID,
+				Name:      user.Name,
+				Email:     user.Email,
+				UserAdmin: user.IsAdmin.Int64,
+			},
+			)
+			returnUser["Users"] = usersSlice
+		}
+	}
+	log.Println("User data to be rendered:", returnUser)
+
 	config.Renderer.Render(writer, "user", returnUser)
 }
 
@@ -201,19 +221,81 @@ func (config *Config) UpdateUserPassword(writer http.ResponseWriter, request *ht
 	UpdateUser(writer, request, "password", password, config)
 }
 
-func (config *Config) UserAdmin(writer http.ResponseWriter, request *http.Request) {
-	log.Println("User Admin endpoint called")
-	userID, errUser := GetUserIDFromToken(request, writer, config)
+// TODO: Modify these admin functions to be more generic
+// TODO: Modify HTMl for this section so users and buttons are updated dynamically
+func (config *Config) AddUserAdmin(writer http.ResponseWriter, request *http.Request) {
+	toUpdateuserID := request.PathValue("userID")
+	log.Println("User Add Admin endpoint called")
+
+	AdminUserID, errUser := GetUserIDFromToken(request, writer, config)
 	if errUser != nil {
 		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
 		return
 	}
 
-	log.Println("User ID from token:", userID)
-	errADmin := config.Db.UpdateUserAdmin(request.Context(), userID)
+	var usersSlice []User
+	returnUser := map[string]interface{}{
+		"ErrorMessage":   "",
+		"SuccessMessage": "",
+		"IsAdmin":        int64(1),
+		"Users":          []User{},
+	}
+	errADmin := config.Db.MakeUserAdmin(request.Context(), toUpdateuserID)
 	if errADmin != nil {
-		respondWithJSON(writer, http.StatusInternalServerError, errADmin.Error())
+		returnUser["ErrorMessage"] = "Error on updating user to admin"
+		config.Renderer.Render(writer, "Admin", returnUser)
 		return
 	}
-	respondWithJSON(writer, http.StatusOK, "User successfully upgraded to Admin")
+	allOtherUsers, _ := config.Db.GetAllUsers(request.Context(), AdminUserID)
+	for _, user := range allOtherUsers {
+		usersSlice = append(usersSlice, User{
+			UserID:    user.ID,
+			Name:      user.Name,
+			Email:     user.Email,
+			UserAdmin: user.IsAdmin.Int64,
+		},
+		)
+		returnUser["Users"] = usersSlice
+	}
+	returnUser["SuccessMessage"] = "Successfully updated user to admin"
+	config.Renderer.Render(writer, "Admin", returnUser)
+}
+
+func (config *Config) RemoveUserAdmin(writer http.ResponseWriter, request *http.Request) {
+	toUpdateuserID := request.PathValue("userID")
+	log.Println("User Remove Admin endpoint called")
+
+	AdminUserID, errUser := GetUserIDFromToken(request, writer, config)
+	if errUser != nil {
+		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
+		return
+	}
+	var usersSlice []User
+	returnUser := map[string]interface{}{
+		"ErrorMessage":   "",
+		"SuccessMessage": "",
+		"IsAdmin":        int64(1),
+		"Users":          []User{},
+	}
+
+	errADmin := config.Db.RemoveUserAdmin(request.Context(), toUpdateuserID)
+	if errADmin != nil {
+		returnUser["ErrorMessage"] = "Error on removing admin from user"
+		config.Renderer.Render(writer, "Admin", returnUser)
+		return
+	}
+
+	allOtherUsers, _ := config.Db.GetAllUsers(request.Context(), AdminUserID)
+	for _, user := range allOtherUsers {
+		usersSlice = append(usersSlice, User{
+			UserID:    user.ID,
+			Name:      user.Name,
+			Email:     user.Email,
+			UserAdmin: user.IsAdmin.Int64,
+		},
+		)
+		returnUser["Users"] = usersSlice
+	}
+	returnUser["SuccessMessage"] = "Successfully removed admin from user"
+	config.Renderer.Render(writer, "Admin", returnUser)
 }

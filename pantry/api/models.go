@@ -5,6 +5,13 @@ import (
 	"time"
 )
 
+type User struct {
+	UserID    string
+	Name      string
+	Email     string
+	UserAdmin int64
+}
+
 type Templates struct {
 	templates *template.Template
 }
