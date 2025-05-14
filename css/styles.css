@@ -35,7 +35,7 @@ input[type="text"] {
     box-sizing: border-box;
 }
 
-button {
+.body-button {
     padding: 10px 15px;
     margin-bottom: 10px;
     background-color: #28a745;
@@ -56,6 +56,20 @@ button:hover {
 .success-message {
     color: green;
     margin-top: 10px;
+}
+
+.remove-access-button {
+    background-color: #dc3545;
+    border: 2px solid #dc3545;
+    padding: 10px 15px;
+    color: white;
+
+    margin-bottom: 10px;
+
+}
+
+.remove-access-button:hover {
+    background-color: #c82333;
 }
 
 .home-container {

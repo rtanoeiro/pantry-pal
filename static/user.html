@@ -67,7 +67,7 @@
                 hx-swap="innerHTML">Make
                 Admin</button>
             {{ else }}
-            <button class="body-button" hx-delete="/user/admin/{{ .UserID }}" hx-target="#users-container"
+            <button class="remove-access-button" hx-delete="/user/admin/{{ .UserID }}" hx-target="#users-container"
                 hx-swap="innerHTML">Remove
                 Admin</button>
             {{ end }}
