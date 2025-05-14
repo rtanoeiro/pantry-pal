@@ -221,7 +221,6 @@ func (config *Config) UpdateUserPassword(writer http.ResponseWriter, request *ht
 }
 
 // TODO: Modify these admin functions to be more generic
-// TODO: Modify HTMl for this section so users and buttons are updated dynamically
 func (config *Config) AddUserAdmin(writer http.ResponseWriter, request *http.Request) {
 	toUpdateuserID := request.PathValue("userID")
 	log.Println("User Add Admin endpoint called")
@@ -241,7 +240,6 @@ func (config *Config) AddUserAdmin(writer http.ResponseWriter, request *http.Req
 	}
 	errADmin := config.Db.MakeUserAdmin(request.Context(), toUpdateuserID)
 	if errADmin != nil {
-		returnUser["ErrorMessage"] = "Error on updating user to admin"
 		config.Renderer.Render(writer, "Admin", returnUser)
 		return
 	}
@@ -256,7 +254,6 @@ func (config *Config) AddUserAdmin(writer http.ResponseWriter, request *http.Req
 		)
 		returnUser["Users"] = usersSlice
 	}
-	returnUser["SuccessMessage"] = "Successfully updated user to admin"
 	config.Renderer.Render(writer, "Admin", returnUser)
 }
 
@@ -279,7 +276,6 @@ func (config *Config) RemoveUserAdmin(writer http.ResponseWriter, request *http.
 
 	errADmin := config.Db.RemoveUserAdmin(request.Context(), toUpdateuserID)
 	if errADmin != nil {
-		returnUser["ErrorMessage"] = "Error on removing admin from user"
 		config.Renderer.Render(writer, "Admin", returnUser)
 		return
 	}
@@ -295,6 +291,5 @@ func (config *Config) RemoveUserAdmin(writer http.ResponseWriter, request *http.
 		)
 		returnUser["Users"] = usersSlice
 	}
-	returnUser["SuccessMessage"] = "Successfully removed admin from user"
 	config.Renderer.Render(writer, "Admin", returnUser)
 }
