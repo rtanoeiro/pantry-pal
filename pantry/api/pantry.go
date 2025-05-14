@@ -97,7 +97,7 @@ func (config *Config) ItemAdd(writer http.ResponseWriter, request *http.Request,
 	log.Println("Adding item to pantry")
 
 	if toAdd.Quantity < 0 {
-		respondWithJSON(writer, http.StatusForbidden, "unable to (add negative items")
+		respondWithJSON(writer, http.StatusForbidden, "unable to add negative items")
 		return
 	}
 	itemToAdd := database.AddItemParams{
