@@ -98,6 +98,5 @@ func checkDate(givenDate string) bool {
 	if errParse != nil {
 		return false
 	}
-	results := formattedDate.Compare(time.Now())
-	return results != -1
+	return !formattedDate.Before(time.Now())
 }
