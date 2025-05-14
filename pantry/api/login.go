@@ -75,6 +75,7 @@ func (config *Config) SignUp(writer http.ResponseWriter, request *http.Request) 
 
 }
 
+// TODO: Add Check UserID from JWT
 func (config *Config) Home(writer http.ResponseWriter, request *http.Request) {
 
 	jwtToken, _ := GetJWTFromCookie(request)
