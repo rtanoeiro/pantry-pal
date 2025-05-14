@@ -28,9 +28,9 @@
                 <input type="password" id="password" name="password" required>
             </div>
             <div id="error-signup" style="color: red">{{ template "errorSignup" . }}</div>
-            <button type="submit">Sign Up</button>
+            <button class="body-button" type="submit">Sign Up</button>
         </form>
-        <button hx-get="/" hx-target="body" hx-swap="innerHTML">Back to Login</button>
+        <button class="body-button" hx-get="/" hx-target="body" hx-swap="innerHTML">Back to Login</button>
 </body>
 
 </html>

@@ -104,6 +104,7 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 
 }
 
+// TODO: Find a way to improve the replacements of data when rendeding HTML, currently rendering everything
 func UpdateUser(writer http.ResponseWriter, request *http.Request, updateType, updateData string, config *Config) {
 
 	userID, errUser := GetUserIDFromToken(request, writer, config)
@@ -118,8 +119,10 @@ func UpdateUser(writer http.ResponseWriter, request *http.Request, updateType, u
 		return
 	}
 	returnUser := map[string]interface{}{
-		"UserName":  userData.Name,
-		"UserEmail": userData.Email,
+		"UserName":       userData.Name,
+		"UserEmail":      userData.Email,
+		"ErrorMessage":   "",
+		"SuccessMessage": "",
 	}
 
 	switch updateType {
@@ -128,34 +131,52 @@ func UpdateUser(writer http.ResponseWriter, request *http.Request, updateType, u
 		hashedPassword, errPWD := HashPassword(updateData)
 		if errPWD != nil {
 			respondWithJSON(writer, http.StatusInternalServerError, errPWD.Error())
-			return
+			returnUser["ErrorMessage"] = "Error on hashing password"
+			config.Renderer.Render(writer, "user", returnUser)
 		}
 		data := database.UpdateUserPasswordParams{
 			PasswordHash: hashedPassword,
 			ID:           userID,
 		}
-		config.Db.UpdateUserPassword(request.Context(), data)
+		errUpdate := config.Db.UpdateUserPassword(request.Context(), data)
+
+		if errUpdate != nil {
+			returnUser["ErrorMessage"] = "Error on updating password"
+			config.Renderer.Render(writer, "user", returnUser)
+			return
+		}
+		returnUser["SuccessMessage"] = "Password updated with success!"
 		config.Renderer.Render(writer, "user", returnUser)
 	case "email":
 		log.Println("Updating user email")
-		//_, userError := config.Db.GetUserByEmail(request.Context(), updateData)
-		// Make that onto the My Account Endpoint
 		data := database.UpdateUserEmailParams{
 			Email: updateData,
 			ID:    userID,
 		}
-		_ = config.Db.UpdateUserEmail(request.Context(), data)
-		config.Renderer.Render(writer, "UserEmail", returnUser)
-
+		errUpdate := config.Db.UpdateUserEmail(request.Context(), data)
+		if errUpdate != nil {
+			returnUser["ErrorMessage"] = "Error on updating user email"
+			config.Renderer.Render(writer, "user", returnUser)
+			return
+		}
+		returnUser["SuccessMessage"] = "Email updated with success!"
+		returnUser["UserEmail"] = updateData
+		config.Renderer.Render(writer, "user", returnUser)
 	case "name":
 		log.Println("Updating user name")
 		data := database.UpdateUserNameParams{
 			Name: updateData,
 			ID:   userID,
 		}
-		_ = config.Db.UpdateUserName(request.Context(), data)
+		errUpdate := config.Db.UpdateUserName(request.Context(), data)
+		if errUpdate != nil {
+			returnUser["ErrorMessage"] = "Error on updating user Name"
+			config.Renderer.Render(writer, "user", returnUser)
+			return
+		}
+		returnUser["SuccessMessage"] = "Name updated with success!"
 		returnUser["UserName"] = updateData
-		config.Renderer.Render(writer, "UserName", returnUser)
+		config.Renderer.Render(writer, "user", returnUser)
 	default:
 		log.Println("Wrong parameters in request")
 		writer.Header().Set("HX-Redirect", "/user")
