@@ -74,10 +74,9 @@ func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Requ
 				Name:      user.Name,
 				Email:     user.Email,
 				UserAdmin: user.IsAdmin.Int64,
-			},
-			)
-			returnUser["Users"] = usersSlice
+			})
 		}
+		returnUser["Users"] = usersSlice
 	}
 	log.Println("User data to be rendered:", returnUser)
 
