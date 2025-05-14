@@ -20,11 +20,6 @@ body {
     background-color: white;
 }
 
-.form-group {
-    margin-bottom: 10px;
-    margin-top: 10px;
-}
-
 input[type="email"],
 input[type="password"],
 input[type="name"],
@@ -38,6 +33,7 @@ input[type="text"] {
 
 button {
     padding: 10px 15px;
+    margin-bottom: 10px;
     background-color: #28a745;
     color: white;
     border: 2px solid #28a745;
@@ -53,17 +49,19 @@ button:hover {
     margin-top: 10px;
 }
 
-.main-container {
+.home-container {
     display: flex;
     /* Adjusts spacing between elements */
     width: 90%;
+    height: 70%;
 }
 
-.left-section {
+.left-section,
+.right-section>* {
     width: 33.33%;
     padding-right: 10px;
+    padding: 10px;
 }
-
 
 .middle-section {
     width: 33.33%;
@@ -88,11 +86,6 @@ button:hover {
     box-sizing: border-box;
 }
 
-.searchButton {
-    align-self: flex-start;
-}
-
-
 .stat-block {
     margin-top: 90px;
     margin-bottom: 20px;
@@ -116,17 +109,7 @@ button:hover {
     /* Adjusts spacing between buttons */
 }
 
-.header-button {
-    margin-right: 10px;
-}
-
+.header-button,
 .action-section>* {
-    margin-bottom: 10px;
-    /* adds spacing between add/search controls */
-    display: block;
-}
-
-
-.right-section>* {
-    padding: 10px;
+    margin-right: 10px;
 }

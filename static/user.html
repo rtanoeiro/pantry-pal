@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Account Page</title>
     <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 </head>
 
 <body hx-boost="true">
@@ -14,43 +15,55 @@
         <h1>Account Settings</h1>
 
         <!-- Account Details Form -->
-        <form id="nameForm" hx-post="/user/name" hx-target="body" hx-swap="outerHTML">
+        <form id="nameForm" hx-post="/user/name" hx-target="#user-name-label" hx-swap="innerHTML">
             <div class="form-group">
-                <label for="name-input">Name: {{.Name}}</label>
+                <label for="name-input" id="user-name-label">{{ template "UserName" . }}</label>
                 <input type="text" id="name-input" name="name" required>
-                <button id="button-name">Update Name</button>
+                <button id="body-button">Update Name</button>
             </div>
         </form>
 
-        <form id="emailForm" hx-post="/user/email" hx-target="body" hx-swap="innerHTML">
+        <form id="emailForm" hx-post="/user/email" hx-target="#user-email-label" hx-swap="innerHTML">
             <!-- Email Update Section -->
             <div class="form-group">
-                <label for="email-input">Email: {{.Email}}</label>
+                <label for="email-input" id="user-email-label">{{ template "UserEmail" . }}</label>
                 <input type="email" id="email-input" name="email" required>
-                <button id="button-email" type="submit">Update Email</button>
+                <button id="body-button" type="submit">Update Email</button>
             </div>
         </form>
 
-        <form id="passwordForm" hx-post="/user/password" hx-target="body" hx-swap="innerHTML">
+        <form id="passwordForm" hx-post="/user/password" hx-target="name-input" hx-swap="innerHTML">
             <div class="form-group">
                 <label for="password-input">Password:</label>
                 <input type="password" id="password-input" name="password">
-                <button id="button-password">Update Password</button>
+                <button id="body-button">Update Password</button>
             </div>
         </form>
 
         <!-- Make Admin Button -->
         <div>
-            <button>Make Admin</button>
+            <button id="body-button">Make Admin</button>
         </div>
 
         <div>
-            <button hx-get="/home" hx-target="body">Back to Home Page</button>
+            <button id="body-button" hx-get="/home" hx-target="body" hx-swap="innerHTML">Back to Home Page</button>
         </div>
 
-        <div id="error-message" style="color: red; margin-top: 10px;">{{.ErrorUpdate}}</div>
+        <div id="error-message">{{ template "ErrorUpdate" .}}</div>
     </div>
 </body>
 
 </html>
+{{ end }}
+
+{{ block "UserName" . }}
+Name: {{ .UserName }}
+{{ end }}
+
+{{ block "UserEmail" . }}
+Email: {{ .UserEmail }}
+{{ end }}
+
+{{ block "ErrorUpdate" . }}
+{{.ErrorMessage}}
 {{ end }}

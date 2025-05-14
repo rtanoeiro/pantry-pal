@@ -13,7 +13,7 @@
 <body>
   <div class="login-container">
     <h2>Login</h2>
-    <form id="loginForm" hx-post="/login" hx-swap="innerHTML" hx-target="#error-login">
+    <form id="loginForm" hx-post="/login" hx-swap="innerHTML" hx-target="#error-message">
       <div class="form-group">
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" required />
@@ -22,11 +22,10 @@
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required />
       </div>
-      <div id="error-login" style="color: red; margin-bottom: 10px;"></div>
-      <button id="login-submit">Login</button>
+      <div id="error-message"></div>
+      <button id="body-button">Login</button>
     </form>
-    <br />
-    <button id="signupButton" hx-get="/signup" hx-target="body">Sign Up</button>
+    <button id=" body-button" hx-get="/signup" hx-target="body" hx-swap="innerHTML">Sign Up</button>
   </div>
 </body>
 

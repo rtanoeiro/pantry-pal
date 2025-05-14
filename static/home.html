@@ -11,7 +11,7 @@
 </head>
 
 <body hx-boost="true">
-  <div class="main-container">
+  <div class="home-container">
 
     <div class="left-section">
       <h1 class="header">Pantry Pal</h1>
@@ -19,24 +19,24 @@
         <p>Welcome, {{ .UserName }}!</p>
       </div>
       <div class="top-buttons">
-        <button class="header-button" id="pantryButton">My Pantry</button>
-        <button class="header-button" id="accountButton" hx-get="/user" hx-target="body"
+        <button class="body-button" id="pantryButton">My Pantry</button>
+        <button class="body-button" id="accountButton" hx-get="/user" hx-target="body"
           hx-push-url="/user">Account</button>
-        <button class="header-button" id="logoutButton" hx-get="/logout">Logout</button>
+        <button class="body-button" id="logoutButton" hx-get="/logout">Logout</button>
       </div>
 
       <div class="action-section">
         Name: <input type="text" id="searchInput" placeholder="Item Name" />
         Quantity: <input type="number" id="quantityInput" placeholder="Quantity" />
         Expiration Date: <input type="date" id="expirationDateInput" />
-        <button class="add-item-button" id="addItemButton">+ Add New Item</button>
+        <button class="body-button" id="addItemButton">+ Add New Item</button>
       </div>
     </div>
 
     <div class="middle-section">
       <div class="search-container">
         <input type="text" id="searchInput" placeholder="Search for items..." />
-        <button class="searchButton" id="searchButton">Search</button>
+        <button class="body-button" id="searchButton">Search</button>
       </div>
     </div>
 

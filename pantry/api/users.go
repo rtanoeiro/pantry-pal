@@ -58,9 +58,8 @@ func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Requ
 	}
 
 	returnUser := map[string]interface{}{
-		"ID":    userData.ID,
-		"Name":  userData.Name,
-		"Email": userData.Email,
+		"UserName":  userData.Name,
+		"UserEmail": userData.Email,
 	}
 	config.Renderer.Render(writer, "user", returnUser)
 }
@@ -113,6 +112,15 @@ func UpdateUser(writer http.ResponseWriter, request *http.Request, updateType, u
 		return
 	}
 	log.Println("User ID from token on Update User Call:", userID)
+	userData, errUser := config.Db.GetUserById(request.Context(), userID)
+	if errUser != nil {
+		respondWithJSON(writer, http.StatusBadRequest, errUser.Error())
+		return
+	}
+	returnUser := map[string]interface{}{
+		"UserName":  userData.Name,
+		"UserEmail": userData.Email,
+	}
 
 	switch updateType {
 	case "password":
@@ -127,7 +135,7 @@ func UpdateUser(writer http.ResponseWriter, request *http.Request, updateType, u
 			ID:           userID,
 		}
 		config.Db.UpdateUserPassword(request.Context(), data)
-		writer.Header().Set("HX-Redirect", "/user")
+		config.Renderer.Render(writer, "user", returnUser)
 	case "email":
 		log.Println("Updating user email")
 		//_, userError := config.Db.GetUserByEmail(request.Context(), updateData)
@@ -137,7 +145,7 @@ func UpdateUser(writer http.ResponseWriter, request *http.Request, updateType, u
 			ID:    userID,
 		}
 		_ = config.Db.UpdateUserEmail(request.Context(), data)
-		writer.Header().Set("HX-Redirect", "/user")
+		config.Renderer.Render(writer, "UserEmail", returnUser)
 
 	case "name":
 		log.Println("Updating user name")
@@ -146,7 +154,8 @@ func UpdateUser(writer http.ResponseWriter, request *http.Request, updateType, u
 			ID:   userID,
 		}
 		_ = config.Db.UpdateUserName(request.Context(), data)
-		writer.Header().Set("HX-Redirect", "/user")
+		returnUser["UserName"] = updateData
+		config.Renderer.Render(writer, "UserName", returnUser)
 	default:
 		log.Println("Wrong parameters in request")
 		writer.Header().Set("HX-Redirect", "/user")
