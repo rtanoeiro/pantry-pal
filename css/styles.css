@@ -1,0 +1,138 @@
+/* styles.css */
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 90vh;
+    margin: 0;
+    background-color: #f4f4f4;
+}
+
+.login-container,
+.signup-container,
+.account-container,
+.main-container {
+    padding: 30px;
+    /* Increased padding */
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: white;
+}
+
+.users-container {
+    margin-top: 20px;
+}
+
+input[type="email"],
+input[type="password"],
+input[type="name"],
+input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+}
+
+.body-button {
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    background-color: #28a745;
+    color: white;
+    border: 2px solid #28a745;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+.error-message {
+    color: red;
+    margin-top: 10px;
+}
+
+.success-message {
+    color: green;
+    margin-top: 10px;
+}
+
+.remove-access-button {
+    background-color: #dc3545;
+    border: 2px solid #dc3545;
+    padding: 10px 15px;
+    color: white;
+
+    margin-bottom: 10px;
+
+}
+
+.remove-access-button:hover {
+    background-color: #c82333;
+}
+
+.home-container {
+    display: flex;
+    /* Adjusts spacing between elements */
+    width: 90%;
+    height: 70%;
+}
+
+.left-section,
+.right-section>* {
+    width: 33.33%;
+    padding-right: 10px;
+    padding: 10px;
+}
+
+.middle-section {
+    width: 33.33%;
+    padding: 10px;
+    margin-top: 103px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.search-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.search-container input {
+    margin-bottom: 10px;
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.stat-block {
+    margin-top: 90px;
+    margin-bottom: 20px;
+    margin-right: 12px;
+    margin-left: 12px;
+    padding-left: 25px
+}
+
+.stat-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-size: 18px;
+}
+
+.top-buttons {
+    display: block;
+    margin-bottom: 20px;
+    /* Adjusts spacing between buttons */
+}
+
+.header-button,
+.action-section>* {
+    margin-right: 10px;
+}
