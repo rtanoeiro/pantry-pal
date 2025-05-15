@@ -26,11 +26,18 @@
         <button class="body-button" id="logoutButton" hx-get="/logout">Logout</button>
       </div>
 
-      <div class="action-section">
-        Name: <input type="text" id="searchInput" placeholder="Item Name" />
-        Quantity: <input type="number" id="quantityInput" placeholder="Quantity" />
-        Expiration Date: <input type="date" id="expirationDateInput" />
-        <button class="body-button" id="addItemButton">+ Add New Item</button>
+      <form id="add-item-form" hx-post="/pantry" hx-target="#responseMessage" hx-swap="innerHTML"
+        hx-on::after-request="this.reset()">
+        <div class="action-section">
+          Name: <input type="text" id="nameInput" placeholder="Item Name" name="itemName" />
+          Quantity: <input type="number" id="quantityInput" name="itemQuantity" placeholder="Quantity" />
+          Expiration Date: <input type="date" id="expirationDateInput" name="itemExpiryDate" />
+          <button class="body-button" id="addItemButton">+ Add New Item</button>
+        </div>
+      </form>
+
+      <div class="response-message" id="responseMessage">
+        {{ template "ResponseMessage" . }}
       </div>
     </div>
 
@@ -41,8 +48,8 @@
       </div>
     </div>
 
-    <div class="right-section" id="right-section" hx-get="/pantry_stats" hx-target="#right-section" hx-swap="outerHTML"
-      hx-trigger="load">
+    <div class="right-section" id="right-section" hx-get="/pantry_stats" hx-target="#right-section" hx-swap="innerHTML"
+      hx-trigger="load, click delay:1.5s from:#addItemButton">
       {{ template "pantryStats" .}}
     </div>
   </div>
@@ -59,7 +66,12 @@
 
 <div class="stat-block">
   <p class="stat-title">Expiring Soon</p>
+  <div class="stat-value" id="expiringSoonList">
+    {{ template "expiringSoonList" . }}
+  </div>
+
   <p class="stat-value" id="expiringSoon">{{ .ExpiringSoon }}</p>
+
 </div>
 
 <div class="stat-block">
@@ -67,3 +79,22 @@
   <p class="stat-value" id="shoppingListCount">{{ .ShoppingList }}</p>
 </div>
 {{end}}
+
+{{ block "ResponseMessage" .}}
+<div id="response-message">
+  <div class="success-message">{{ .SuccessMessage }}</div>
+  <div class="error-message">{{ .ErrorMessage }}</div>
+</div>
+{{ end }}
+
+{{ block "expiringSoonList" . }}
+{{ if .ExpiringSoonItems }}
+<ul>
+  {{ range .ExpiringSoonItems }}
+  <li>{{ .Name }} x{{ .Quantity }} - {{ .ExpiryDate }}</li>
+  {{ end }}
+</ul>
+{{ else }}
+<p>No items expiring soon.</p>
+{{ end }}
+{{ end }}

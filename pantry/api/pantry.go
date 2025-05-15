@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"pantry-pal/pantry/database"
+	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
@@ -12,56 +13,78 @@ import (
 
 func (config *Config) HandleNewItem(writer http.ResponseWriter, request *http.Request) {
 
+	itemName := request.FormValue("itemName")
+	itemName = strings.TrimSpace(itemName)
+	itemQuantity, errQuantity := strconv.Atoi(request.FormValue("itemQuantity"))
+	if errQuantity != nil {
+		respondWithJSON(writer, http.StatusBadRequest, "Invalid quantity")
+		return
+	}
+	itemExpiry := request.FormValue("itemExpiryDate")
+	log.Printf("Received item \n- Name: %s\n- Quantity: %d\n- Expity Date: %s", itemName, itemQuantity, itemExpiry)
+	returnPantry := map[string]interface{}{
+		"ErrorMessage":   "",
+		"SuccessMessage": "",
+	}
+
+	if !checkDate(itemExpiry) {
+		respondWithJSON(writer, http.StatusForbidden, "Invalid Date. Please send in the Format YYYY-MM-DD or Date is already expired")
+		returnPantry["ErrorMessage"] = "Invalid Date. Please send in the Format YYYY-MM-DD or Date is already expired"
+		config.Renderer.Render(writer, "ResponseMessage", returnPantry)
+		return
+	}
+
 	userID, errUser := GetUserIDFromToken(request, writer, config)
 	if errUser != nil {
 		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
+		returnPantry["ErrorMessage"] = "Unable to retrieve user Pantry Items"
+		config.Renderer.Render(writer, "ResponseMessage", returnPantry)
 		return
 	}
-
-	decoder := json.NewDecoder(request.Body)
-	item := AddItemRequest{}
-	err := decoder.Decode(&item)
-	if err != nil {
-		respondWithJSON(writer, http.StatusBadRequest, err.Error())
-		return
-	}
-	log.Printf("Received item \n- Name: %s\n- Quantity: %d", item.ItemName, item.Quantity)
 
 	findItem := database.FindItemByNameParams{
 		UserID:   userID,
-		ItemName: strings.ToLower(item.ItemName),
+		ItemName: strings.ToLower(itemName),
 	}
 	items, errItem := config.Db.FindItemByName(request.Context(), findItem)
 	if errItem != nil {
 		respondWithJSON(writer, http.StatusInternalServerError, errItem.Error())
+		returnPantry["ErrorMessage"] = "Failed to get current items in pantry, please try again"
+		config.Renderer.Render(writer, "ResponseMessage", returnPantry)
 		return
-	}
-	for _, item := range items {
-		log.Printf("Found item \n- Name: %s\n- Quantity: %d", item.ItemName, item.Quantity)
 	}
 
 	for _, currentItem := range items {
-		if currentItem.ItemName == item.ItemName && currentItem.ExpiryAt == item.ExpiryAt {
+		if currentItem.ItemName == itemName && currentItem.ExpiryAt == itemExpiry {
 			toUpdate := UpdateItemRequest{
 				ItemID:            currentItem.ID,
 				UserID:            userID,
-				ItemName:          item.ItemName,
+				ItemName:          itemName,
 				QuantityAvailable: currentItem.Quantity,
-				QuantityToAdd:     item.Quantity,
+				QuantityToAdd:     int64(itemQuantity),
 				ExpiryAt:          currentItem.ExpiryAt,
 			}
 			config.ItemUpdate(writer, request, toUpdate)
+			config.GetPantryStats(writer, request)
 			return
 		}
 	}
-	// if the function hasn't returned yet, the item is new, so we add it
-	item.UserID = userID
-	config.ItemAdd(writer, request, item)
-
+	addItem := AddItemRequest{
+		UserID:   userID,
+		ItemName: itemName,
+		Quantity: int64(itemQuantity),
+		ExpiryAt: itemExpiry,
+	}
+	config.ItemAdd(writer, request, addItem)
+	writer.Header().Set("HX-Redirect", "/home")
 }
 
 func (config *Config) ItemUpdate(writer http.ResponseWriter, request *http.Request, toUpdate UpdateItemRequest) {
 	log.Println("Updating item in pantry")
+	returnPantry := map[string]interface{}{
+		"ErrorMessage":   "",
+		"SuccessMessage": "",
+	}
 	itemToUpdate := database.UpdateItemQuantityParams{
 		Quantity: toUpdate.QuantityAvailable + toUpdate.QuantityToAdd,
 		ID:       toUpdate.ItemID,
@@ -70,34 +93,31 @@ func (config *Config) ItemUpdate(writer http.ResponseWriter, request *http.Reque
 
 	if itemToUpdate.Quantity < 0 {
 		respondWithJSON(writer, http.StatusForbidden, "unable to remove more items than available")
+		returnPantry["ErrorMessage"] = "Unable to remove more items than available"
+		config.Renderer.Render(writer, "ResponseMessage", returnPantry)
 		return
 	}
 	updatedItem, errUpdate := config.Db.UpdateItemQuantity(request.Context(), itemToUpdate)
 	if errUpdate != nil {
 		respondWithJSON(writer, http.StatusInternalServerError, errUpdate.Error())
+		returnPantry["ErrorMessage"] = "Failed to update items to Pantry, please try again"
+		config.Renderer.Render(writer, "ResponseMessage", returnPantry)
 		return
 	}
-	updateReponse := UpdateItemResponse{
-		ItemID:   updatedItem.ID,
-		UserID:   toUpdate.UserID,
-		ItemName: toUpdate.ItemName,
-		Quantity: updatedItem.Quantity,
-		ExpiryAt: toUpdate.ExpiryAt,
-	}
-	data, err := json.Marshal(updateReponse)
-	if err != nil {
-		respondWithJSON(writer, http.StatusInternalServerError, err.Error())
-		return
-	}
-	respondWithJSON(writer, http.StatusOK, data)
-
+	returnPantry["SuccessMessage"] = updatedItem.ItemName + "updated on Pantry"
+	config.Renderer.Render(writer, "ResponseMessage", returnPantry)
 }
 
 func (config *Config) ItemAdd(writer http.ResponseWriter, request *http.Request, toAdd AddItemRequest) {
 	log.Println("Adding item to pantry")
-
+	returnPantry := map[string]interface{}{
+		"ErrorMessage":   "",
+		"SuccessMessage": "",
+	}
 	if toAdd.Quantity < 0 {
-		respondWithJSON(writer, http.StatusForbidden, "unable to add negative items")
+		respondWithJSON(writer, http.StatusForbidden, "Unable to add negative items")
+		returnPantry["ErrorMessage"] = "Unable to add negative items"
+		config.Renderer.Render(writer, "ResponseMessage", returnPantry)
 		return
 	}
 	itemToAdd := database.AddItemParams{
@@ -108,31 +128,16 @@ func (config *Config) ItemAdd(writer http.ResponseWriter, request *http.Request,
 		ExpiryAt: toAdd.ExpiryAt,
 	}
 
-	if !checkDate(toAdd.ExpiryAt) {
-		respondWithJSON(writer, http.StatusForbidden, "Invalid Date. Please send in the Format YYYY-MM-DD or Date is already expired")
-		return
-	}
 	log.Printf("Item to add: \n- UserID: %s \n- ItemName: %s \n- Quantity: %d \n- Expiry Date: %s", toAdd.UserID, toAdd.ItemName, toAdd.Quantity, toAdd.ExpiryAt)
 	addedItem, errUpdate := config.Db.AddItem(request.Context(), itemToAdd)
 	if errUpdate != nil {
 		respondWithJSON(writer, http.StatusInternalServerError, errUpdate.Error())
+		returnPantry["ErrorMessage"] = "Failed to add items to Pantry, please try again"
+		config.Renderer.Render(writer, "ResponseMessage", returnPantry)
 		return
 	}
-
-	addResponse := AddItemResponse{
-		ItemID:   addedItem.ID,
-		UserID:   toAdd.UserID,
-		ItemName: addedItem.ItemName,
-		Quantity: addedItem.Quantity,
-		ExpiryAt: addedItem.ExpiryAt,
-	}
-
-	data, err := json.Marshal(addResponse)
-	if err != nil {
-		respondWithJSON(writer, http.StatusInternalServerError, err.Error())
-		return
-	}
-	respondWithJSON(writer, http.StatusOK, data)
+	returnPantry["SuccessMessage"] = addedItem.ItemName + " added to pantry"
+	config.Renderer.Render(writer, "ResponseMessage", returnPantry)
 }
 
 func (config *Config) GetItemByName(writer http.ResponseWriter, request *http.Request) {
@@ -200,6 +205,7 @@ func (config *Config) GetAllPantryItems(writer http.ResponseWriter, request *htt
 	returnPantry["Items"] = PantrySlice
 	config.Renderer.Render(writer, "pantrypage", returnPantry)
 }
+
 func (config *Config) DeleteItem(writer http.ResponseWriter, request *http.Request) {
 
 	userID, errUser := GetUserIDFromToken(request, writer, config)
