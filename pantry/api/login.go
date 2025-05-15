@@ -77,8 +77,29 @@ func (config *Config) SignUp(writer http.ResponseWriter, request *http.Request) 
 
 // TODO: Add Check UserID from JWT
 func (config *Config) Home(writer http.ResponseWriter, request *http.Request) {
-	jwtToken, _ := GetJWTFromCookie(request)
-	writer.Header().Add("JWTToken", jwtToken)
-	config.Renderer.Render(writer, "home", nil)
+	returnPantry := map[string]interface{}{
+		"ErrorMessage":   "",
+		"SuccessMessage": "",
+	}
+
+	userID, errUser := GetUserIDFromToken(request, writer, config)
+	if errUser != nil {
+		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
+		returnPantry["ErrorMessage"] = "Unable to retrieve user Pantry Items"
+		config.Renderer.Render(writer, "ResponseMessage", returnPantry)
+		return
+	}
+
+	user, userError := config.Db.GetUserById(request.Context(), userID)
+	if userError != nil {
+		respondWithJSON(writer, http.StatusUnauthorized, userError.Error())
+		returnPantry["ErrorMessage"] = "Unable to retrieve user Pantry Items"
+		config.Renderer.Render(writer, "ResponseMessage", returnPantry)
+		writer.Header().Set("HX-Redirect", "/")
+		return
+	}
+
+	returnPantry["UserName"] = user.Name
+	config.Renderer.Render(writer, "home", returnPantry)
 	log.Println("User entered Home Page...")
 }

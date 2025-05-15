@@ -67,11 +67,16 @@
 <div class="stat-block">
   <p class="stat-title">Expiring Soon</p>
   <div class="stat-value" id="expiringSoonList">
-    {{ template "expiringSoonList" . }}
+    {{ if .ExpiringSoon }}
+    <ul>
+      {{ range .ExpiringSoon }}
+      <li>{{ .ItemName }} x{{ .Quantity }} - {{ .ExpiryAt }}</li>
+      {{ end }}
+    </ul>
+    {{ else }}
+    <p>No items expiring soon.</p>
+    {{ end }}
   </div>
-
-  <p class="stat-value" id="expiringSoon">{{ .ExpiringSoon }}</p>
-
 </div>
 
 <div class="stat-block">
@@ -85,16 +90,4 @@
   <div class="success-message">{{ .SuccessMessage }}</div>
   <div class="error-message">{{ .ErrorMessage }}</div>
 </div>
-{{ end }}
-
-{{ block "expiringSoonList" . }}
-{{ if .ExpiringSoonItems }}
-<ul>
-  {{ range .ExpiringSoonItems }}
-  <li>{{ .Name }} x{{ .Quantity }} - {{ .ExpiryDate }}</li>
-  {{ end }}
-</ul>
-{{ else }}
-<p>No items expiring soon.</p>
-{{ end }}
 {{ end }}
