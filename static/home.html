@@ -13,19 +13,22 @@
 <body hx-boost="true">
   <div class="home-container">
 
-    <div class="left-section">
+    <!-- TOP + MIDDLE SECTION -->
+    <div class="top-section">
       <h1 class="header">Pantry Pal</h1>
       <div class="welcome-message">
         <p>Welcome, {{ .UserName }}!</p>
       </div>
+
+      <!-- Navigation buttons -->
       <div class="top-buttons">
-        <button class="body-button" id="pantryButton" hx-get="/pantry" hx-target="body">My
-          Pantry</button>
+        <button class="body-button" id="pantryButton" hx-get="/pantry" hx-target="body">My Pantry</button>
         <button class="body-button" id="accountButton" hx-get="/user" hx-target="body"
           hx-push-url="/user">Account</button>
         <button class="body-button" id="logoutButton" hx-get="/logout">Logout</button>
       </div>
 
+      <!-- Add item form -->
       <form id="add-item-form" hx-post="/pantry" hx-target="#responseMessage" hx-swap="innerHTML"
         hx-on::after-request="this.reset()">
         <div class="action-section">
@@ -36,27 +39,32 @@
         </div>
       </form>
 
+      <!-- Response messages -->
       <div class="response-message" id="responseMessage">
         {{ template "ResponseMessage" . }}
       </div>
+
+      <!-- Pantry Stats moved here -->
+      <div class="middle-section" id="right-section" hx-get="/pantry_stats" hx-target="#right-section"
+        hx-swap="innerHTML" hx-trigger="load, click delay:1.5s from:#addItemButton">
+        {{ template "pantryStats" . }}
+      </div>
     </div>
 
-    <div class="middle-section">
+    <!-- BOTTOM SECTION (search) -->
+    <div class="bottom-section">
       <div class="search-container">
         <input type="text" id="searchInput" placeholder="Search for items..." />
         <button class="body-button" id="searchButton">Search</button>
       </div>
     </div>
 
-    <div class="right-section" id="right-section" hx-get="/pantry_stats" hx-target="#right-section" hx-swap="innerHTML"
-      hx-trigger="load, click delay:1.5s from:#addItemButton">
-      {{ template "pantryStats" .}}
-    </div>
   </div>
 </body>
 
 </html>
 {{ end }}
+
 
 {{ block "pantryStats" . }}
 <div class="stat-block">
