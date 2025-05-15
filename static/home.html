@@ -19,7 +19,8 @@
         <p>Welcome, {{ .UserName }}!</p>
       </div>
       <div class="top-buttons">
-        <button class="body-button" id="pantryButton">My Pantry</button>
+        <button class="body-button" id="pantryButton" hx-get="/pantry" hx-target="body">My
+          Pantry</button>
         <button class="body-button" id="accountButton" hx-get="/user" hx-target="body"
           hx-push-url="/user">Account</button>
         <button class="body-button" id="logoutButton" hx-get="/logout">Logout</button>
@@ -40,7 +41,6 @@
       </div>
     </div>
 
-    <!-- Right Section -->
     <div class="right-section" id="right-section" hx-get="/pantry_stats" hx-target="#right-section" hx-swap="outerHTML"
       hx-trigger="load">
       {{ template "pantryStats" .}}

@@ -1,0 +1,52 @@
+{{ block "pantrypage" . }}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Pantry</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+</head>
+
+<body hx-boost="true">
+    <div class="main-container">
+        <h2>My Pantry</h2>
+        {{ template "pantryItems" . }}
+        <div>
+            <button class="body-button" id="button-home" hx-get="/home" hx-target="body" hx-swap="innerHTML"
+                hx-push-url="/home">Back to
+                Home Page</button>
+        </div>
+
+    </div>
+</body>
+
+</html>
+{{ end }}
+
+{{ block "pantryItems" . }}
+<div class="users-container">
+    {{ if .Items }}
+    {{ range .Items }}
+    <div class="item-row">
+        <strong>{{ .ItemName }}</strong><br />
+        <small>Expires: {{ .ExpiryAt }}</small>
+
+        <button class="body-button" hx-post="/pantry/decrement/{{ .ID }}" hx-target="#item-qty-{{ .ID }}">-</button>
+        <span id="item-qty-{{ .ID }}" style="margin: 0 10px;">{{ .Quantity }}</span>
+        <button class="body-button" hx-post="/pantry/increment/{{ .ID }}" hx-target="#item-qty-{{ .ID }}">+</button>
+
+        <button class="remove-access-button" hx-delete="/pantry/delete/{{ .ID }}" hx-target="closest .item-row"
+            hx-swap="outerHTML">Delete</button>
+
+    </div>
+    {{ end }}
+    {{ else }}
+    <div class="empty-pantry">
+        <p>Your pantry is empty. Add some items!</p>
+        <p>No items in pantry.</p>
+        {{ end }}
+    </div>
+    {{ end }}

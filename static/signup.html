@@ -29,7 +29,8 @@
             <div id="error-signup" style="color: red">{{ template "errorSignup" . }}</div>
             <button class="body-button" type="submit">Sign Up</button>
         </form>
-        <button class="body-button" hx-get="/" hx-target="body" hx-swap="innerHTML">Back to Login</button>
+        <button class="body-button" hx-get="/" hx-target="body" hx-swap="innerHTML" hx-push-url="/">Back to
+            Login</button>
 </body>
 
 </html>

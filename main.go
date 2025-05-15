@@ -63,7 +63,7 @@ func main() {
 	// Pantry endpoints
 	httpServerMux.Handle("POST /pantry", http.HandlerFunc(config.HandleNewItem))
 	httpServerMux.Handle("GET /pantry/{itemName}", http.HandlerFunc(config.GetItemByName))
-	httpServerMux.Handle("GET /pantry/", http.HandlerFunc(config.GetAllPantryItems))
+	httpServerMux.Handle("GET /pantry", http.HandlerFunc(config.GetAllPantryItems))
 	httpServerMux.Handle("GET /pantry_stats", http.HandlerFunc(config.GetPantryStats))
 	httpServerMux.Handle("DELETE /pantry/{itemID}", http.HandlerFunc(config.DeleteItem))
 

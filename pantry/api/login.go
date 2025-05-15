@@ -7,8 +7,11 @@ import (
 )
 
 func (config *Config) Index(writer http.ResponseWriter, request *http.Request) {
+<<<<<<< HEAD
 
 	log.Println("User entered login page")
+=======
+>>>>>>> 3fe1874 (adjusted ednpoint to see users pantry)
 	config.Renderer.Render(writer, "index", nil)
 }
 
@@ -68,20 +71,14 @@ func (config *Config) Logout(writer http.ResponseWriter, request *http.Request) 
 }
 
 func (config *Config) SignUp(writer http.ResponseWriter, request *http.Request) {
-
-	writer.Header().Set("HX-Replace-Url", "/signup")
 	config.Renderer.Render(writer, "signup", nil)
 	log.Println("User entered SignUp Page...")
-
 }
 
 // TODO: Add Check UserID from JWT
 func (config *Config) Home(writer http.ResponseWriter, request *http.Request) {
-
 	jwtToken, _ := GetJWTFromCookie(request)
 	writer.Header().Add("JWTToken", jwtToken)
-	writer.Header().Set("HX-Replace-Url", "/home")
 	config.Renderer.Render(writer, "home", nil)
 	log.Println("User entered Home Page...")
-
 }

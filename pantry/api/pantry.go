@@ -164,30 +164,42 @@ func (config *Config) GetItemByName(writer http.ResponseWriter, request *http.Re
 
 func (config *Config) GetAllPantryItems(writer http.ResponseWriter, request *http.Request) {
 
+	log.Println("User entered it's Pantry")
+	returnPantry := map[string]interface{}{
+		"ErrorMessage":   "",
+		"SuccessMessage": "",
+		"Items":          []PantryItem{},
+	}
+
 	userID, errUser := GetUserIDFromToken(request, writer, config)
 	if errUser != nil {
 		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
+		returnPantry["ErrorMessage"] = "Unable to retrieve user Pantry Items"
+		config.Renderer.Render(writer, "pantrypage", returnPantry)
 		return
 	}
 
 	allPantryItems, errAll := config.Db.GetAllItems(request.Context(), userID)
 	if errAll != nil {
 		respondWithJSON(writer, http.StatusBadRequest, errAll.Error())
+		returnPantry["ErrorMessage"] = "Unable to retrieve user Pantry Items"
+		config.Renderer.Render(writer, "pantrypage", returnPantry)
 		return
 	}
 
+	var PantrySlice []PantryItem
 	for _, item := range allPantryItems {
 		log.Printf("Found item \n- Name: %s\n- Quantity: %d", item.ItemName, item.Quantity)
+		toAppend := PantryItem{
+			ItemName: item.ItemName,
+			Quantity: int(item.Quantity),
+			ExpiryAt: item.ExpiryAt,
+		}
+		PantrySlice = append(PantrySlice, toAppend)
 	}
-	data, err := json.Marshal(allPantryItems)
-	if err != nil {
-		respondWithJSON(writer, http.StatusInternalServerError, err.Error())
-		return
-	}
-	respondWithJSON(writer, http.StatusOK, data)
-
+	returnPantry["Items"] = PantrySlice
+	config.Renderer.Render(writer, "pantrypage", returnPantry)
 }
-
 func (config *Config) DeleteItem(writer http.ResponseWriter, request *http.Request) {
 
 	userID, errUser := GetUserIDFromToken(request, writer, config)
