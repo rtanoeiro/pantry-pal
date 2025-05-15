@@ -8,7 +8,7 @@ import (
 
 func (config *Config) Index(writer http.ResponseWriter, request *http.Request) {
 
-	writer.Header().Set("HX-Replace-Url", "/")
+	log.Println("User entered login page")
 	config.Renderer.Render(writer, "index", nil)
 }
 
