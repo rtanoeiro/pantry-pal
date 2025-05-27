@@ -7,11 +7,8 @@ import (
 )
 
 func (config *Config) Index(writer http.ResponseWriter, request *http.Request) {
-<<<<<<< HEAD
 
 	log.Println("User entered login page")
-=======
->>>>>>> 3fe1874 (adjusted ednpoint to see users pantry)
 	config.Renderer.Render(writer, "index", nil)
 }
 
