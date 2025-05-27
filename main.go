@@ -46,7 +46,7 @@ func main() {
 
 	//Login
 	httpServerMux.Handle("/", http.HandlerFunc(config.Index))
-	httpServerMux.Handle("POST /login", http.HandlerFunc(config.Login))
+	httpServerMux.Handle("POST /login", http.HandlerFunc(config.Index))
 	httpServerMux.Handle("GET /signup", http.HandlerFunc(config.SignUp))
 	httpServerMux.Handle("POST /signup", http.HandlerFunc(config.CreateUser))
 	httpServerMux.Handle("GET /home", http.HandlerFunc(config.Home))
