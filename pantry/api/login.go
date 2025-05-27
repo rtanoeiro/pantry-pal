@@ -7,7 +7,6 @@ import (
 )
 
 func (config *Config) Index(writer http.ResponseWriter, request *http.Request) {
-
 	log.Println("User entered login page")
 	config.Renderer.Render(writer, "index", nil)
 }
