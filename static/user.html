@@ -48,10 +48,6 @@
             {{ template "Admin" . }}
         </div>
 
-        <div id="response-message">
-            {{ template "ResponseMessage" . }}
-        </div>
-
     </div>
 </body>
 
@@ -66,25 +62,22 @@
     <ul>
         {{ range .Users }}
         <li>{{ .Name }} - {{ .Email }}</li>
-        <button class="body-button" hx-delete="/user/{{ .UserID }}" hx-target="#response-message"
+        <button class="body-button" hx-delete="/user/{{ .UserID }}" hx-target="#users-container"
             hx-swap="innerHTML">Delete</button>
         {{ if not .UserAdmin }}
-        <button class="body-button" hx-post="/user/admin/{{ .UserID }}" hx-target="#response-message"
+        <button class="body-button" hx-post="/user/admin/{{ .UserID }}" hx-target="#users-container"
             hx-swap="innerHTML">Make
             Admin</button>
         {{ else }}
-        <button class="remove-access-button" hx-delete="/user/admin/{{ .UserID }}" hx-target="#response-message"
+        <button class="remove-access-button" hx-delete="/user/admin/{{ .UserID }}" hx-target="#users-container"
             hx-swap="innerHTML">Remove
             Admin</button>
         {{ end }}
         {{ end }}
     </ul>
 </div>
-{{ end }}
-</div>
-{{end}}
-
-{{ block "ResponseMessage" .}}
 <div class="success-message">{{ .SuccessMessage }}</div>
 <div class="error-message">{{ .ErrorMessage }}</div>
+
+{{ end }}
 {{ end }}

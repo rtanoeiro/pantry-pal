@@ -125,23 +125,42 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 
 func (config *Config) DeleteUser(writer http.ResponseWriter, request *http.Request) {
 	log.Println("Delete User endpoint called")
-	returnHTML := map[string]interface{}{
+	AdminUserID, errUser := GetUserIDFromToken(request, writer, config)
+	if errUser != nil {
+		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
+		return
+	}
+	var usersSlice []User
+	returnUser := map[string]interface{}{
 		"ErrorMessage":   "",
 		"SuccessMessage": "",
+		"IsAdmin":        int64(1),
+		"Users":          []User{},
 	}
 
 	userID := request.PathValue("userID")
 	errDelete := config.Db.DeleteUser(request.Context(), userID)
 	if errDelete != nil {
 		respondWithJSON(writer, http.StatusBadRequest, errDelete.Error())
-		returnHTML["ErrorMessage"] = "Error on deleting user"
-		config.Renderer.Render(writer, "ResponseMessage", returnHTML)
+		returnUser["ErrorMessage"] = "Error on deleting user"
+		config.Renderer.Render(writer, "Admin", returnUser)
 		return
 	}
+	allOtherUsers, _ := config.Db.GetAllUsers(request.Context(), AdminUserID)
 
-	returnHTML["SuccessMessage"] = "User Deleted With Success!"
-	config.Renderer.Render(writer, "ResponseMessage", returnHTML)
-	writer.Header().Set("HX-Redirect", "/user")
+	for _, user := range allOtherUsers {
+		usersSlice = append(usersSlice, User{
+			UserID:    user.ID,
+			Name:      user.Name,
+			Email:     user.Email,
+			UserAdmin: user.IsAdmin.Int64,
+		},
+		)
+		returnUser["Users"] = usersSlice
+	}
+
+	returnUser["SuccessMessage"] = "User Deleted With Success!"
+	config.Renderer.Render(writer, "Admin", returnUser)
 }
 
 // TODO: Find a way to improve the replacements of data when rendeding HTML, currently rendering everything
@@ -276,10 +295,8 @@ func (config *Config) AddUserAdmin(writer http.ResponseWriter, request *http.Req
 		)
 		returnUser["Users"] = usersSlice
 	}
-	config.Renderer.Render(writer, "Admin", returnUser)
 	returnUser["SuccessMessage"] = "User Added as Admin with Success!"
-	config.Renderer.Render(writer, "ResponseMessage", returnUser)
-
+	config.Renderer.Render(writer, "Admin", returnUser)
 }
 
 func (config *Config) RemoveUserAdmin(writer http.ResponseWriter, request *http.Request) {
@@ -319,7 +336,5 @@ func (config *Config) RemoveUserAdmin(writer http.ResponseWriter, request *http.
 	}
 
 	returnUser["SuccessMessage"] = "User Removed as Admin with Success!"
-	config.Renderer.Render(writer, "ResponseMessage", returnUser)
-
 	config.Renderer.Render(writer, "Admin", returnUser)
 }
