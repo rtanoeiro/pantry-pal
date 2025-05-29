@@ -1,6 +1,20 @@
 package api
 
-import "time"
+import (
+	"html/template"
+	"time"
+)
+
+type User struct {
+	UserID    string
+	Name      string
+	Email     string
+	UserAdmin int64
+}
+
+type Templates struct {
+	templates *template.Template
+}
 
 // To be used when we use javascript
 type CreateUserRequest struct {
@@ -62,6 +76,20 @@ type UpdateItemResponse struct {
 	ExpiryAt string `json:"expiry_at"`
 }
 
-type ErrorResponse struct {
-	ErrorMessage string
+// To Be used in HomePage
+type PantryItem struct {
+	ItemName string `json:"item_name"`
+	Quantity int    `json:"quantity"`
+	ExpiryAt string `json:"expiry_at"`
+}
+
+type ItemShopping struct {
+	ItemName string `json:"item_id"`
+	Quantity int    `json:"quantity"`
+}
+
+type PantryStats struct {
+	NumItems     int
+	ExpiringSoon []PantryItem
+	ShoppingList []ItemShopping
 }

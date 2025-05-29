@@ -1,13 +1,10 @@
 package api
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"pantry-pal/pantry/database"
 	"time"
-
-	"context"
 
 	"github.com/google/uuid"
 )
@@ -16,13 +13,13 @@ func (config *Config) ResetUsers(writer http.ResponseWriter, request *http.Reque
 
 	// Update to check for admin privileges?
 	if config.Env != "dev" {
-		respondWithError(writer, http.StatusUnauthorized, "Unable to perform this action in this environment")
+		respondWithJSON(writer, http.StatusUnauthorized, "Unable to perform this action in this environment")
 		return
 	}
 
 	errReset := config.Db.ResetTable(request.Context())
 	if errReset != nil {
-		respondWithError(writer, http.StatusInternalServerError, errReset.Error())
+		respondWithJSON(writer, http.StatusInternalServerError, errReset.Error())
 		return
 	}
 
@@ -31,8 +28,7 @@ func (config *Config) ResetUsers(writer http.ResponseWriter, request *http.Reque
 }
 
 func GetUserIDFromToken(request *http.Request, writer http.ResponseWriter, config *Config) (string, error) {
-	token, errTk := GetBearerToken(request.Header)
-	log.Println("Token from header:", token)
+	token, errTk := GetJWTFromCookie(request)
 	if errTk != nil {
 		return "", errTk
 	}
@@ -48,31 +44,43 @@ func GetUserIDFromToken(request *http.Request, writer http.ResponseWriter, confi
 
 func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Request) {
 
+	log.Println("User Info endpoint called")
 	userID, errUser := GetUserIDFromToken(request, writer, config)
 	if errUser != nil {
-		respondWithError(writer, http.StatusUnauthorized, errUser.Error())
+		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
 		return
 	}
 	userData, errUser := config.Db.GetUserById(request.Context(), userID)
 
 	if errUser != nil {
-		respondWithError(writer, http.StatusBadRequest, errUser.Error())
+		respondWithJSON(writer, http.StatusBadRequest, errUser.Error())
 		return
 	}
 
-	returnUser := CreateUserResponse{
-		ID:    userData.ID,
-		Name:  userData.Name,
-		Email: userData.Email,
+	var usersSlice []User
+	returnUser := map[string]interface{}{
+		"UserID":    userData.ID,
+		"UserName":  userData.Name,
+		"UserEmail": userData.Email,
+		"IsAdmin":   userData.IsAdmin.Valid,
+		"Users":     []User{},
 	}
-	data, err := json.Marshal(returnUser)
 
-	if err != nil {
-		respondWithError(writer, http.StatusInternalServerError, err.Error())
-		return
+	if userData.IsAdmin.Int64 == 1 {
+		allOtherUsers, _ := config.Db.GetAllUsers(request.Context(), userData.ID)
+		for _, user := range allOtherUsers {
+			usersSlice = append(usersSlice, User{
+				UserID:    user.ID,
+				Name:      user.Name,
+				Email:     user.Email,
+				UserAdmin: user.IsAdmin.Int64,
+			})
+		}
+		returnUser["Users"] = usersSlice
 	}
-	respondWithJSON(writer, http.StatusCreated, data)
+	log.Println("User data to be rendered:", returnUser)
 
+	config.Renderer.Render(writer, "user", returnUser)
 }
 
 func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Request) {
@@ -85,20 +93,16 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 	log.Println("Name from form: ", name)
 	log.Println("Password from form:", password)
 
-	if email == "" || password == "" || name == "" {
-		respondWithError(writer, http.StatusBadRequest, "Please provide all 3 information in order to register")
-		return
-	}
 	_, userError := config.Db.GetUserByEmail(request.Context(), email)
 
 	if userError == nil {
-		respondWithError(writer, http.StatusConflict, "User already exists")
+		config.Renderer.Render(writer, "signup", CreateErrorMessageInterfaces("User already exists"))
 		return
 	}
 
 	hashedPassword, errPwd := HashPassword(password)
 	if errPwd != nil {
-		respondWithError(writer, http.StatusInternalServerError, errPwd.Error())
+		respondWithJSON(writer, http.StatusInternalServerError, errPwd.Error())
 		return
 	}
 	createUser := database.CreateUserParams{
@@ -111,89 +115,226 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 	}
 	userAdd, errAdd := config.Db.CreateUser(request.Context(), createUser)
 	if errAdd != nil {
-		respondWithError(writer, http.StatusInternalServerError, errAdd.Error())
+		respondWithJSON(writer, http.StatusInternalServerError, errAdd.Error())
 		return
 	}
 	log.Printf("User added with success - UserID:%s \n-Name:%s\n-Email: %s", userAdd.ID, userAdd.Name, userAdd.Email)
-
-	http.Redirect(writer, request, "/", http.StatusFound) // Redirect to /home
+	config.Index(writer, request)
 
 }
 
-func UpdateUser[T interface{}](writer http.ResponseWriter, request *http.Request, dbFunc func(context.Context, T) error, config *Config) {
+func (config *Config) DeleteUser(writer http.ResponseWriter, request *http.Request) {
+	log.Println("Delete User endpoint called")
+	AdminUserID, errUser := GetUserIDFromToken(request, writer, config)
+	if errUser != nil {
+		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
+		return
+	}
+	var usersSlice []User
+	returnUser := map[string]interface{}{
+		"ErrorMessage":   "",
+		"SuccessMessage": "",
+		"IsAdmin":        int64(1),
+		"Users":          []User{},
+	}
+
+	userID := request.PathValue("userID")
+	errDelete := config.Db.DeleteUser(request.Context(), userID)
+	if errDelete != nil {
+		respondWithJSON(writer, http.StatusBadRequest, errDelete.Error())
+		returnUser["ErrorMessage"] = "Error on deleting user"
+		config.Renderer.Render(writer, "Admin", returnUser)
+		return
+	}
+	allOtherUsers, _ := config.Db.GetAllUsers(request.Context(), AdminUserID)
+
+	for _, user := range allOtherUsers {
+		usersSlice = append(usersSlice, User{
+			UserID:    user.ID,
+			Name:      user.Name,
+			Email:     user.Email,
+			UserAdmin: user.IsAdmin.Int64,
+		},
+		)
+		returnUser["Users"] = usersSlice
+	}
+
+	returnUser["SuccessMessage"] = "User Deleted With Success!"
+	config.Renderer.Render(writer, "Admin", returnUser)
+}
+
+// TODO: Find a way to improve the replacements of data when rendeding HTML, currently rendering everything
+func UpdateUser(writer http.ResponseWriter, request *http.Request, updateType, updateData string, config *Config) {
 
 	userID, errUser := GetUserIDFromToken(request, writer, config)
 	if errUser != nil {
-		respondWithError(writer, http.StatusUnauthorized, errUser.Error())
+		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
 		return
 	}
 	log.Println("User ID from token on Update User Call:", userID)
-
-	var updateParams T
-	err := json.NewDecoder(request.Body).Decode(&updateParams)
-	if err != nil {
-		respondWithError(writer, http.StatusBadRequest, err.Error())
+	userData, errUser := config.Db.GetUserById(request.Context(), userID)
+	if errUser != nil {
+		respondWithJSON(writer, http.StatusBadRequest, errUser.Error())
 		return
 	}
+	returnUser := map[string]interface{}{
+		"UserName":       userData.Name,
+		"UserEmail":      userData.Email,
+		"ErrorMessage":   "",
+		"SuccessMessage": "",
+	}
 
-	switch params := any(updateParams).(type) {
-	case database.UpdateUserPasswordParams:
+	switch updateType {
+	case "password":
 		log.Println("Updating user password")
-		hashedPassword, errPWD := HashPassword(params.PasswordHash)
+		hashedPassword, errPWD := HashPassword(updateData)
 		if errPWD != nil {
-			respondWithError(writer, http.StatusInternalServerError, errPWD.Error())
+			respondWithJSON(writer, http.StatusInternalServerError, errPWD.Error())
+			returnUser["ErrorMessage"] = "Error on hashing password"
+			config.Renderer.Render(writer, "user", returnUser)
+		}
+		data := database.UpdateUserPasswordParams{
+			PasswordHash: hashedPassword,
+			ID:           userID,
+		}
+		errUpdate := config.Db.UpdateUserPassword(request.Context(), data)
+
+		if errUpdate != nil {
+			returnUser["ErrorMessage"] = "Error on updating password"
+			config.Renderer.Render(writer, "user", returnUser)
 			return
 		}
-		params.PasswordHash = hashedPassword
-		params.ID = userID
-		updateParams = any(params).(T)
-	case database.UpdateUserEmailParams:
+		returnUser["SuccessMessage"] = "Password updated with success!"
+		config.Renderer.Render(writer, "user", returnUser)
+	case "email":
 		log.Println("Updating user email")
-		params.ID = userID
-		updateParams = any(params).(T)
-	case database.UpdateUserNameParams:
+		data := database.UpdateUserEmailParams{
+			Email: updateData,
+			ID:    userID,
+		}
+		errUpdate := config.Db.UpdateUserEmail(request.Context(), data)
+		if errUpdate != nil {
+			returnUser["ErrorMessage"] = "Error on updating user email"
+			config.Renderer.Render(writer, "user", returnUser)
+			return
+		}
+		returnUser["SuccessMessage"] = "Email updated with success!"
+		returnUser["UserEmail"] = updateData
+		config.Renderer.Render(writer, "user", returnUser)
+	case "name":
 		log.Println("Updating user name")
-		params.ID = userID
-		updateParams = any(params).(T)
+		data := database.UpdateUserNameParams{
+			Name: updateData,
+			ID:   userID,
+		}
+		errUpdate := config.Db.UpdateUserName(request.Context(), data)
+		if errUpdate != nil {
+			returnUser["ErrorMessage"] = "Error on updating user Name"
+			config.Renderer.Render(writer, "user", returnUser)
+			return
+		}
+		returnUser["SuccessMessage"] = "Name updated with success!"
+		returnUser["UserName"] = updateData
+		config.Renderer.Render(writer, "user", returnUser)
 	default:
 		log.Println("Wrong parameters in request")
-		respondWithError(writer, http.StatusMethodNotAllowed, "Wrong Parameters in Request")
+		writer.Header().Set("HX-Redirect", "/user")
 	}
-	errUpdate := dbFunc(request.Context(), updateParams)
-
-	if errUpdate != nil {
-		respondWithError(writer, http.StatusInternalServerError, errUpdate.Error())
-		return
-	}
-
-	respondWithJSON(writer, http.StatusAccepted, []byte{})
 }
 
 func (config *Config) UpdateUserEmail(writer http.ResponseWriter, request *http.Request) {
-	UpdateUser(writer, request, config.Db.UpdateUserEmail, config)
+	log.Println("Update User Email endpoint called")
+	email := request.FormValue("email")
+	UpdateUser(writer, request, "email", email, config)
 }
 
 func (config *Config) UpdateUserName(writer http.ResponseWriter, request *http.Request) {
-	UpdateUser(writer, request, config.Db.UpdateUserName, config)
+	log.Println("Update User Name endpoint called")
+	name := request.FormValue("name")
+	UpdateUser(writer, request, "name", name, config)
 }
 
 func (config *Config) UpdateUserPassword(writer http.ResponseWriter, request *http.Request) {
-	UpdateUser(writer, request, config.Db.UpdateUserPassword, config)
+	log.Println("Update User Password endpoint called")
+	password := request.FormValue("password")
+	UpdateUser(writer, request, "password", password, config)
 }
 
-func (config *Config) UserAdmin(writer http.ResponseWriter, request *http.Request) {
-	log.Println("User Admin endpoint called")
-	userID, errUser := GetUserIDFromToken(request, writer, config)
+// TODO: Modify these admin functions to be more generic
+func (config *Config) AddUserAdmin(writer http.ResponseWriter, request *http.Request) {
+	toUpdateuserID := request.PathValue("userID")
+	log.Println("User Add Admin endpoint called")
+
+	AdminUserID, errUser := GetUserIDFromToken(request, writer, config)
 	if errUser != nil {
-		respondWithError(writer, http.StatusUnauthorized, errUser.Error())
+		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
 		return
 	}
 
-	log.Println("User ID from token:", userID)
-	errADmin := config.Db.UpdateUserAdmin(request.Context(), userID)
+	var usersSlice []User
+	returnUser := map[string]interface{}{
+		"ErrorMessage":   "",
+		"SuccessMessage": "",
+		"IsAdmin":        int64(1),
+		"Users":          []User{},
+	}
+	errADmin := config.Db.MakeUserAdmin(request.Context(), toUpdateuserID)
 	if errADmin != nil {
-		respondWithError(writer, http.StatusInternalServerError, errADmin.Error())
+		returnUser["ErrorMessage"] = "Unable to Assign Admin to User!"
+		config.Renderer.Render(writer, "ResponseMessage", returnUser)
 		return
 	}
-	respondWithJSON(writer, http.StatusOK, []byte("User successfully upgraded to Admin"))
+	allOtherUsers, _ := config.Db.GetAllUsers(request.Context(), AdminUserID)
+	for _, user := range allOtherUsers {
+		usersSlice = append(usersSlice, User{
+			UserID:    user.ID,
+			Name:      user.Name,
+			Email:     user.Email,
+			UserAdmin: user.IsAdmin.Int64,
+		},
+		)
+		returnUser["Users"] = usersSlice
+	}
+	returnUser["SuccessMessage"] = "User Added as Admin with Success!"
+	config.Renderer.Render(writer, "Admin", returnUser)
+}
+
+func (config *Config) RemoveUserAdmin(writer http.ResponseWriter, request *http.Request) {
+	toUpdateuserID := request.PathValue("userID")
+	log.Println("User Remove Admin endpoint called")
+
+	AdminUserID, errUser := GetUserIDFromToken(request, writer, config)
+	if errUser != nil {
+		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
+		return
+	}
+	var usersSlice []User
+	returnUser := map[string]interface{}{
+		"ErrorMessage":   "",
+		"SuccessMessage": "",
+		"IsAdmin":        int64(1),
+		"Users":          []User{},
+	}
+
+	errADmin := config.Db.RemoveUserAdmin(request.Context(), toUpdateuserID)
+	if errADmin != nil {
+		returnUser["ErrorMessage"] = "Unable to Remove Admin to ser!"
+		config.Renderer.Render(writer, "ResponseMessage", returnUser)
+		return
+	}
+
+	allOtherUsers, _ := config.Db.GetAllUsers(request.Context(), AdminUserID)
+	for _, user := range allOtherUsers {
+		usersSlice = append(usersSlice, User{
+			UserID:    user.ID,
+			Name:      user.Name,
+			Email:     user.Email,
+			UserAdmin: user.IsAdmin.Int64,
+		},
+		)
+		returnUser["Users"] = usersSlice
+	}
+
+	returnUser["SuccessMessage"] = "User Removed as Admin with Success!"
+	config.Renderer.Render(writer, "Admin", returnUser)
 }

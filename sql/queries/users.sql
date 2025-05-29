@@ -4,6 +4,10 @@ VALUES (?, ?, ?, ?, ?, ?)
 
 RETURNING *;
 
+-- name: DeleteUser :exec
+DELETE FROM users
+WHERE id = ?;
+
 -- name: UpdateUserEmail :exec
 UPDATE users
 SET 
@@ -28,12 +32,19 @@ WHERE id = ?
 
 RETURNING *;
 
--- name: UpdateUserAdmin :exec
+-- name: MakeUserAdmin :exec
 UPDATE users
 SET 
     is_admin = 1
 WHERE id = ?
 
+RETURNING *;
+
+-- name: RemoveUserAdmin :exec
+UPDATE users
+SET 
+    is_admin = 0
+WHERE id = ?
 RETURNING *;
 
 -- name: GetUserById :one
@@ -51,5 +62,12 @@ SELECT id, name, email, password_hash, created_at, updated_at, is_admin
 FROM users
 WHERE email = ?;
 
+-- name: GetAllUsers :many
+SELECT id, name, email, password_hash, created_at, updated_at, is_admin
+FROM users
+WHERE id != ?
+ORDER BY created_at DESC;
+
 -- name: ResetTable :exec
-DELETE FROM users;
+DELETE FROM users
+WHERE email != 'admin@admin.com';

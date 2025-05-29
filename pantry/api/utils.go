@@ -3,31 +3,36 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"html/template"
+	"io"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func respondWithError(writer http.ResponseWriter, code int, msg string) {
-
-	errorReturn := ErrorResponse{
-		ErrorMessage: msg,
-	}
-	data, _ := json.Marshal(errorReturn)
-
-	respondWithJSON(writer, code, data)
+func (tmplt *Templates) Render(writer io.Writer, name string, data interface{}) error {
+	return tmplt.templates.ExecuteTemplate(writer, name, data)
 }
 
-func respondWithJSON(writer http.ResponseWriter, code int, data []byte) {
+func MyTemplates() *Templates {
+	templates, _ := template.ParseGlob("static/*.html")
+	return &Templates{
+		templates: templates,
+	}
+}
+
+func respondWithJSON(writer http.ResponseWriter, code int, data interface{}) {
 	writer.Header().Set("Content-Type", "application/json; charset=utf-8")
 	writer.WriteHeader(code)
-	_, errWriter := writer.Write(data)
+	results, _ := json.Marshal(data)
+	writer.Write(results)
+}
 
-	if errWriter != nil {
-		respondWithError(writer, http.StatusInternalServerError, errWriter.Error())
+func CreateErrorMessageInterfaces(message string) map[string]interface{} {
+	return map[string]interface{}{
+		"Message": message,
 	}
 }
 
@@ -76,15 +81,22 @@ func ValidateJWT(tokenString, tokenSecret string) (string, error) {
 	return subject, nil
 }
 
-func GetBearerToken(headers http.Header) (string, error) {
-	authHeader := headers.Get("Authorization")
-	if authHeader == "" {
-		return "", errors.New("authorization header missing")
-	}
+func GetJWTFromCookie(request *http.Request) (string, error) {
 
-	parts := strings.Fields(authHeader)
-	if len(parts) == 2 && parts[0] == "Bearer" {
-		return parts[1], nil
+	jwtToken, errorJwt := request.Cookie("JWTToken")
+	if errorJwt != nil {
+		return "", errorJwt
 	}
-	return "", errors.New("invalid authorization header format")
+	return jwtToken.Value, nil
+}
+
+func checkDate(givenDate string) bool {
+
+	dateLayout := "2006-01-02"
+	formattedDate, errParse := time.Parse(dateLayout, givenDate)
+
+	if errParse != nil {
+		return false
+	}
+	return !formattedDate.Before(time.Now())
 }
