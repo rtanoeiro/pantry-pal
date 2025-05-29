@@ -4,6 +4,10 @@ VALUES (?, ?, ?, ?, ?, ?)
 
 RETURNING *;
 
+-- name: DeleteUser :exec
+DELETE FROM users
+WHERE id = ?;
+
 -- name: UpdateUserEmail :exec
 UPDATE users
 SET 

@@ -13,7 +13,6 @@ func (config *Config) Index(writer http.ResponseWriter, request *http.Request) {
 
 func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 
-	log.Println("User entered Login Page...")
 	email := request.FormValue("email")
 	password := request.FormValue("password")
 

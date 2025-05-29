@@ -40,13 +40,19 @@
 
         <div>
             <button class="body-button" id="button-home" hx-get="/home" hx-target="body" hx-swap="innerHTML"
-                hx-push-url="/home">Back to
-                Home Page</button>
+                hx-push-url="/home">Back to Home Page
+            </button>
         </div>
 
-        {{ template "Admin" . }}
-        {{ template "ResponseMessage" . }}
+        <div id="users-container" class="users-container">
+            {{ template "Admin" . }}
+        </div>
 
+        <div id="response-message">
+            {{ template "ResponseMessage" . }}
+        </div>
+
+    </div>
 </body>
 
 </html>
@@ -54,35 +60,31 @@
 
 
 {{ block "Admin" .}}
-<div id="users-container" class="users-container">
-    {{ if .IsAdmin }}
-    <div class="user-list">
-        <h2>Current Registered Users</h2>
-        <ul>
-            {{ range .Users }}
-            <li>{{ .Name }} - {{ .Email }}</li>
-            <button class="body-button" hx-delete="/user/{{ .UserID }}" hx-target="#users-container"
-                hx-swap="innerHTML">Delete</button>
-            {{ if not .UserAdmin }}
-            <button class="body-button" hx-post="/user/admin/{{ .UserID }}" hx-target="#users-container"
-                hx-swap="innerHTML">Make
-                Admin</button>
-            {{ else }}
-            <button class="remove-access-button" hx-delete="/user/admin/{{ .UserID }}" hx-target="#users-container"
-                hx-swap="innerHTML">Remove
-                Admin</button>
-            {{ end }}
-            {{ end }}
-        </ul>
-    </div>
-    {{ end }}
-
+{{ if .IsAdmin }}
+<div class="user-list">
+    <h2>Current Registered Users</h2>
+    <ul>
+        {{ range .Users }}
+        <li>{{ .Name }} - {{ .Email }}</li>
+        <button class="body-button" hx-delete="/user/{{ .UserID }}" hx-target="#response-message"
+            hx-swap="innerHTML">Delete</button>
+        {{ if not .UserAdmin }}
+        <button class="body-button" hx-post="/user/admin/{{ .UserID }}" hx-target="#response-message"
+            hx-swap="innerHTML">Make
+            Admin</button>
+        {{ else }}
+        <button class="remove-access-button" hx-delete="/user/admin/{{ .UserID }}" hx-target="#response-message"
+            hx-swap="innerHTML">Remove
+            Admin</button>
+        {{ end }}
+        {{ end }}
+    </ul>
+</div>
+{{ end }}
 </div>
 {{end}}
 
 {{ block "ResponseMessage" .}}
-<div id="response-message">
-    <div class="success-message">{{ .SuccessMessage }}</div>
-    <div class="error-message">{{ .ErrorMessage }}</div>
-</div>
+<div class="success-message">{{ .SuccessMessage }}</div>
+<div class="error-message">{{ .ErrorMessage }}</div>
 {{ end }}

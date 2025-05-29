@@ -123,6 +123,27 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 
 }
 
+func (config *Config) DeleteUser(writer http.ResponseWriter, request *http.Request) {
+	log.Println("Delete User endpoint called")
+	returnHTML := map[string]interface{}{
+		"ErrorMessage":   "",
+		"SuccessMessage": "",
+	}
+
+	userID := request.PathValue("userID")
+	errDelete := config.Db.DeleteUser(request.Context(), userID)
+	if errDelete != nil {
+		respondWithJSON(writer, http.StatusBadRequest, errDelete.Error())
+		returnHTML["ErrorMessage"] = "Error on deleting user"
+		config.Renderer.Render(writer, "ResponseMessage", returnHTML)
+		return
+	}
+
+	returnHTML["SuccessMessage"] = "User Deleted With Success!"
+	config.Renderer.Render(writer, "ResponseMessage", returnHTML)
+	writer.Header().Set("HX-Redirect", "/user")
+}
+
 // TODO: Find a way to improve the replacements of data when rendeding HTML, currently rendering everything
 func UpdateUser(writer http.ResponseWriter, request *http.Request, updateType, updateData string, config *Config) {
 
@@ -240,7 +261,8 @@ func (config *Config) AddUserAdmin(writer http.ResponseWriter, request *http.Req
 	}
 	errADmin := config.Db.MakeUserAdmin(request.Context(), toUpdateuserID)
 	if errADmin != nil {
-		config.Renderer.Render(writer, "Admin", returnUser)
+		returnUser["ErrorMessage"] = "Unable to Assign Admin to User!"
+		config.Renderer.Render(writer, "ResponseMessage", returnUser)
 		return
 	}
 	allOtherUsers, _ := config.Db.GetAllUsers(request.Context(), AdminUserID)
@@ -255,6 +277,9 @@ func (config *Config) AddUserAdmin(writer http.ResponseWriter, request *http.Req
 		returnUser["Users"] = usersSlice
 	}
 	config.Renderer.Render(writer, "Admin", returnUser)
+	returnUser["SuccessMessage"] = "User Added as Admin with Success!"
+	config.Renderer.Render(writer, "ResponseMessage", returnUser)
+
 }
 
 func (config *Config) RemoveUserAdmin(writer http.ResponseWriter, request *http.Request) {
@@ -276,7 +301,8 @@ func (config *Config) RemoveUserAdmin(writer http.ResponseWriter, request *http.
 
 	errADmin := config.Db.RemoveUserAdmin(request.Context(), toUpdateuserID)
 	if errADmin != nil {
-		config.Renderer.Render(writer, "Admin", returnUser)
+		returnUser["ErrorMessage"] = "Unable to Remove Admin to ser!"
+		config.Renderer.Render(writer, "ResponseMessage", returnUser)
 		return
 	}
 
@@ -291,5 +317,9 @@ func (config *Config) RemoveUserAdmin(writer http.ResponseWriter, request *http.
 		)
 		returnUser["Users"] = usersSlice
 	}
+
+	returnUser["SuccessMessage"] = "User Removed as Admin with Success!"
+	config.Renderer.Render(writer, "ResponseMessage", returnUser)
+
 	config.Renderer.Render(writer, "Admin", returnUser)
 }

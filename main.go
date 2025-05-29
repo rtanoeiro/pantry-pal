@@ -46,7 +46,7 @@ func main() {
 
 	//Login
 	httpServerMux.Handle("/", http.HandlerFunc(config.Index))
-	httpServerMux.Handle("POST /login", http.HandlerFunc(config.Index))
+	httpServerMux.Handle("POST /login", http.HandlerFunc(config.Login))
 	httpServerMux.Handle("GET /signup", http.HandlerFunc(config.SignUp))
 	httpServerMux.Handle("POST /signup", http.HandlerFunc(config.CreateUser))
 	httpServerMux.Handle("GET /home", http.HandlerFunc(config.Home))
@@ -54,6 +54,7 @@ func main() {
 
 	// Users endpoints
 	httpServerMux.Handle("GET /user", http.HandlerFunc(config.GetUserInfo))
+	httpServerMux.Handle("DELETE /user/{userID}", http.HandlerFunc(config.DeleteUser))
 	httpServerMux.Handle("POST /user/admin/{userID}", http.HandlerFunc(config.AddUserAdmin))
 	httpServerMux.Handle("DELETE /user/admin/{userID}", http.HandlerFunc(config.RemoveUserAdmin))
 	httpServerMux.Handle("POST /user/email", http.HandlerFunc(config.UpdateUserEmail))
