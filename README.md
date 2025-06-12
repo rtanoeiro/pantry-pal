@@ -41,6 +41,14 @@ Pull the repository and run the script at scripts/start_server.sh. The server sh
 
 ### Contributing
 
+### Necessary Tools
+
+- go 1.21+
+- sqlc [https://sqlc.dev/](https://sqlc.dev/) - Install with go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+- air [https://github.com/air-verse/air](https://github.com/air-verse/air) - Install with go install github.com/air-verse/air@latest
+    - Not really necessary, but it helps as it reloads the server on file changes.
+- Docker - For running the application in a containerized environment.
+
 Whenever you're contributing to new features, make sure all tests are passing, then open a PR with a clear description of your changes.
 
 For issues, please create one detailing the error with screenshots, if possible.
