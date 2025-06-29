@@ -35,6 +35,16 @@ type LoginUserRequest struct {
 	Password string
 }
 
+type UserInfoRequest struct {
+	ID             string `json:"id"`
+	UserName       string `json:"name"`
+	UserEmail      string `json:"email"`
+	IsAdmin        bool   `json:"is_admin"`
+	Users          []User `json:"users"`
+	ErrorMessage   string `json:"error_message"`
+	SuccessMessage string `json:"success_message"`
+}
+
 type LoginUserResponse struct {
 	ID        string    `json:"id"`
 	Name      string    `json:"name"`
