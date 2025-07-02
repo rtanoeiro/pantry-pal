@@ -69,7 +69,7 @@
     {{ if .ExpiringSoon }}
     <div class="list-grid">
       {{ range .ExpiringSoon }}
-      <div class="expiring-item">
+      <div class="item-card">
         {{ .ItemName }} x{{ .Quantity }}<br />
         <small>{{ .ExpiryAt }}</small>
       </div>
@@ -86,7 +86,7 @@
   <p class="stat-title">Shopping List</p>
   <div class="list-grid">
     {{ range .ShoppingList }}
-    <div class="expiring-item">
+    <div class="item-card">
       {{ .ItemName }} x{{ .Quantity }}<br />
     </div>
     {{ end }}
