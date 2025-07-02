@@ -1,4 +1,4 @@
-{{ block "pantrypage" . }}
+{{ block "pantry" . }}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -27,27 +27,23 @@
 {{ end }}
 
 {{ block "pantryItems" . }}
-<div class="users-container">
+<div class="stat-block">
     {{ if .Items }}
-    {{ range .Items }}
-    <div class="item-row">
-        <strong>{{ .ItemName }}</strong><br />
-        <small>Expires: {{ .ExpiryAt }}</small>
+    <div class="list-grid">
+        {{ range .Items }}
+        <div class="item-card">
+            <strong>{{ .ItemName }}</strong><br />
+            <small>Expires: {{ .ExpiryAt }}</small>
+        </div>
 
-        <button class="body-button" hx-post="/pantry/decrement/{{ .ID }}" hx-target="#item-qty-{{ .ID }}">-</button>
-        <span id="item-qty-{{ .ID }}" style="margin: 0 10px;">{{ .Quantity }}</span>
-        <button class="body-button" hx-post="/pantry/increment/{{ .ID }}" hx-target="#item-qty-{{ .ID }}">+</button>
 
-        <button class="remove-access-button" hx-delete="/pantry/delete/{{ .ID }}" hx-target="closest .item-row"
-            hx-swap="outerHTML">Delete</button>
-
-    </div>
-    {{ end }}
-    {{ else }}
-    <div class="empty-pantry">
-        <p>Your pantry is empty. Add some items!</p>
-        <p>No items in pantry.</p>
         {{ end }}
+        {{ else }}
+        <div class="empty-pantry">
+            <p>Your pantry is empty. Add some items!</p>
+            <p>No items in pantry.</p>
+            {{ end }}
+        </div>
     </div>
 </div>
 {{ end }}
