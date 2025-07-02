@@ -14,7 +14,7 @@
     <div class="account-container">
         <h1>Account Settings</h1>
 
-        <form id="nameForm" hx-post="/user/name" hx-target="body">
+        <form id="nameForm" hx-post="/user/name" hx-target="body" hx-on::after-request="this.reset()">
             <div class="form-group">
                 <label for="name-input" id="user-name-label">Name: {{ .UserName }}</label>
                 <input type="text" id="name-input" name="name" required>
@@ -22,7 +22,7 @@
             </div>
         </form>
 
-        <form id="emailForm" hx-post="/user/email" hx-target="body">
+        <form id="emailForm" hx-post="/user/email" hx-target="body" hx-on::after-request="this.reset()">
             <div class="form-group">
                 <label for="email-input" id="user-email-label">Email: {{ .UserEmail }}</label>
                 <input type="email" id="email-input" name="email" required>
@@ -30,7 +30,7 @@
             </div>
         </form>
 
-        <form id="passwordForm" hx-post="/user/password" hx-target="body">
+        <form id="passwordForm" hx-post="/user/password" hx-target="body" hx-on::after-request="this.reset()">
             <div class="form-group">
                 <label for="password-input">Password:</label>
                 <input type="password" id="password-input" name="password">
@@ -39,10 +39,15 @@
         </form>
 
         <div>
-            <button class="body-button" id="button-home" hx-get="/home" hx-target="body" hx-swap="innerHTML"
-                hx-push-url="/home">Back to Home Page
-            </button>
+            <button class="body-button" id="button-home" hx-get="/home" hx-target="body" hx-push-url="/home">Back to
+                Home
+                Page</button>
         </div>
+
+        <div class="response-message" id="responseMessage">
+            {{ template "ResponseMessage" . }}
+        </div>
+
 
         <div id="users-container" class="users-container">
             {{ template "Admin" . }}
@@ -76,8 +81,13 @@
         {{ end }}
     </ul>
 </div>
-<div class="success-message">{{ .SuccessMessage }}</div>
-<div class="error-message">{{ .ErrorMessage }}</div>
 
 {{ end }}
+{{ end }}
+
+{{ block "ResponseMessage" .}}
+<div id="response-message">
+    <div class="success-message">{{ .SuccessMessage }}</div>
+    <div class="error-message">{{ .ErrorMessage }}</div>
+</div>
 {{ end }}
