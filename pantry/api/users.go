@@ -27,21 +27,6 @@ func (config *Config) ResetUsers(writer http.ResponseWriter, request *http.Reque
 
 }
 
-func GetUserIDFromToken(request *http.Request, writer http.ResponseWriter, config *Config) (string, error) {
-	token, errTk := GetJWTFromCookie(request)
-	if errTk != nil {
-		return "", errTk
-	}
-
-	userID, errJWT := ValidateJWT(token, config.Secret)
-	if errJWT != nil {
-		return "", errJWT
-	}
-	log.Println("User ID from token:", userID)
-
-	return userID, nil
-}
-
 func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Request) {
 
 	log.Println("User Info endpoint called")
@@ -66,10 +51,11 @@ func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Requ
 		ErrorMessage:   "",
 		SuccessMessage: "",
 	}
-	config.renderAllOtherUsers(writer, request, userInfo)
+	userInfo.Users = config.GetAllOtherUsers(writer, request, userInfo)
+	config.Renderer.Render(writer, "user", userInfo)
 }
 
-func (config *Config) renderAllOtherUsers(writer http.ResponseWriter, request *http.Request, userInfo UserInfoRequest) {
+func (config *Config) GetAllOtherUsers(writer http.ResponseWriter, request *http.Request, userInfo UserInfoRequest) []User {
 
 	var usersSlice []User
 	if userInfo.IsAdmin {
@@ -83,10 +69,8 @@ func (config *Config) renderAllOtherUsers(writer http.ResponseWriter, request *h
 			})
 		}
 	}
-	log.Println("User data to be rendered:", userInfo)
-	userInfo.Users = usersSlice
-
-	config.Renderer.Render(writer, "user", userInfo)
+	log.Println("All other available users:", usersSlice)
+	return usersSlice
 }
 
 func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Request) {
@@ -151,7 +135,7 @@ func (config *Config) DeleteUser(writer http.ResponseWriter, request *http.Reque
 		ErrorMessage:   "",
 		SuccessMessage: "",
 	}
-
+	userInfo.Users = config.GetAllOtherUsers(writer, request, userInfo)
 	userIDToDelete := request.PathValue("userID")
 	errDelete := config.Db.DeleteUser(request.Context(), userIDToDelete)
 	if errDelete != nil {
@@ -160,7 +144,8 @@ func (config *Config) DeleteUser(writer http.ResponseWriter, request *http.Reque
 		config.Renderer.Render(writer, "Admin", userInfo)
 		return
 	}
-	config.renderAllOtherUsers(writer, request, userInfo)
+	config.Renderer.Render(writer, "Admin", userInfo)
+
 }
 
 // TODO: Find a way to improve the replacements of data when rendeding HTML, currently rendering everything
@@ -216,10 +201,11 @@ func (config *Config) handleName(writer http.ResponseWriter, request *http.Reque
 		userInfo.ErrorMessage = "Error on updating user Name"
 		config.Renderer.Render(writer, "user", userInfo)
 	}
+	userInfo.Users = config.GetAllOtherUsers(writer, request, *userInfo)
+
 	userInfo.SuccessMessage = "Name updated with success!"
 	userInfo.UserName = updateData
 	config.Renderer.Render(writer, "user", userInfo)
-	config.renderAllOtherUsers(writer, request, *userInfo)
 }
 
 func (config *Config) handleEmail(writer http.ResponseWriter, request *http.Request, userInfo *UserInfoRequest, updateData string) {
@@ -227,6 +213,8 @@ func (config *Config) handleEmail(writer http.ResponseWriter, request *http.Requ
 		Email: updateData,
 		ID:    userInfo.ID,
 	}
+	userInfo.Users = config.GetAllOtherUsers(writer, request, *userInfo)
+
 	errUpdate := config.Db.UpdateUserEmail(request.Context(), data)
 	if errUpdate != nil {
 		userInfo.ErrorMessage = "Error on updating user email"
@@ -236,7 +224,6 @@ func (config *Config) handleEmail(writer http.ResponseWriter, request *http.Requ
 	userInfo.SuccessMessage = "Email updated with success!"
 	userInfo.UserEmail = updateData
 	config.Renderer.Render(writer, "user", userInfo)
-	config.renderAllOtherUsers(writer, request, *userInfo)
 }
 
 func (config *Config) handlePassword(writer http.ResponseWriter, request *http.Request, userInfo *UserInfoRequest, updateData string) {
@@ -250,6 +237,7 @@ func (config *Config) handlePassword(writer http.ResponseWriter, request *http.R
 		PasswordHash: hashedPassword,
 		ID:           userInfo.ID,
 	}
+	userInfo.Users = config.GetAllOtherUsers(writer, request, *userInfo)
 
 	errUpdate := config.Db.UpdateUserPassword(request.Context(), data)
 	if errUpdate != nil {
@@ -260,7 +248,6 @@ func (config *Config) handlePassword(writer http.ResponseWriter, request *http.R
 
 	userInfo.SuccessMessage = "Password updated with success!"
 	config.Renderer.Render(writer, "user", userInfo)
-	config.renderAllOtherUsers(writer, request, *userInfo)
 }
 
 func (config *Config) UpdateUserEmail(writer http.ResponseWriter, request *http.Request) {
@@ -292,31 +279,30 @@ func (config *Config) AddUserAdmin(writer http.ResponseWriter, request *http.Req
 		return
 	}
 
-	var usersSlice []User
-	returnUser := map[string]interface{}{
-		"ErrorMessage":   "",
-		"SuccessMessage": "",
-		"IsAdmin":        int64(1),
-		"Users":          []User{},
+	userData, errUser := config.Db.GetUserById(request.Context(), AdminUserID)
+	if errUser != nil {
+		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
+		return
 	}
+	returnUser := UserInfoRequest{
+		ID:             userData.ID,
+		UserName:       userData.Name,
+		UserEmail:      userData.Email,
+		IsAdmin:        true,
+		ErrorMessage:   "",
+		SuccessMessage: "",
+		Users:          []User{},
+	}
+
 	errADmin := config.Db.MakeUserAdmin(request.Context(), toUpdateuserID)
 	if errADmin != nil {
-		returnUser["ErrorMessage"] = "Unable to Assign Admin to User!"
+		returnUser.ErrorMessage = "Unable to Assign Admin to User!"
 		config.Renderer.Render(writer, "ResponseMessage", returnUser)
 		return
 	}
-	allOtherUsers, _ := config.Db.GetAllUsers(request.Context(), AdminUserID)
-	for _, user := range allOtherUsers {
-		usersSlice = append(usersSlice, User{
-			UserID:    user.ID,
-			Name:      user.Name,
-			Email:     user.Email,
-			UserAdmin: user.IsAdmin.Int64,
-		},
-		)
-		returnUser["Users"] = usersSlice
-	}
-	returnUser["SuccessMessage"] = "User Added as Admin with Success!"
+
+	returnUser.Users = config.GetAllOtherUsers(writer, request, returnUser)
+	returnUser.SuccessMessage = "User Added as Admin with Success!"
 	config.Renderer.Render(writer, "Admin", returnUser)
 }
 
@@ -329,33 +315,29 @@ func (config *Config) RemoveUserAdmin(writer http.ResponseWriter, request *http.
 		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
 		return
 	}
-	var usersSlice []User
-	returnUser := map[string]interface{}{
-		"ErrorMessage":   "",
-		"SuccessMessage": "",
-		"IsAdmin":        int64(1),
-		"Users":          []User{},
-	}
 
+	userData, errUser := config.Db.GetUserById(request.Context(), AdminUserID)
+	if errUser != nil {
+		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
+		return
+	}
+	returnUser := UserInfoRequest{
+		ID:             userData.ID,
+		UserName:       userData.Name,
+		UserEmail:      userData.Email,
+		IsAdmin:        true,
+		ErrorMessage:   "",
+		SuccessMessage: "",
+		Users:          []User{},
+	}
 	errADmin := config.Db.RemoveUserAdmin(request.Context(), toUpdateuserID)
 	if errADmin != nil {
-		returnUser["ErrorMessage"] = "Unable to Remove Admin to ser!"
+		returnUser.ErrorMessage = "Unable to Remove Admin to user!"
 		config.Renderer.Render(writer, "ResponseMessage", returnUser)
 		return
 	}
 
-	allOtherUsers, _ := config.Db.GetAllUsers(request.Context(), AdminUserID)
-	for _, user := range allOtherUsers {
-		usersSlice = append(usersSlice, User{
-			UserID:    user.ID,
-			Name:      user.Name,
-			Email:     user.Email,
-			UserAdmin: user.IsAdmin.Int64,
-		},
-		)
-		returnUser["Users"] = usersSlice
-	}
-
-	returnUser["SuccessMessage"] = "User Removed as Admin with Success!"
+	returnUser.Users = config.GetAllOtherUsers(writer, request, returnUser)
+	returnUser.SuccessMessage = "User Removed as Admin with Success!"
 	config.Renderer.Render(writer, "Admin", returnUser)
 }
