@@ -5,6 +5,7 @@ import (
 	"errors"
 	"html/template"
 	"io"
+	"log"
 	"net/http"
 	"time"
 
@@ -99,4 +100,20 @@ func checkDate(givenDate string) bool {
 		return false
 	}
 	return !formattedDate.Before(time.Now())
+}
+
+// Split into two functions one to get JWT and another to validate it
+func GetUserIDFromToken(request *http.Request, writer http.ResponseWriter, config *Config) (string, error) {
+	token, errTk := GetJWTFromCookie(request)
+	if errTk != nil {
+		return "", errTk
+	}
+
+	userID, errJWT := ValidateJWT(token, config.Secret)
+	if errJWT != nil {
+		return "", errJWT
+	}
+	log.Println("User ID from token:", userID)
+
+	return userID, nil
 }
