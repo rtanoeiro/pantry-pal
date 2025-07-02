@@ -99,7 +99,6 @@ type ItemShopping struct {
 }
 
 type PantryStats struct {
-	NumItems     int
 	ExpiringSoon []PantryItem
 	ShoppingList []ItemShopping
 }
