@@ -65,7 +65,7 @@ func main() {
 	httpServerMux.Handle("POST /pantry", http.HandlerFunc(config.HandleNewItem))
 	httpServerMux.Handle("GET /pantry/{itemName}", http.HandlerFunc(config.GetItemByName))
 	httpServerMux.Handle("GET /pantry", http.HandlerFunc(config.GetAllPantryItems))
-	httpServerMux.Handle("GET /pantry_stats", http.HandlerFunc(config.GetPantryStats))
+	httpServerMux.Handle("GET /expiring", http.HandlerFunc(config.RenderExpiringSoon))
 	httpServerMux.Handle("DELETE /pantry/{itemID}", http.HandlerFunc(config.DeleteItem))
 
 	httpServer := http.Server{
