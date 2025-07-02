@@ -1,4 +1,4 @@
-{{ define "home" }}
+{{ block "home" . }}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -50,9 +50,9 @@
       </div>
     </div>
 
-    <div class="bottom-section" id="right-section" hx-get="/pantry_stats" hx-target="#right-section" hx-swap="innerHTML"
+    <div class="bottom-section" id="right-section" hx-get="/expiring" hx-target="#right-section" hx-swap="innerHTML"
       hx-trigger="load, click delay:1.5s from:#addItemButton">
-      {{ template "pantryStats" . }}
+      {{ template "expiringSoonBlock" . }}
     </div>
   </div>
 </body>
@@ -61,7 +61,7 @@
 {{ end }}
 
 
-{{ block "pantryStats" . }}
+{{ block "expiringSoonBlock" . }}
 <!-- Expiring Soon Section -->
 <div class="stat-block">
   <p class="stat-title">Expiring Soon</p>
