@@ -102,3 +102,8 @@ type PantryStats struct {
 	ExpiringSoon []PantryItem
 	ShoppingList []ItemShopping
 }
+
+type SuccessErrorResponse struct {
+	SuccessMessage string `json:"success_message"`
+	ErrorMessage   string `json:"error_message"`
+}
