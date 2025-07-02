@@ -93,6 +93,11 @@ type PantryItem struct {
 	ExpiryAt string `json:"expiry_at"`
 }
 
+type PantryItems struct {
+	SuccessMessage string       `json:"success_message"`
+	ErrorMessage   string       `json:"error_message"`
+	Items          []PantryItem `json:"items"`
+}
 type ItemShopping struct {
 	ItemName string `json:"item_id"`
 	Quantity int    `json:"quantity"`
