@@ -182,7 +182,7 @@ func (config *Config) GetAllPantryItems(writer http.ResponseWriter, request *htt
 	if errUser != nil {
 		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
 		returnPantry.ErrorMessage = "Unable to retrieve user Pantry Items"
-		config.Renderer.Render(writer, "pantryItems", returnPantry)
+		config.Renderer.Render(writer, "pantry", returnPantry)
 		return
 	}
 
@@ -190,7 +190,7 @@ func (config *Config) GetAllPantryItems(writer http.ResponseWriter, request *htt
 	if errAll != nil {
 		respondWithJSON(writer, http.StatusBadRequest, errAll.Error())
 		returnPantry.ErrorMessage = "Unable to retrieve user Pantry Items"
-		config.Renderer.Render(writer, "pantryItems", returnPantry)
+		config.Renderer.Render(writer, "pantry", returnPantry)
 		return
 	}
 
@@ -198,6 +198,7 @@ func (config *Config) GetAllPantryItems(writer http.ResponseWriter, request *htt
 	for _, item := range allPantryItems {
 		log.Printf("Found item \n- Name: %s\n- Quantity: %d", item.ItemName, item.Quantity)
 		toAppend := PantryItem{
+			ItemID:   item.ID,
 			ItemName: item.ItemName,
 			Quantity: int(item.Quantity),
 			ExpiryAt: item.ExpiryAt,
@@ -205,7 +206,7 @@ func (config *Config) GetAllPantryItems(writer http.ResponseWriter, request *htt
 		PantrySlice = append(PantrySlice, toAppend)
 	}
 	returnPantry.Items = PantrySlice
-	config.Renderer.Render(writer, "pantryItems", returnPantry)
+	config.Renderer.Render(writer, "pantry", returnPantry)
 }
 
 func (config *Config) DeleteItem(writer http.ResponseWriter, request *http.Request) {
