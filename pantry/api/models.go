@@ -88,6 +88,7 @@ type UpdateItemResponse struct {
 
 // To Be used in HomePage
 type PantryItem struct {
+	ItemID   string `json:"item_id"`
 	ItemName string `json:"item_name"`
 	Quantity int    `json:"quantity"`
 	ExpiryAt string `json:"expiry_at"`
