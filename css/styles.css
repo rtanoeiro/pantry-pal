@@ -30,6 +30,24 @@ input[type="date"] {
     cursor: pointer;
 }
 
+.pantry-home-button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.pantry-home-button {
+    background-color: #28a745;
+    border: 2px solid #28a745;
+    cursor: pointer;
+    color: white;
+    padding: 10px 15px;
+}
+
+.pantry-home-button:hover {
+    background-color: #218838;
+}
+
 button:hover {
     background-color: #218838;
 }
@@ -37,7 +55,8 @@ button:hover {
 .login-container,
 .signup-container,
 .account-container,
-.main-container {
+.main-container,
+.pantry-container {
     padding: 30px;
     border: 1px solid #ccc;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -104,7 +123,7 @@ button:hover {
 
 .list-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     /* 3 items per row */
     gap: 10px;
     margin-top: 10px;
