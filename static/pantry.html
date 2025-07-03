@@ -11,15 +11,14 @@
 </head>
 
 <body hx-boost="true">
-    <div class="main-container">
+    <div class="home-container">
         <h2>My Pantry</h2>
         {{ template "pantryItems" . }}
-        <div>
-            <button class="body-button" id="button-home" hx-get="/home" hx-target="body" hx-swap="innerHTML"
+        <div class="pantry-home-button-container">
+            <button class="pantry-home-button" id="button-home" hx-get="/home" hx-target="body" hx-swap="innerHTML"
                 hx-push-url="/home">Back to
                 Home Page</button>
         </div>
-
     </div>
 </body>
 
@@ -32,18 +31,16 @@
     <div class="list-grid">
         {{ range .Items }}
         <div class="item-card">
-            <strong>{{ .ItemName }}</strong><br />
-            <small>Expires: {{ .ExpiryAt }}</small>
+            {{ .ItemName }} {{ .Quantity }}<br />
+            <small>Expiry at: {{ .ExpiryAt }}</small>
         </div>
-
-
         {{ end }}
-        {{ else }}
-        <div class="empty-pantry">
-            <p>Your pantry is empty. Add some items!</p>
-            <p>No items in pantry.</p>
-            {{ end }}
-        </div>
     </div>
+    {{ else }}
+    <div class="empty-pantry">
+        <p>Your pantry is empty. Add some items!</p>
+        <p>No items in pantry.</p>
+    </div>
+    {{ end }}
 </div>
 {{ end }}
