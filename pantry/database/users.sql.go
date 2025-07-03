@@ -48,6 +48,54 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
+const deleteUser = `-- name: DeleteUser :exec
+DELETE FROM users
+WHERE id = ?
+`
+
+func (q *Queries) DeleteUser(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deleteUser, id)
+	return err
+}
+
+const getAllUsers = `-- name: GetAllUsers :many
+SELECT id, name, email, password_hash, created_at, updated_at, is_admin
+FROM users
+WHERE id != ?
+ORDER BY created_at DESC
+`
+
+func (q *Queries) GetAllUsers(ctx context.Context, id string) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, getAllUsers, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Email,
+			&i.PasswordHash,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.IsAdmin,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT id, name, email, password_hash, created_at, updated_at, is_admin
 FROM users
@@ -111,16 +159,7 @@ func (q *Queries) GetUserByName(ctx context.Context, name string) (User, error) 
 	return i, err
 }
 
-const resetTable = `-- name: ResetTable :exec
-DELETE FROM users
-`
-
-func (q *Queries) ResetTable(ctx context.Context) error {
-	_, err := q.db.ExecContext(ctx, resetTable)
-	return err
-}
-
-const updateUserAdmin = `-- name: UpdateUserAdmin :exec
+const makeUserAdmin = `-- name: MakeUserAdmin :exec
 UPDATE users
 SET 
     is_admin = 1
@@ -129,8 +168,31 @@ WHERE id = ?
 RETURNING id, name, email, password_hash, created_at, updated_at, is_admin
 `
 
-func (q *Queries) UpdateUserAdmin(ctx context.Context, id string) error {
-	_, err := q.db.ExecContext(ctx, updateUserAdmin, id)
+func (q *Queries) MakeUserAdmin(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, makeUserAdmin, id)
+	return err
+}
+
+const removeUserAdmin = `-- name: RemoveUserAdmin :exec
+UPDATE users
+SET 
+    is_admin = 0
+WHERE id = ?
+RETURNING id, name, email, password_hash, created_at, updated_at, is_admin
+`
+
+func (q *Queries) RemoveUserAdmin(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, removeUserAdmin, id)
+	return err
+}
+
+const resetTable = `-- name: ResetTable :exec
+DELETE FROM users
+WHERE email != 'admin@admin.com'
+`
+
+func (q *Queries) ResetTable(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, resetTable)
 	return err
 }
 

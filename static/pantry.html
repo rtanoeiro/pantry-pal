@@ -1,0 +1,46 @@
+{{ block "pantry" . }}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Pantry</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+</head>
+
+<body hx-boost="true">
+    <div class="home-container">
+        <h2>My Pantry</h2>
+        {{ template "pantryItems" . }}
+        <div class="pantry-home-button-container">
+            <button class="pantry-home-button" id="button-home" hx-get="/home" hx-target="body" hx-swap="innerHTML"
+                hx-push-url="/home">Back to
+                Home Page</button>
+        </div>
+    </div>
+</body>
+
+</html>
+{{ end }}
+
+{{ block "pantryItems" . }}
+<div class="stat-block">
+    {{ if .Items }}
+    <div class="list-grid">
+        {{ range .Items }}
+        <div class="item-card">
+            {{ .ItemName }} {{ .Quantity }}<br />
+            <small>Expiry at: {{ .ExpiryAt }}</small>
+        </div>
+        {{ end }}
+    </div>
+    {{ else }}
+    <div class="empty-pantry">
+        <p>Your pantry is empty. Add some items!</p>
+        <p>No items in pantry.</p>
+    </div>
+    {{ end }}
+</div>
+{{ end }}

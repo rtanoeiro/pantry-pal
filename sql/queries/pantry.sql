@@ -35,3 +35,16 @@ SELECT id, user_id, item_name, quantity, added_at, expiry_at
 FROM pantry
 WHERE user_id = ?
 ORDER BY expiry_at DESC;
+
+-- name: GetTotalNumberOfItems :one
+SELECT COUNT(distinct item_name) as total
+FROM pantry
+WHERE user_id = ?;
+
+-- name: GetExpiringSoon :many
+select item_name, quantity, expiry_at
+from pantry
+where user_id = ?
+    and expiry_at >= strftime('%Y-%m-%d','now')
+    and expiry_at <= strftime('%Y-%m-%d','now', '+7 days')
+order by expiry_at asc;

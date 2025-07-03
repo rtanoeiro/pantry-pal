@@ -1,32 +1,105 @@
+{{ block "home" . }}
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-  <link rel="stylesheet" type='text/css' href="static/css/styles.css"> <!-- Link to the external CSS file -->
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pantry Pal - Home</title>
-  <link rel="stylesheet" href="static/css/styles.css"> <!-- Link to the external CSS file -->
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 </head>
 
-<body>
-  <h1>Pantry Pal</h1>
-  <button class="header-button" id="pantryButton">My Pantry</button>
-  <button class="header-button" id="accountButton">Account</button>
-  <button class="header-button" id="logoutButton">Logout</button>
-  <button class="add-item-button" id="addItemButton">+ Add New Item</button>
-  <input type="text" id="searchInput" placeholder="Search for items...">
-  <button id="searchButton">Search</button>
+<body hx-boost="true">
+  <div class="home-container">
 
-  <h2 class="section-title">Pantry Stats</h2>
-  <p class="stat-title">Total Items</p>
-  <p class="stat-value" id="totalItems">{totalNumItems}</p>
-  <p class="stat-title">Expiring Soon</p>
-  <p class="stat-value" id="expiringSoon">{numExpiringSoon}</p>
-  <p class="stat-title">Categories</p>
-  <p class="stat-value" id="categoriesCount">{numCategories}</p>
-  <p class="stat-title">Shopping List Items</p>
-  <p class="stat-value" id="shoppingListCount">{numItemsShoppingList}</p>
+    <div class="top-section">
+      <h1 class="header">Pantry Pal</h1>
+      <div class="welcome-message">
+        <p>Welcome, {{ .UserName }}!</p>
+      </div>
+
+      <div class="top-buttons">
+        <button class="body-button" id="pantryButton" hx-get="/pantry" hx-target="body" hx-push-url="/pantry">My
+          Pantry</button>
+        <button class="body-button" id="accountButton" hx-get="/user" hx-target="body"
+          hx-push-url="/user">Account</button>
+        <button class="body-button" id="logoutButton" hx-get="/logout">Logout</button>
+      </div>
+
+      <form id="add-item-form" hx-post="/pantry" hx-target="#responseMessage" hx-swap="innerHTML"
+        hx-on::after-request="this.reset()">
+        <div class="action-section">
+          Name: <input type="text" id="nameInput" placeholder="Item Name" name="itemName" />
+          Quantity: <input type="number" id="quantityInput" name="itemQuantity" placeholder="Quantity" />
+          Expiration Date: <input type="date" id="expirationDateInput" name="itemExpiryDate" />
+          <button class="body-button" id="addItemButton">+ Add New Item</button>
+        </div>
+      </form>
+
+      <div class="response-message" id="responseMessage">
+        {{ template "ResponseMessage" . }}
+      </div>
+
+
+      <div class="middle-section">
+        <div class="search-container">
+          <input type="text" id="searchInput" placeholder="Search for items..." />
+          <button class="body-button" id="searchButton">Search</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-section" id="right-section" hx-get="/expiring" hx-target="#right-section" hx-swap="innerHTML"
+      hx-trigger="load, click delay:1.5s from:#addItemButton">
+      {{ template "expiringSoonBlock" . }}
+    </div>
+  </div>
 </body>
 
 </html>
+{{ end }}
+
+
+{{ block "expiringSoonBlock" . }}
+<!-- Expiring Soon Section -->
+<div class="stat-block">
+  <p class="stat-title">Expiring Soon</p>
+  <div class="stat-value" id="expiringSoonList">
+    {{ if .ExpiringSoon }}
+    <div class="list-grid">
+      {{ range .ExpiringSoon }}
+      <div class="item-card">
+        {{ .ItemName }} x{{ .Quantity }}<br />
+        <small>{{ .ExpiryAt }}</small>
+      </div>
+      {{ end }}
+    </div>
+    {{ else }}
+    <p>No items expiring soon.</p>
+    {{ end }}
+  </div>
+</div>
+
+<!-- Shopping List Section -->
+<div class="stat-block">
+  <p class="stat-title">Shopping List</p>
+  <div class="list-grid">
+    {{ range .ShoppingList }}
+    <div class="item-card">
+      {{ .ItemName }} x{{ .Quantity }}<br />
+    </div>
+    {{ end }}
+  </div>
+
+</div>
+{{ end }}
+
+
+
+{{ block "ResponseMessage" .}}
+<div id="response-message">
+  <div class="success-message">{{ .SuccessMessage }}</div>
+  <div class="error-message">{{ .ErrorMessage }}</div>
+</div>
+{{ end }}

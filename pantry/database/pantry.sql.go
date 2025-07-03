@@ -125,6 +125,57 @@ func (q *Queries) GetAllItems(ctx context.Context, userID string) ([]Pantry, err
 	return items, nil
 }
 
+const getExpiringSoon = `-- name: GetExpiringSoon :many
+select item_name, quantity, expiry_at
+from pantry
+where user_id = ?
+    and expiry_at >= strftime('%Y-%m-%d','now')
+    and expiry_at <= strftime('%Y-%m-%d','now', '+7 days')
+order by expiry_at asc
+`
+
+type GetExpiringSoonRow struct {
+	ItemName string
+	Quantity int64
+	ExpiryAt string
+}
+
+func (q *Queries) GetExpiringSoon(ctx context.Context, userID string) ([]GetExpiringSoonRow, error) {
+	rows, err := q.db.QueryContext(ctx, getExpiringSoon, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetExpiringSoonRow
+	for rows.Next() {
+		var i GetExpiringSoonRow
+		if err := rows.Scan(&i.ItemName, &i.Quantity, &i.ExpiryAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getTotalNumberOfItems = `-- name: GetTotalNumberOfItems :one
+SELECT COUNT(distinct item_name) as total
+FROM pantry
+WHERE user_id = ?
+`
+
+func (q *Queries) GetTotalNumberOfItems(ctx context.Context, userID string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getTotalNumberOfItems, userID)
+	var total int64
+	err := row.Scan(&total)
+	return total, err
+}
+
 const removeItem = `-- name: RemoveItem :one
 DELETE FROM pantry
 WHERE id = ?
