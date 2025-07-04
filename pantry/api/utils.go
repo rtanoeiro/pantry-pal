@@ -40,7 +40,11 @@ func respondWithJSON(writer http.ResponseWriter, code int, data interface{}) {
 	writer.Header().Set("Content-Type", "application/json; charset=utf-8")
 	writer.WriteHeader(code)
 	results, _ := json.Marshal(data)
-	writer.Write(results)
+	_, errorWriter := writer.Write(results)
+	if errorWriter != nil {
+		log.Println("Error writing response:", errorWriter)
+		return
+	}
 }
 
 func CreateErrorMessageInterfaces(message string) map[string]interface{} {
