@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"html/template"
@@ -13,8 +14,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (tmplt *Templates) Render(writer io.Writer, name string, data interface{}) error {
-	return tmplt.templates.ExecuteTemplate(writer, name, data)
+func (tmplt *Templates) Render(writer io.Writer, name string, data interface{}) {
+	errorTemplate := tmplt.templates.ExecuteTemplate(writer, name, data)
+	if errorTemplate != nil {
+		log.Println("Error rendering template:", errorTemplate)
+	}
 }
 
 func MyTemplates() *Templates {
@@ -24,11 +28,23 @@ func MyTemplates() *Templates {
 	}
 }
 
+func CloseDB(dbConn *sql.DB) {
+	if err := dbConn.Close(); err != nil {
+		log.Println("Error closing database connection:", err)
+	} else {
+		log.Println("Database connection closed successfully.")
+	}
+}
+
 func respondWithJSON(writer http.ResponseWriter, code int, data interface{}) {
 	writer.Header().Set("Content-Type", "application/json; charset=utf-8")
 	writer.WriteHeader(code)
 	results, _ := json.Marshal(data)
-	writer.Write(results)
+	_, errorWriter := writer.Write(results)
+	if errorWriter != nil {
+		log.Println("Error writing response:", errorWriter)
+		return
+	}
 }
 
 func CreateErrorMessageInterfaces(message string) map[string]interface{} {
