@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"html/template"
@@ -13,14 +14,25 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (tmplt *Templates) Render(writer io.Writer, name string, data interface{}) error {
-	return tmplt.templates.ExecuteTemplate(writer, name, data)
+func (tmplt *Templates) Render(writer io.Writer, name string, data interface{}) {
+	errorTemplate := tmplt.templates.ExecuteTemplate(writer, name, data)
+	if errorTemplate != nil {
+		log.Println("Error rendering template:", errorTemplate)
+	}
 }
 
 func MyTemplates() *Templates {
 	templates, _ := template.ParseGlob("static/*.html")
 	return &Templates{
 		templates: templates,
+	}
+}
+
+func CloseDB(dbConn *sql.DB) {
+	if err := dbConn.Close(); err != nil {
+		log.Println("Error closing database connection:", err)
+	} else {
+		log.Println("Database connection closed successfully.")
 	}
 }
 

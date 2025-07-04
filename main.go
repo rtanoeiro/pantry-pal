@@ -28,7 +28,7 @@ func main() {
 	if dbError != nil {
 		log.Fatal("Unable to open database. Closing app. Error: ", dbError)
 	}
-	defer newDB.Close()
+	defer api.CloseDB(newDB)
 
 	config := api.Config{
 		Db:       database.New(newDB),
