@@ -7,20 +7,7 @@ linters:
 formatters:
   # Enable specific formatter.
   enable:
-    - gci
     - gofmt
-    - gofumpt
-    - goimports
-    - golines
-    - swaggo
-
-  formatters:
-  settings:
-    gofumpt:
-      # Choose whether to use the extra rules.
-      # Default: false
-      extra-rules: true
-
 
 severity:
   # Set the default severity for issues.
