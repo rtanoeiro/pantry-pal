@@ -82,7 +82,6 @@ func ValidateJWT(tokenString, tokenSecret string) (string, error) {
 			return []byte(tokenSecret), nil
 		},
 	)
-
 	if err != nil {
 		return "", err
 	}
@@ -91,7 +90,6 @@ func ValidateJWT(tokenString, tokenSecret string) (string, error) {
 	}
 	// subject is the userID setup in the JWT
 	subject, err := token.Claims.GetSubject()
-
 	if err != nil {
 		return "", err
 	}
@@ -99,7 +97,6 @@ func ValidateJWT(tokenString, tokenSecret string) (string, error) {
 }
 
 func GetJWTFromCookie(request *http.Request) (string, error) {
-
 	jwtToken, errorJwt := request.Cookie("JWTToken")
 	if errorJwt != nil {
 		return "", errorJwt
@@ -108,7 +105,6 @@ func GetJWTFromCookie(request *http.Request) (string, error) {
 }
 
 func checkDate(givenDate string) bool {
-
 	dateLayout := "2006-01-02"
 	formattedDate, errParse := time.Parse(dateLayout, givenDate)
 
@@ -119,7 +115,11 @@ func checkDate(givenDate string) bool {
 }
 
 // Split into two functions one to get JWT and another to validate it
-func GetUserIDFromToken(request *http.Request, writer http.ResponseWriter, config *Config) (string, error) {
+func GetUserIDFromToken(
+	request *http.Request,
+	writer http.ResponseWriter,
+	config *Config,
+) (string, error) {
 	token, errTk := GetJWTFromCookie(request)
 	if errTk != nil {
 		return "", errTk

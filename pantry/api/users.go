@@ -3,17 +3,20 @@ package api
 import (
 	"log"
 	"net/http"
-	"pantry-pal/pantry/database"
 	"time"
 
 	"github.com/google/uuid"
+	"pantry-pal/pantry/database"
 )
 
 func (config *Config) ResetUsers(writer http.ResponseWriter, request *http.Request) {
-
 	// Update to check for admin privileges?
 	if config.Env != "dev" {
-		respondWithJSON(writer, http.StatusUnauthorized, "Unable to perform this action in this environment")
+		respondWithJSON(
+			writer,
+			http.StatusUnauthorized,
+			"Unable to perform this action in this environment",
+		)
 		return
 	}
 
@@ -24,11 +27,9 @@ func (config *Config) ResetUsers(writer http.ResponseWriter, request *http.Reque
 	}
 
 	respondWithJSON(writer, http.StatusAccepted, []byte{})
-
 }
 
 func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Request) {
-
 	log.Println("User Info endpoint called")
 	userID, errUser := GetUserIDFromToken(request, writer, config)
 	if errUser != nil {
@@ -55,8 +56,11 @@ func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Requ
 	config.Renderer.Render(writer, "user", userInfo)
 }
 
-func (config *Config) GetAllOtherUsers(writer http.ResponseWriter, request *http.Request, userInfo UserInfoRequest) []User {
-
+func (config *Config) GetAllOtherUsers(
+	writer http.ResponseWriter,
+	request *http.Request,
+	userInfo UserInfoRequest,
+) []User {
 	var usersSlice []User
 	if userInfo.IsAdmin {
 		allOtherUsers, _ := config.Db.GetAllUsers(request.Context(), userInfo.ID)
@@ -74,7 +78,6 @@ func (config *Config) GetAllOtherUsers(writer http.ResponseWriter, request *http
 }
 
 func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Request) {
-
 	email := request.FormValue("email")
 	name := request.FormValue("name")
 	password := request.FormValue("password")
@@ -86,7 +89,11 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 	_, userError := config.Db.GetUserByEmail(request.Context(), email)
 
 	if userError == nil {
-		config.Renderer.Render(writer, "signup", CreateErrorMessageInterfaces("User already exists"))
+		config.Renderer.Render(
+			writer,
+			"signup",
+			CreateErrorMessageInterfaces("User already exists"),
+		)
 		return
 	}
 
@@ -108,9 +115,13 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 		respondWithJSON(writer, http.StatusInternalServerError, errAdd.Error())
 		return
 	}
-	log.Printf("User added with success - UserID:%s \n-Name:%s\n-Email: %s", userAdd.ID, userAdd.Name, userAdd.Email)
+	log.Printf(
+		"User added with success - UserID:%s \n-Name:%s\n-Email: %s",
+		userAdd.ID,
+		userAdd.Name,
+		userAdd.Email,
+	)
 	config.Index(writer, request)
-
 }
 
 func (config *Config) DeleteUser(writer http.ResponseWriter, request *http.Request) {
@@ -145,12 +156,14 @@ func (config *Config) DeleteUser(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 	config.Renderer.Render(writer, "Admin", userInfo)
-
 }
 
 // TODO: Find a way to improve the replacements of data when rendeding HTML, currently rendering everything
-func (config *Config) UpdateUser(writer http.ResponseWriter, request *http.Request, updateType, updateData string) {
-
+func (config *Config) UpdateUser(
+	writer http.ResponseWriter,
+	request *http.Request,
+	updateType, updateData string,
+) {
 	userID, errUser := GetUserIDFromToken(request, writer, config)
 	if errUser != nil {
 		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
@@ -191,7 +204,12 @@ func (config *Config) UpdateUser(writer http.ResponseWriter, request *http.Reque
 	}
 }
 
-func (config *Config) handleName(writer http.ResponseWriter, request *http.Request, userInfo *UserInfoRequest, updateData string) {
+func (config *Config) handleName(
+	writer http.ResponseWriter,
+	request *http.Request,
+	userInfo *UserInfoRequest,
+	updateData string,
+) {
 	data := database.UpdateUserNameParams{
 		Name: updateData,
 		ID:   userInfo.ID,
@@ -208,7 +226,12 @@ func (config *Config) handleName(writer http.ResponseWriter, request *http.Reque
 	config.Renderer.Render(writer, "user", userInfo)
 }
 
-func (config *Config) handleEmail(writer http.ResponseWriter, request *http.Request, userInfo *UserInfoRequest, updateData string) {
+func (config *Config) handleEmail(
+	writer http.ResponseWriter,
+	request *http.Request,
+	userInfo *UserInfoRequest,
+	updateData string,
+) {
 	data := database.UpdateUserEmailParams{
 		Email: updateData,
 		ID:    userInfo.ID,
@@ -226,7 +249,12 @@ func (config *Config) handleEmail(writer http.ResponseWriter, request *http.Requ
 	config.Renderer.Render(writer, "user", userInfo)
 }
 
-func (config *Config) handlePassword(writer http.ResponseWriter, request *http.Request, userInfo *UserInfoRequest, updateData string) {
+func (config *Config) handlePassword(
+	writer http.ResponseWriter,
+	request *http.Request,
+	userInfo *UserInfoRequest,
+	updateData string,
+) {
 	hashedPassword, errPWD := HashPassword(updateData)
 	if errPWD != nil {
 		respondWithJSON(writer, http.StatusInternalServerError, errPWD.Error())

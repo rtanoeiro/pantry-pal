@@ -6,12 +6,12 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"pantry-pal/pantry/api"
-	"pantry-pal/pantry/database"
 	"time"
 
 	"github.com/joho/godotenv"
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
+	"pantry-pal/pantry/api"
+	"pantry-pal/pantry/database"
 )
 
 func main() {
@@ -44,7 +44,7 @@ func main() {
 	// Reset - Used in dev for testing
 	httpServerMux.Handle("POST /reset", http.HandlerFunc(config.ResetUsers))
 
-	//Login
+	// Login
 	httpServerMux.Handle("/", http.HandlerFunc(config.Index))
 	httpServerMux.Handle("POST /login", http.HandlerFunc(config.Login))
 	httpServerMux.Handle("GET /signup", http.HandlerFunc(config.SignUp))
