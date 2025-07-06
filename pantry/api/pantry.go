@@ -4,15 +4,14 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"pantry-pal/pantry/database"
 	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
+	"pantry-pal/pantry/database"
 )
 
 func (config *Config) HandleNewItem(writer http.ResponseWriter, request *http.Request) {
-
 	returnPantry := SuccessErrorResponse{
 		ErrorMessage:   "",
 		SuccessMessage: "",
@@ -28,10 +27,19 @@ func (config *Config) HandleNewItem(writer http.ResponseWriter, request *http.Re
 		return
 	}
 	itemExpiry := request.FormValue("itemExpiryDate")
-	log.Printf("Received item \n- Name: %s\n- Quantity: %d\n- Expity Date: %s", itemName, itemQuantity, itemExpiry)
+	log.Printf(
+		"Received item \n- Name: %s\n- Quantity: %d\n- Expity Date: %s",
+		itemName,
+		itemQuantity,
+		itemExpiry,
+	)
 
 	if !checkDate(itemExpiry) {
-		respondWithJSON(writer, http.StatusForbidden, "Invalid Date. Please send in the Format YYYY-MM-DD or Date is already expired")
+		respondWithJSON(
+			writer,
+			http.StatusForbidden,
+			"Invalid Date. Please send in the Format YYYY-MM-DD or Date is already expired",
+		)
 		returnPantry.ErrorMessage = "Invalid Date. Please send in the Format YYYY-MM-DD or Date is already expired"
 		config.Renderer.Render(writer, "ResponseMessage", returnPantry)
 		return
@@ -82,7 +90,11 @@ func (config *Config) HandleNewItem(writer http.ResponseWriter, request *http.Re
 	writer.Header().Set("HX-Redirect", "/home")
 }
 
-func (config *Config) ItemUpdate(writer http.ResponseWriter, request *http.Request, toUpdate UpdateItemRequest) {
+func (config *Config) ItemUpdate(
+	writer http.ResponseWriter,
+	request *http.Request,
+	toUpdate UpdateItemRequest,
+) {
 	log.Println("Updating item in pantry")
 	returnPantry := SuccessErrorResponse{
 		ErrorMessage:   "",
@@ -111,7 +123,11 @@ func (config *Config) ItemUpdate(writer http.ResponseWriter, request *http.Reque
 	config.Renderer.Render(writer, "ResponseMessage", returnPantry)
 }
 
-func (config *Config) ItemAdd(writer http.ResponseWriter, request *http.Request, toAdd AddItemRequest) {
+func (config *Config) ItemAdd(
+	writer http.ResponseWriter,
+	request *http.Request,
+	toAdd AddItemRequest,
+) {
 	log.Println("Adding item to pantry")
 	returnPantry := SuccessErrorResponse{
 		ErrorMessage:   "",
@@ -131,7 +147,13 @@ func (config *Config) ItemAdd(writer http.ResponseWriter, request *http.Request,
 		ExpiryAt: toAdd.ExpiryAt,
 	}
 
-	log.Printf("Item to add: \n- UserID: %s \n- ItemName: %s \n- Quantity: %d \n- Expiry Date: %s", toAdd.UserID, toAdd.ItemName, toAdd.Quantity, toAdd.ExpiryAt)
+	log.Printf(
+		"Item to add: \n- UserID: %s \n- ItemName: %s \n- Quantity: %d \n- Expiry Date: %s",
+		toAdd.UserID,
+		toAdd.ItemName,
+		toAdd.Quantity,
+		toAdd.ExpiryAt,
+	)
 	addedItem, errUpdate := config.Db.AddItem(request.Context(), itemToAdd)
 	if errUpdate != nil {
 		respondWithJSON(writer, http.StatusInternalServerError, errUpdate.Error())
@@ -171,7 +193,6 @@ func (config *Config) GetItemByName(writer http.ResponseWriter, request *http.Re
 }
 
 func (config *Config) GetAllPantryItems(writer http.ResponseWriter, request *http.Request) {
-
 	log.Println("User entered it's Pantry")
 	returnPantry := PantryItems{
 		ErrorMessage:   "",
@@ -210,7 +231,6 @@ func (config *Config) GetAllPantryItems(writer http.ResponseWriter, request *htt
 }
 
 func (config *Config) DeleteItem(writer http.ResponseWriter, request *http.Request) {
-
 	userID, errUser := GetUserIDFromToken(request, writer, config)
 	if errUser != nil {
 		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
@@ -230,7 +250,12 @@ func (config *Config) DeleteItem(writer http.ResponseWriter, request *http.Reque
 		respondWithJSON(writer, http.StatusInternalServerError, errRemove.Error())
 		return
 	}
-	log.Printf("Successfully remove %d item(s) %s, with Expiry date at %s", item.Quantity, item.ItemName, item.ExpiryAt)
+	log.Printf(
+		"Successfully remove %d item(s) %s, with Expiry date at %s",
+		item.Quantity,
+		item.ItemName,
+		item.ExpiryAt,
+	)
 	respondWithJSON(writer, http.StatusOK, []byte{})
 }
 

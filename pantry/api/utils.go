@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"html/template"
@@ -13,8 +14,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (tmplt *Templates) Render(writer io.Writer, name string, data interface{}) error {
-	return tmplt.templates.ExecuteTemplate(writer, name, data)
+func (tmplt *Templates) Render(writer io.Writer, name string, data interface{}) {
+	errorTemplate := tmplt.templates.ExecuteTemplate(writer, name, data)
+	if errorTemplate != nil {
+		log.Println("Error rendering template:", errorTemplate)
+	}
 }
 
 func MyTemplates() *Templates {
@@ -24,11 +28,23 @@ func MyTemplates() *Templates {
 	}
 }
 
+func CloseDB(dbConn *sql.DB) {
+	if err := dbConn.Close(); err != nil {
+		log.Println("Error closing database connection:", err)
+	} else {
+		log.Println("Database connection closed successfully.")
+	}
+}
+
 func respondWithJSON(writer http.ResponseWriter, code int, data interface{}) {
 	writer.Header().Set("Content-Type", "application/json; charset=utf-8")
 	writer.WriteHeader(code)
 	results, _ := json.Marshal(data)
-	writer.Write(results)
+	_, errorWriter := writer.Write(results)
+	if errorWriter != nil {
+		log.Println("Error writing response:", errorWriter)
+		return
+	}
 }
 
 func CreateErrorMessageInterfaces(message string) map[string]interface{} {
@@ -46,7 +62,7 @@ func CheckPasswordHash(password, hash string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 }
 
-func MakeJWT(userID string, tokenSecret string, expiresIn time.Duration) (string, error) {
+func MakeJWT(userID, tokenSecret string, expiresIn time.Duration) (string, error) {
 	claims := jwt.RegisteredClaims{
 		Issuer:    "pantry-pal",
 		IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
@@ -66,7 +82,6 @@ func ValidateJWT(tokenString, tokenSecret string) (string, error) {
 			return []byte(tokenSecret), nil
 		},
 	)
-
 	if err != nil {
 		return "", err
 	}
@@ -75,7 +90,6 @@ func ValidateJWT(tokenString, tokenSecret string) (string, error) {
 	}
 	// subject is the userID setup in the JWT
 	subject, err := token.Claims.GetSubject()
-
 	if err != nil {
 		return "", err
 	}
@@ -83,7 +97,6 @@ func ValidateJWT(tokenString, tokenSecret string) (string, error) {
 }
 
 func GetJWTFromCookie(request *http.Request) (string, error) {
-
 	jwtToken, errorJwt := request.Cookie("JWTToken")
 	if errorJwt != nil {
 		return "", errorJwt
@@ -92,7 +105,6 @@ func GetJWTFromCookie(request *http.Request) (string, error) {
 }
 
 func checkDate(givenDate string) bool {
-
 	dateLayout := "2006-01-02"
 	formattedDate, errParse := time.Parse(dateLayout, givenDate)
 
@@ -103,7 +115,11 @@ func checkDate(givenDate string) bool {
 }
 
 // Split into two functions one to get JWT and another to validate it
-func GetUserIDFromToken(request *http.Request, writer http.ResponseWriter, config *Config) (string, error) {
+func GetUserIDFromToken(
+	request *http.Request,
+	writer http.ResponseWriter,
+	config *Config,
+) (string, error) {
 	token, errTk := GetJWTFromCookie(request)
 	if errTk != nil {
 		return "", errTk
