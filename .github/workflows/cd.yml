@@ -28,6 +28,7 @@ jobs:
       run: chmod +x ./scripts/migrate_up.sh && ./scripts/migrate_up.sh
     
     - name: Build .env file
+      # This will be decomissioned, it's needed now 
       run: |
           echo "PORT=${{ secrets.PORT }}" > .env
           echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
