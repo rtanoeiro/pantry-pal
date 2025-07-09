@@ -1,4 +1,4 @@
-FROM golang:tip-alpine AS builder
+FROM golang:tip-alpine3.22 AS builder
 
 WORKDIR /app
 
@@ -9,7 +9,7 @@ COPY . ./
 RUN CGO_ENABLED=0 GOOS=linux go build -o pantry_pal
 
 # Final image
-FROM alpine:latest
+FROM alpine:3.22.0
 WORKDIR /app
 COPY --from=builder /app/pantry_pal .
 
