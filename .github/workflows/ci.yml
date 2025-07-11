@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 jobs:
-  tests:
+  Tests:
     name: Tests
     runs-on: ubuntu-latest
 
@@ -30,7 +30,7 @@ jobs:
       - name: gosec
         run: gosec -exclude=G101,G104 ./...
 
-  style:
+  Style:
     name: Style
     runs-on: ubuntu-latest
 
