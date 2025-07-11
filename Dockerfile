@@ -13,9 +13,11 @@ FROM alpine:3.22.0
 WORKDIR /app
 COPY --from=builder /app/pantry_pal .
 
-COPY .env ./
+COPY data ./data
 COPY static ./static
 COPY css ./css
+
+RUN apk update && apk add sqlite
 
 
 EXPOSE 8080
