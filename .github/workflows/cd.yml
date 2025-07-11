@@ -1,4 +1,4 @@
-name: Deployment
+name: CD
 
 on:
   pull_request:
