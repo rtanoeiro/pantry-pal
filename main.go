@@ -8,18 +8,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/joho/godotenv"
 	_ "github.com/mattn/go-sqlite3"
 	"pantry-pal/pantry/api"
 	"pantry-pal/pantry/database"
 )
 
 func main() {
-	envError := godotenv.Load()
-	if envError != nil {
-		log.Fatal("Unable to load environment variables")
-	}
-
 	dbURL := os.Getenv("DATABASE_URL")
 	port := os.Getenv("PORT")
 	jwtSecret := os.Getenv("JWT_SECRET")
