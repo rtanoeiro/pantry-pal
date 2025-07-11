@@ -25,7 +25,9 @@ jobs:
         run: go install github.com/pressly/goose/v3/cmd/goose@latest    
       
       - name: Migrate DB
-        run: chmod +x ./scripts/migrate_up.sh && ./scripts/migrate_up.sh
+        run: | # database is saved in data folder, so we need to create it
+          mkdir data
+          chmod +x ./scripts/migrate_up.sh && ./scripts/migrate_up.sh
 
   deploy:
     name: Deploy
