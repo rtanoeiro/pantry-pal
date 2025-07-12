@@ -8,9 +8,10 @@ import (
 	"os"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3"
 	"pantry-pal/pantry/api"
 	"pantry-pal/pantry/database"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
