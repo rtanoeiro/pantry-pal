@@ -25,16 +25,9 @@ jobs:
         run: go install github.com/pressly/goose/v3/cmd/goose@latest    
       
       - name: Migrate DB
-        run: | # database is saved in data folder, so we need to create it
+        run: |
           mkdir data
           chmod +x ./scripts/migrate_up.sh && ./scripts/migrate_up.sh
-
-      - name: Build .env file
-        # This will be decomissioned, it's needed now 
-        run: |
-            echo "PORT=${{ secrets.PORT }}" > .env
-            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
-            echo "JWT_SECRET=${{secrets.JWT_SECRET}}" >> .env
 
       - name: Build Docker Image
         run: docker build --tag mrramonster/pantry_pal:latest .
