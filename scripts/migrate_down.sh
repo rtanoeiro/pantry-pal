@@ -1,9 +1,3 @@
 #!/bin/bash
-
-if [ -f .env ]; then
-    source .env
-fi
-
-cd sql/schema
-
-goose turso $DATABASE_URL down
+# Trying to set up an env file for the variables above make the scipt fails
+goose -dir sql/schema sqlite3 ./data/pantry_pal.db down

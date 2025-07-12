@@ -24,26 +24,46 @@ PantryPal is a comprehensive, user-friendly application designed to help you man
 ### Installation
 
 #### Option 1: Docker (Recommended)
-Run these commands to set up PantryPal:
+You can run PantrPal using Docker, use the docker-compose-template.yml file to set up your container. Make sure to define a port, and to create. JWT Secret before running the container. You can rename your file to pantry-pal.yaml and run the following command:
 
 ```bash
-
-docker pull mrramonster/pantrypal:latest
-docker run -d -p PORT-CHOICE:PORT-CHOICE --name pantry-pal \
-          --env-file .env \
-          mrramonster/pantrypal:latest
+docker-compose -f pantry-pal.yml up
 ```
 
 ### Option 2: Binary
+Use this option if you want to run this application without Docker, useful for development purposes, or if you are not familia with Docker.
 
-Pull the repository and run the script at scripts/start_server.sh. The server should start at the designed port on your env file.
+1. Pull the repository with:
 
+```bash
+git clone https://github.com/rtanoeiro/pantry-pal.git
+```
+
+2. You'll need some environment variables. Enter the folder of the repository you just downloaded and run:
+``` bash
+echo "PORT=8080" > .env
+echo $(openssl rand -base64 32)
+# Copy the output from the commmand above and paste it in the next line
+echo "JWT_SECRET=THING_YOU_JUST_COPIED" >> .env
+```
+
+3. After that, you can download all dependencies with:
+
+```bash
+go mod download
+```
+
+4. Now, you should be ready to Go! You can run the application with:
+
+```bash
+go run main.go
+```
 
 ### Contributing
 
 ### Necessary Tools
 
-- go 1.21+
+- go 1.24.2+
 - sqlc [https://sqlc.dev/](https://sqlc.dev/) - Install with go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 - air [https://github.com/air-verse/air](https://github.com/air-verse/air) - Install with go install github.com/air-verse/air@latest
     - Not really necessary, but it helps as it reloads the server on file changes.
