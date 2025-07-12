@@ -8,7 +8,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . ./
-RUN CGO_ENABLED=1 GOOS=linux GOARCH=arm64 go build -o pantry_pal
+RUN CGO_ENABLED=1 go build -o pantry_pal
 
 # Final image
 FROM alpine:3.22.0
