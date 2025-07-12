@@ -4,7 +4,7 @@ services:
     container_name: pantry_pal
     environment:
       - PORT=8080
-      - DB_FILE=/data/pantry_pal.db
+      - DATABASE_URL=data/pantry_pal.db
       - JWT_SECRET=my_secret
       # You can create a secret with the following command:
       # echo $(openssl rand -base64 32) or echo $(openssl rand -base64 64), depending on how complex you want your secret to be
