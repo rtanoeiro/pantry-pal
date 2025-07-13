@@ -31,7 +31,7 @@ docker-compose -f pantry-pal.yml up
 ```
 
 ### Option 2: Binary
-Use this option if you want to run this application without Docker, useful for development purposes, or if you are not familia with Docker.
+Use this option if you want to run this application without Docker, useful for development purposes, or if you are not familiar with Docker.
 
 1. Pull the repository with:
 
@@ -41,10 +41,11 @@ git clone https://github.com/rtanoeiro/pantry-pal.git
 
 2. You'll need some environment variables. Enter the folder of the repository you just downloaded and run:
 ``` bash
-echo "PORT=8080" > .env
-echo $(openssl rand -base64 32)
+export PORT=8080
+export DATABASE_URL=data/pantry_pal.db
+# You can create a Secret with the following command ``ècho $(openssl rand -base64 32)```
 # Copy the output from the commmand above and paste it in the next line
-echo "JWT_SECRET=THING_YOU_JUST_COPIED" >> .env
+export JWT_SECRET=THING_YOU_JUST_COPIED
 ```
 
 3. After that, you can download all dependencies with:
@@ -65,6 +66,7 @@ go run main.go
 
 - go 1.24.2+
 - sqlc [https://sqlc.dev/](https://sqlc.dev/) - Install with go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+- goose [https://github.com/pressly/goose](https://github.com/pressly/goose) - Package for handling migrations in the database. Install with go install github.com/pressly/goose/v3/cmd/goose@latest
 - air [https://github.com/air-verse/air](https://github.com/air-verse/air) - Install with go install github.com/air-verse/air@latest
     - Not really necessary, but it helps as it reloads the server on file changes.
 - Docker - For running the application in a containerized environment.
