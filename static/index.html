@@ -3,32 +3,47 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login - Pantry Pal</title>
-  <link rel="stylesheet" href="/css/styles.css">
-  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pantry Pal - Sign In</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 </head>
 
 <body>
-  <div class="login-container">
-    <h2>Login</h2>
-    <form id="loginForm" hx-post="/login" hx-swap="innerHTML" hx-target="#error-message">
-      <div class="form-group">
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required />
-      </div>
-      <div class="form-group">
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required />
-      </div>
-      <div id="error-message"></div>
-      <button class="body-button" id="button-login">Login</button>
-    </form>
-    <button class="body-button" id=" button-signup" hx-get="/signup" hx-target="body" hx-swap="innerHTML"
-      hx-push-url="/signup">Sign
-      Up</button>
-  </div>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1 class="auth-title">🥗 Pantry Pal</h1>
+                <p class="auth-subtitle">Sign in to manage your kitchen smarter</p>
+            </div>
+
+            <form id="loginForm" hx-post="/login" hx-target="#error-login" hx-swap="innerHTML" class="auth-form">
+                <div class="form-group">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input type="email" id="email" name="email" class="form-input" placeholder="Enter your email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" name="password" class="form-input" placeholder="Enter your password" required>
+                </div>
+
+                <div id="error-login" class="response-container">
+                    {{ template "errorLogin" . }}
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+            </form>
+
+            <div class="auth-footer">
+                <p class="auth-link-text">Don't have an account?</p>
+                <button class="btn btn-ghost" hx-get="/signup" hx-target="body" hx-swap="innerHTML" hx-push-url="/signup">
+                    Create Account
+                </button>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
@@ -36,6 +51,9 @@
 
 {{ block "errorLogin" . }}
 {{ if .Message }}
-{{ .Message }}
+<div class="alert alert-error">
+    <span class="alert-icon">✕</span>
+    {{ .Message }}
+</div>
 {{ end }}
 {{ end }}
