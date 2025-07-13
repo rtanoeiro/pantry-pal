@@ -9,9 +9,6 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
 
-    env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -34,5 +31,5 @@ jobs:
 
       - name: Publish Docker Image
         run: |
-         docker login -u mrramonster -p ${{ secrets.DOCKER_HUB_TOKEN }}
+         docker login -u mrramonster --password-stdin ${{ secrets.DOCKER_HUB_TOKEN }}
          docker push mrramonster/pantry_pal:latest
