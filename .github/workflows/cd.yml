@@ -1,7 +1,7 @@
 name: CD
 
 on:
-  pull_request:
+  push:
     branches: [main]
 
 jobs:
@@ -13,18 +13,22 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.24.2"
-    
-      - name: Install goose
-        run: go install github.com/pressly/goose/v3/cmd/goose@latest    
-      
       - name: Migrate DB
         run: |
           mkdir data
           chmod +x ./scripts/migrate_up.sh && ./scripts/migrate_up.sh
 
-      - name: Build Docker Image
-        run: docker build --tag mrramonster/pantry_pal:latest .
+      - name: Login Docker
+        uses: docker/login-action@v3
+        with:
+            username: mrramonster
+            password: ${{ secrets.DOCKER_HUB_TOKEN }}
+        
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+            context: .
+            file: Dockerfile
+            push: true
+            tags: mrramonster/pantry_pal:latest
