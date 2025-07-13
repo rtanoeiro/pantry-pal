@@ -21,5 +21,7 @@ COPY css ./css
 
 RUN apk update && apk add sqlite
 
+## HEALTHCHECK --interval=30s --timeout=30s --retries=3 CMD curl -f http://localhost:8080/health
+
 EXPOSE 8080
 CMD ["./pantry_pal"]
