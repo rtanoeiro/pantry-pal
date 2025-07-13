@@ -8,23 +8,18 @@ import (
 	"os"
 	"time"
 
-	"github.com/joho/godotenv"
-	_ "github.com/tursodatabase/libsql-client-go/libsql"
 	"pantry-pal/pantry/api"
 	"pantry-pal/pantry/database"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
-	envError := godotenv.Load()
-	if envError != nil {
-		log.Fatal("Unable to load environment variables")
-	}
-
 	dbURL := os.Getenv("DATABASE_URL")
 	port := os.Getenv("PORT")
 	jwtSecret := os.Getenv("JWT_SECRET")
 
-	newDB, dbError := sql.Open("libsql", dbURL)
+	newDB, dbError := sql.Open("sqlite3", dbURL)
 	if dbError != nil {
 		log.Fatal("Unable to open database. Closing app. Error: ", dbError)
 	}
