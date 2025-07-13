@@ -8,8 +8,4 @@ services:
       - JWT_SECRET=my_secret
       # You can create a secret with the following command:
       # echo $(openssl rand -base64 32) or echo $(openssl rand -base64 64), depending on how complex you want your secret to be
-    volumes:
-      - $PATH_ON_YOUR_MACHINE/:/data/
-    ports:
-      - 8080:$PORT
     entrypoint: ['./pantry_pal']
