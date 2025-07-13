@@ -5,20 +5,27 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Pantry</title>
+    <title>My Pantry - Pantry Pal</title>
     <link rel="stylesheet" href="/css/styles.css">
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 </head>
 
 <body hx-boost="true">
-    <div class="home-container">
-        <h2>My Pantry</h2>
-        {{ template "pantryItems" . }}
-        <div class="pantry-home-button-container">
-            <button class="pantry-home-button" id="button-home" hx-get="/home" hx-target="body" hx-swap="innerHTML"
-                hx-push-url="/home">Back to
-                Home Page</button>
-        </div>
+    <div class="app-container">
+        <header class="page-header">
+            <div class="header-content">
+                <h1 class="page-title">🏠 My Pantry</h1>
+                <button class="btn btn-primary" hx-get="/home" hx-target="body" hx-swap="innerHTML" hx-push-url="/home">
+                    ← Back to Dashboard
+                </button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="pantry-container">
+                {{ template "pantryItems" . }}
+            </div>
+        </main>
     </div>
 </body>
 
@@ -26,21 +33,38 @@
 {{ end }}
 
 {{ block "pantryItems" . }}
-<div class="stat-block">
-    {{ if .Items }}
-    <div class="list-grid">
-        {{ range .Items }}
-        <div class="item-card">
-            {{ .ItemName }} {{ .Quantity }}<br />
-            <small>Expiry at: {{ .ExpiryAt }}</small>
-        </div>
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">All Items</h2>
+        <p class="card-subtitle">{{ len .Items }} items in your pantry</p>
+    </div>
+    
+    <div class="card-content">
+        {{ if .Items }}
+            <div class="item-grid">
+                {{ range .Items }}
+                <div class="item-card pantry-item">
+                    <div class="item-header">
+                        <span class="item-name">{{ .ItemName }}</span>
+                        <span class="item-quantity">×{{ .Quantity }}</span>
+                    </div>
+                    <div class="item-footer">
+                        <span class="expiry-label">Expires:</span>
+                        <span class="expiry-date">{{ .ExpiryAt }}</span>
+                    </div>
+                </div>
+                {{ end }}
+            </div>
+        {{ else }}
+            <div class="empty-state large">
+                <div class="empty-icon">📦</div>
+                <h3 class="empty-title">Your pantry is empty</h3>
+                <p class="empty-text">Start by adding some items to track their expiration dates</p>
+                <button class="btn btn-primary" hx-get="/home" hx-target="body" hx-swap="innerHTML" hx-push-url="/home">
+                    Add Your First Item
+                </button>
+            </div>
         {{ end }}
     </div>
-    {{ else }}
-    <div class="empty-pantry">
-        <p>Your pantry is empty. Add some items!</p>
-        <p>No items in pantry.</p>
-    </div>
-    {{ end }}
 </div>
 {{ end }}

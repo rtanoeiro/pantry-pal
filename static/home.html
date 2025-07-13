@@ -3,103 +3,176 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pantry Pal - Home</title>
-  <link rel="stylesheet" href="/css/styles.css">
-  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pantry Pal - Dashboard</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 </head>
 
 <body hx-boost="true">
-  <div class="home-container">
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1 class="app-title">Pantry Pal</h1>
+                <div class="header-user">
+                    <span class="welcome-text">Welcome, {{ .UserName }}!</span>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" hx-get="/pantry" hx-target="body" hx-push-url="/pantry">
+                            My Pantry
+                        </button>
+                        <button class="btn btn-secondary" hx-get="/user" hx-target="body" hx-push-url="/user">
+                            Account
+                        </button>
+                        <button class="btn btn-outline" hx-get="/logout">
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
 
-    <div class="top-section">
-      <h1 class="header">Pantry Pal</h1>
-      <div class="welcome-message">
-        <p>Welcome, {{ .UserName }}!</p>
-      </div>
+        <main class="main-content">
+            <!-- Add Item Section -->
+            <section class="add-item-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Add New Item</h2>
+                        <p class="card-subtitle">Keep track of your pantry items and expiration dates</p>
+                    </div>
+                    
+                    <form id="add-item-form" hx-post="/pantry" hx-target="#responseMessage" hx-swap="innerHTML"
+                        hx-on::after-request="this.reset()" class="add-item-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="nameInput" class="form-label">Item Name</label>
+                                <input type="text" id="nameInput" name="itemName" class="form-input" 
+                                    placeholder="e.g., Milk, Bread, Apples" required />
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="quantityInput" class="form-label">Quantity</label>
+                                <input type="number" id="quantityInput" name="itemQuantity" class="form-input"
+                                    placeholder="1" min="1" required />
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="expirationDateInput" class="form-label">Expiration Date</label>
+                                <input type="date" id="expirationDateInput" name="itemExpiryDate" class="form-input" required />
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-full" id="addItemButton">
+                            <span class="btn-icon">+</span>
+                            Add Item to Pantry
+                        </button>
+                    </form>
 
-      <div class="top-buttons">
-        <button class="body-button" id="pantryButton" hx-get="/pantry" hx-target="body" hx-push-url="/pantry">My
-          Pantry</button>
-        <button class="body-button" id="accountButton" hx-get="/user" hx-target="body"
-          hx-push-url="/user">Account</button>
-        <button class="body-button" id="logoutButton" hx-get="/logout">Logout</button>
-      </div>
+                    <div id="responseMessage" class="response-container">
+                        {{ template "ResponseMessage" . }}
+                    </div>
+                </div>
+            </section>
 
-      <form id="add-item-form" hx-post="/pantry" hx-target="#responseMessage" hx-swap="innerHTML"
-        hx-on::after-request="this.reset()">
-        <div class="action-section">
-          Name: <input type="text" id="nameInput" placeholder="Item Name" name="itemName" />
-          Quantity: <input type="number" id="quantityInput" name="itemQuantity" placeholder="Quantity" />
-          Expiration Date: <input type="date" id="expirationDateInput" name="itemExpiryDate" />
-          <button class="body-button" id="addItemButton">+ Add New Item</button>
-        </div>
-      </form>
+            <!-- Search Section -->
+            <section class="search-section">
+                <div class="card">
+                    <div class="search-container">
+                        <input type="text" id="searchInput" class="search-input" placeholder="Search for items in your pantry..." />
+                        <button class="btn btn-primary" id="searchButton">Search</button>
+                    </div>
+                </div>
+            </section>
 
-      <div class="response-message" id="responseMessage">
-        {{ template "ResponseMessage" . }}
-      </div>
-
-
-      <div class="middle-section">
-        <div class="search-container">
-          <input type="text" id="searchInput" placeholder="Search for items..." />
-          <button class="body-button" id="searchButton">Search</button>
-        </div>
-      </div>
+            <!-- Dashboard Grid -->
+            <section class="dashboard-grid">
+                <div id="right-section" hx-get="/expiring" hx-target="#right-section" hx-swap="innerHTML"
+                    hx-trigger="load, click delay:1.5s from:#addItemButton">
+                    {{ template "expiringSoonBlock" . }}
+                </div>
+            </section>
+        </main>
     </div>
-
-    <div class="bottom-section" id="right-section" hx-get="/expiring" hx-target="#right-section" hx-swap="innerHTML"
-      hx-trigger="load, click delay:1.5s from:#addItemButton">
-      {{ template "expiringSoonBlock" . }}
-    </div>
-  </div>
 </body>
 
 </html>
 {{ end }}
 
-
 {{ block "expiringSoonBlock" . }}
-<!-- Expiring Soon Section -->
-<div class="stat-block">
-  <p class="stat-title">Expiring Soon</p>
-  <div class="stat-value" id="expiringSoonList">
-    {{ if .ExpiringSoon }}
-    <div class="list-grid">
-      {{ range .ExpiringSoon }}
-      <div class="item-card">
-        {{ .ItemName }} x{{ .Quantity }}<br />
-        <small>{{ .ExpiryAt }}</small>
-      </div>
-      {{ end }}
+<div class="dashboard-card">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">⚠️ Expiring Soon</h3>
+            <p class="card-subtitle">Items that need your attention</p>
+        </div>
+        <div class="card-content">
+            {{ if .ExpiringSoon }}
+                <div class="item-grid">
+                    {{ range .ExpiringSoon }}
+                    <div class="item-card expiring">
+                        <div class="item-header">
+                            <span class="item-name">{{ .ItemName }}</span>
+                            <span class="item-quantity">×{{ .Quantity }}</span>
+                        </div>
+                        <div class="item-footer">
+                            <span class="expiry-date">{{ .ExpiryAt }}</span>
+                        </div>
+                    </div>
+                    {{ end }}
+                </div>
+            {{ else }}
+                <div class="empty-state">
+                    <p class="empty-text">No items expiring soon</p>
+                    <p class="empty-subtitle">Great job managing your pantry!</p>
+                </div>
+            {{ end }}
+        </div>
     </div>
-    {{ else }}
-    <p>No items expiring soon.</p>
-    {{ end }}
-  </div>
 </div>
 
-<!-- Shopping List Section -->
-<div class="stat-block">
-  <p class="stat-title">Shopping List</p>
-  <div class="list-grid">
-    {{ range .ShoppingList }}
-    <div class="item-card">
-      {{ .ItemName }} x{{ .Quantity }}<br />
+<div class="dashboard-card">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">🛒 Shopping List</h3>
+            <p class="card-subtitle">Items to buy next</p>
+        </div>
+        <div class="card-content">
+            {{ if .ShoppingList }}
+                <div class="item-grid">
+                    {{ range .ShoppingList }}
+                    <div class="item-card shopping">
+                        <div class="item-header">
+                            <span class="item-name">{{ .ItemName }}</span>
+                            <span class="item-quantity">×{{ .Quantity }}</span>
+                        </div>
+                    </div>
+                    {{ end }}
+                </div>
+            {{ else }}
+                <div class="empty-state">
+                    <p class="empty-text">Shopping list is empty</p>
+                    <p class="empty-subtitle">Add items as they run low</p>
+                </div>
+            {{ end }}
+        </div>
     </div>
-    {{ end }}
-  </div>
-
 </div>
 {{ end }}
 
-
-
 {{ block "ResponseMessage" .}}
-<div id="response-message">
-  <div class="success-message">{{ .SuccessMessage }}</div>
-  <div class="error-message">{{ .ErrorMessage }}</div>
+<div class="response-messages">
+    {{ if .SuccessMessage }}
+    <div class="alert alert-success">
+        <span class="alert-icon">✓</span>
+        {{ .SuccessMessage }}
+    </div>
+    {{ end }}
+    {{ if .ErrorMessage }}
+    <div class="alert alert-error">
+        <span class="alert-icon">✕</span>
+        {{ .ErrorMessage }}
+    </div>
+    {{ end }}
 </div>
 {{ end }}
