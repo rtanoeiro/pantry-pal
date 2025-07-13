@@ -34,7 +34,7 @@
                     <input type="password" id="password" name="password" class="form-input" placeholder="Create a secure password" required>
                 </div>
 
-                <div id="error-signup" class="error-message">{{ template "errorSignup" . }}</div>
+            {{ template "errorSignup" . }}
 
                 <button type="submit" class="btn btn-primary btn-full">Create Account</button>
             </form>
@@ -54,6 +54,10 @@
 
 {{ block "errorSignup" .}}
 {{ if .Message }}
-<div class="error-content">{{ .Message }}</div>
+<div id="error-signup" class="error-message">
+    <div class="error-content">
+        {{ .Message }}
+    </div>
+</div>
 {{ end }}
 {{ end }}
