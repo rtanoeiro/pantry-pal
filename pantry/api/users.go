@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/google/uuid"
 	"pantry-pal/pantry/database"
+
+	"github.com/google/uuid"
 )
 
 func (config *Config) ResetUsers(writer http.ResponseWriter, request *http.Request) {
@@ -146,7 +147,6 @@ func (config *Config) DeleteUser(writer http.ResponseWriter, request *http.Reque
 		ErrorMessage:   "",
 		SuccessMessage: "",
 	}
-	userInfo.Users = config.GetAllOtherUsers(writer, request, userInfo)
 	userIDToDelete := request.PathValue("userID")
 	errDelete := config.Db.DeleteUser(request.Context(), userIDToDelete)
 	if errDelete != nil {
@@ -155,6 +155,7 @@ func (config *Config) DeleteUser(writer http.ResponseWriter, request *http.Reque
 		config.Renderer.Render(writer, "Admin", userInfo)
 		return
 	}
+	userInfo.Users = config.GetAllOtherUsers(writer, request, userInfo)
 	config.Renderer.Render(writer, "Admin", userInfo)
 }
 

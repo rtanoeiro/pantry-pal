@@ -306,6 +306,17 @@ body {
     background: white;
 }
 
+.account-input {
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-base);
+    background: white;
+    margin-bottom: var(--space-2);
+}
+
+
 .form-input:focus {
     outline: none;
     border-color: var(--primary-500);
@@ -648,9 +659,7 @@ body {
 }
 
 .settings-form {
-    border-bottom: 1px solid var(--gray-100);
-    padding-bottom: var(--space-6);
-    margin-bottom: var(--space-6);
+    padding-bottom: var(--space-3);
 }
 
 .settings-form:last-child {
