@@ -40,7 +40,7 @@ func main() {
 	httpServerMux.Handle("POST /reset", http.HandlerFunc(config.ResetUsers))
 
 	// Login
-	httpServerMux.Handle("/", http.HandlerFunc(config.Index))
+	httpServerMux.Handle("GET /login", http.HandlerFunc(config.Index))
 	httpServerMux.Handle("POST /login", http.HandlerFunc(config.Login))
 	httpServerMux.Handle("GET /signup", http.HandlerFunc(config.SignUp))
 	httpServerMux.Handle("POST /signup", http.HandlerFunc(config.CreateUser))
