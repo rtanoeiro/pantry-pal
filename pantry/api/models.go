@@ -29,12 +29,6 @@ type CreateUserResponse struct {
 	Email string `json:"email"`
 }
 
-// To be used when we use javascript
-type LoginUserRequest struct {
-	Email    string
-	Password string
-}
-
 type UserInfoRequest struct {
 	ID             string `json:"id"`
 	UserName       string `json:"name"`
@@ -86,7 +80,6 @@ type UpdateItemResponse struct {
 	ExpiryAt string `json:"expiry_at"`
 }
 
-// To Be used in HomePage
 type PantryItem struct {
 	ItemID   string `json:"item_id"`
 	ItemName string `json:"item_name"`
@@ -99,14 +92,9 @@ type PantryItems struct {
 	ErrorMessage   string       `json:"error_message"`
 	Items          []PantryItem `json:"items"`
 }
-type ItemShopping struct {
-	ItemName string `json:"item_id"`
-	Quantity int    `json:"quantity"`
-}
 
 type PantryStats struct {
 	ExpiringSoon []PantryItem
-	ShoppingList []ItemShopping
 }
 
 type SuccessErrorResponse struct {
