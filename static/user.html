@@ -37,7 +37,7 @@
                                 <div class="form-group">
                                     <label for="name-input" class="form-label">Name</label>
                                     <div class="current-value">Current: {{ .UserName }}</div>
-                                    <input type="text" id="name-input" name="name" class="form-input" placeholder="Enter new name" required>
+                                    <input type="text" id="name-input" name="name" class="account-input" placeholder="Enter new name" required>
                                     <button type="submit" class="btn btn-secondary">Update Name</button>
                                 </div>
                             </form>
@@ -46,7 +46,7 @@
                                 <div class="form-group">
                                     <label for="email-input" class="form-label">Email Address</label>
                                     <div class="current-value">Current: {{ .UserEmail }}</div>
-                                    <input type="email" id="email-input" name="email" class="form-input" placeholder="Enter new email" required>
+                                    <input type="email" id="email-input" name="email" class="account-input" placeholder="Enter new email" required>
                                     <button type="submit" class="btn btn-secondary">Update Email</button>
                                 </div>
                             </form>
@@ -54,7 +54,7 @@
                             <form id="passwordForm" hx-post="/user/password" hx-target="body" hx-on::after-request="this.reset()" class="settings-form">
                                 <div class="form-group">
                                     <label for="password-input" class="form-label">Password</label>
-                                    <input type="password" id="password-input" name="password" class="form-input" placeholder="Enter new password" required>
+                                    <input type="password" id="password-input" name="password" class="account-input" placeholder="Enter new password" required>
                                     <button type="submit" class="btn btn-secondary">Update Password</button>
                                 </div>
                             </form>
@@ -87,7 +87,7 @@
             <h2 class="card-title">👑 Admin Panel</h2>
             <p class="card-subtitle">Manage users and permissions</p>
         </div>
-        
+        {{ if .Users }}
         <div class="card-content">
             <div class="admin-users">
                 {{ range .Users }}
@@ -119,6 +119,13 @@
                     </div>
                 </div>
                 {{ end }}
+        {{ else }}
+            <div class="empty-state large">
+                <div class="empty-icon">👤</div>
+                <h3 class="empty-title">Your User List is empty</h3>
+            </div>
+
+        {{ end }}
             </div>
         </div>
     </div>
