@@ -36,9 +36,6 @@ func main() {
 
 	httpServerMux.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("css"))))
 
-	// Reset - Used in dev for testing
-	httpServerMux.Handle("POST /reset", http.HandlerFunc(config.ResetUsers))
-
 	// Login
 	httpServerMux.Handle("GET /login", http.HandlerFunc(config.Index))
 	httpServerMux.Handle("POST /login", http.HandlerFunc(config.Login))
