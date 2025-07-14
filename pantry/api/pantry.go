@@ -7,8 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/google/uuid"
 	"pantry-pal/pantry/database"
+
+	"github.com/google/uuid"
 )
 
 func (config *Config) HandleNewItem(writer http.ResponseWriter, request *http.Request) {
@@ -282,7 +283,6 @@ func (config *Config) RenderExpiringSoon(writer http.ResponseWriter, request *ht
 	}
 	pantryStats := PantryStats{
 		ExpiringSoon: expiringSoonItems,
-		ShoppingList: []ItemShopping{},
 	}
 	log.Println("Current Pantry Stats: ", pantryStats)
 	config.Renderer.Render(writer, "expiringSoonBlock", pantryStats)
