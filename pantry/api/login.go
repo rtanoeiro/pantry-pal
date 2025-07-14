@@ -16,9 +16,6 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 	email := request.FormValue("email")
 	password := request.FormValue("password")
 
-	log.Println("Email from form:", email)
-	log.Println("Password from form:", password)
-
 	user, errEmail := config.Db.GetUserByEmail(request.Context(), email)
 
 	if errEmail != nil {
@@ -31,18 +28,6 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 		log.Println("Invalid password during login")
 		return
 	}
-	log.Println(
-		"User details after login. \n- User:",
-		user.ID,
-		"\n- Email:",
-		user.Email,
-		"\n- Hashed Password:",
-		user.PasswordHash,
-		"\n- Created At:",
-		user.CreatedAt,
-		"\n- Updated At:",
-		user.UpdatedAt,
-	)
 
 	userJWTToken, errJWTToken := MakeJWT(user.ID, config.Secret, time.Second*3600*6)
 	if errJWTToken != nil {
