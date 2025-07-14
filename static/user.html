@@ -23,54 +23,17 @@
 
         <main class="main-content">
             <div class="settings-container">
-                
+
                 <!-- Personal Information -->
                 <section class="settings-section">
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">Personal Information</h2>
-                            <p class="card-subtitle">Update your account details</p>
-                        </div>
-                        
-                        <div class="card-content">
-                            <form id="nameForm" hx-post="/user/name" hx-target="body" hx-on::after-request="this.reset()" class="settings-form">
-                                <div class="form-group">
-                                    <label for="name-input" class="form-label">Name</label>
-                                    <div class="current-value">Current: {{ .UserName }}</div>
-                                    <input type="text" id="name-input" name="name" class="account-input" placeholder="Enter new name" required>
-                                    <button type="submit" class="btn btn-secondary">Update Name</button>
-                                </div>
-                            </form>
-
-                            <form id="emailForm" hx-post="/user/email" hx-target="body" hx-on::after-request="this.reset()" class="settings-form">
-                                <div class="form-group">
-                                    <label for="email-input" class="form-label">Email Address</label>
-                                    <div class="current-value">Current: {{ .UserEmail }}</div>
-                                    <input type="email" id="email-input" name="email" class="account-input" placeholder="Enter new email" required>
-                                    <button type="submit" class="btn btn-secondary">Update Email</button>
-                                </div>
-                            </form>
-
-                            <form id="passwordForm" hx-post="/user/password" hx-target="body" hx-on::after-request="this.reset()" class="settings-form">
-                                <div class="form-group">
-                                    <label for="password-input" class="form-label">Password</label>
-                                    <input type="password" id="password-input" name="password" class="account-input" placeholder="Enter new password" required>
-                                    <button type="submit" class="btn btn-secondary">Update Password</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+                    {{ template "UserInformation" . }}
                 </section>
-
-                <!-- Response Messages -->
-                <div id="responseMessage" class="response-container">
-                    {{ template "ResponseMessage" . }}
-                </div>
 
                 <!-- Admin Section -->
                 <div id="users-container">
                     {{ template "Admin" . }}
                 </div>
+
             </div>
         </main>
     </div>
@@ -78,6 +41,55 @@
 
 </html>
 {{ end }}
+
+{{ block "UserInformation" . }}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Personal Information</h2>
+        <p class="card-subtitle">Update your account details</p>
+    </div>
+
+    <div class="card-content">
+        <form id="nameForm" hx-post="/user/name" hx-target=".settings-section" hx-swap="innerHTML"
+            hx-on::after-request="this.reset()" class="settings-form">
+            <div class="form-group">
+                <label for="name-input" class="form-label">Name</label>
+                <div class="current-value">Current: {{ .UserName }}</div>
+                <input type="text" id="name-input" name="name" class="account-input" placeholder="Enter new name"
+                    required>
+                <button type="submit" class="btn btn-secondary">Update Name</button>
+            </div>
+        </form>
+
+        <form id="emailForm" hx-post="/user/email" hx-target=".settings-section" hx-swap="innerHTML"
+            hx-on::after-request="this.reset()" class="settings-form">
+            <div class="form-group">
+                <label for="email-input" class="form-label">Email Address</label>
+                <div class="current-value">Current: {{ .UserEmail }}</div>
+                <input type="email" id="email-input" name="email" class="account-input" placeholder="Enter new email"
+                    required>
+                <button type="submit" class="btn btn-secondary">Update Email</button>
+            </div>
+        </form>
+
+        <form id="passwordForm" hx-post="/user/password" hx-target=".settings-section" hx-swap="innerHTML"
+            hx-on::after-request="this.reset()" class="settings-form">
+            <div class="form-group">
+                <label for="password-input" class="form-label">Password</label>
+                <input type="password" id="password-input" name="password" class="account-input"
+                    placeholder="Enter new password" required>
+                <button type="submit" class="btn btn-secondary">Update Password</button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- Response Messages -->
+<div id="responseMessage" class="response-container">
+    {{ template "ResponseMessage" . }}
+</div>
+
+{{ end }}
+
 
 {{ block "Admin" .}}
 {{ if .IsAdmin }}
@@ -101,17 +113,17 @@
                     </div>
                     <div class="user-actions">
                         {{ if not .UserAdmin }}
-                        <button class="btn btn-sm btn-secondary" hx-post="/user/admin/{{ .UserID }}" 
+                        <button class="btn btn-sm btn-secondary" hx-post="/user/admin/{{ .UserID }}"
                             hx-target="#users-container" hx-swap="innerHTML">
                             Make Admin
                         </button>
                         {{ else }}
-                        <button class="btn btn-sm btn-outline" hx-delete="/user/admin/{{ .UserID }}" 
+                        <button class="btn btn-sm btn-outline" hx-delete="/user/admin/{{ .UserID }}"
                             hx-target="#users-container" hx-swap="innerHTML">
                             Remove Admin
                         </button>
                         {{ end }}
-                        <button class="btn btn-sm btn-danger" hx-delete="/user/{{ .UserID }}" 
+                        <button class="btn btn-sm btn-danger" hx-delete="/user/{{ .UserID }}"
                             hx-target="#users-container" hx-swap="innerHTML"
                             hx-confirm="Are you sure you want to delete this user?">
                             Delete User
@@ -119,13 +131,13 @@
                     </div>
                 </div>
                 {{ end }}
-        {{ else }}
-            <div class="empty-state large">
-                <div class="empty-icon">👤</div>
-                <h3 class="empty-title">Your User List is empty</h3>
-            </div>
+                {{ else }}
+                <div class="empty-state large">
+                    <div class="empty-icon">👤</div>
+                    <h3 class="empty-title">Your User List is empty</h3>
+                </div>
 
-        {{ end }}
+                {{ end }}
             </div>
         </div>
     </div>

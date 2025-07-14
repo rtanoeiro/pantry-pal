@@ -10,28 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (config *Config) ResetUsers(writer http.ResponseWriter, request *http.Request) {
-	// Update to check for admin privileges?
-	if config.Env != "dev" {
-		respondWithJSON(
-			writer,
-			http.StatusUnauthorized,
-			"Unable to perform this action in this environment",
-		)
-		return
-	}
-
-	errReset := config.Db.ResetTable(request.Context())
-	if errReset != nil {
-		respondWithJSON(writer, http.StatusInternalServerError, errReset.Error())
-		return
-	}
-
-	respondWithJSON(writer, http.StatusAccepted, []byte{})
-}
-
 func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Request) {
-	log.Println("User Info endpoint called")
 	userID, errUser := GetUserIDFromToken(request, writer, config)
 	if errUser != nil {
 		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
@@ -83,10 +62,6 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 	name := request.FormValue("name")
 	password := request.FormValue("password")
 
-	log.Println("Email from form:", email)
-	log.Println("Name from form: ", name)
-	log.Println("Password from form:", password)
-
 	_, userError := config.Db.GetUserByEmail(request.Context(), email)
 
 	if userError == nil {
@@ -117,16 +92,16 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 	log.Printf(
-		"User added with success - UserID:%s \n-Name:%s\n-Email: %s",
+		"User added with success at %s- UserID:%s \n-Name:%s\n-Email: %s",
 		userAdd.ID,
 		userAdd.Name,
 		userAdd.Email,
+		time.Now(),
 	)
 	config.Index(writer, request)
 }
 
 func (config *Config) DeleteUser(writer http.ResponseWriter, request *http.Request) {
-	log.Println("Delete User endpoint called")
 	adminUserID, errUser := GetUserIDFromToken(request, writer, config)
 	if errUser != nil {
 		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
@@ -159,7 +134,24 @@ func (config *Config) DeleteUser(writer http.ResponseWriter, request *http.Reque
 	config.Renderer.Render(writer, "Admin", userInfo)
 }
 
-// TODO: Find a way to improve the replacements of data when rendeding HTML, currently rendering everything
+func (config *Config) UpdateUserEmail(writer http.ResponseWriter, request *http.Request) {
+	log.Println("Update User Email endpoint called")
+	email := request.FormValue("email")
+	config.UpdateUser(writer, request, "email", email)
+}
+
+func (config *Config) UpdateUserName(writer http.ResponseWriter, request *http.Request) {
+	log.Println("Update User Name endpoint called")
+	name := request.FormValue("name")
+	config.UpdateUser(writer, request, "name", name)
+}
+
+func (config *Config) UpdateUserPassword(writer http.ResponseWriter, request *http.Request) {
+	log.Println("Update User Password endpoint called")
+	password := request.FormValue("password")
+	config.UpdateUser(writer, request, "password", password)
+}
+
 func (config *Config) UpdateUser(
 	writer http.ResponseWriter,
 	request *http.Request,
@@ -187,15 +179,15 @@ func (config *Config) UpdateUser(
 
 	switch updateType {
 	case "password":
-		log.Printf("Updating password for userID: %s", userID)
+		log.Printf("Updating password for userID: %s at %s", userID, time.Now())
 		config.handlePassword(writer, request, &userInfo, updateData)
 		return
 	case "email":
-		log.Printf("Updating email for userID: %s", userID)
+		log.Printf("Updating email for userID: %s at %s", userID, time.Now())
 		config.handleEmail(writer, request, &userInfo, updateData)
 		return
 	case "name":
-		log.Printf("Updating name for userID: %s", userID)
+		log.Printf("Updating name for userID:%s at %s", userID, time.Now())
 		config.handleName(writer, request, &userInfo, updateData)
 		return
 	default:
@@ -220,11 +212,9 @@ func (config *Config) handleName(
 		userInfo.ErrorMessage = "Error on updating user Name"
 		config.Renderer.Render(writer, "user", userInfo)
 	}
-	userInfo.Users = config.GetAllOtherUsers(writer, request, *userInfo)
-
 	userInfo.SuccessMessage = "Name updated with success!"
 	userInfo.UserName = updateData
-	config.Renderer.Render(writer, "user", userInfo)
+	config.Renderer.Render(writer, "UserInformation", userInfo)
 }
 
 func (config *Config) handleEmail(
@@ -237,8 +227,6 @@ func (config *Config) handleEmail(
 		Email: updateData,
 		ID:    userInfo.ID,
 	}
-	userInfo.Users = config.GetAllOtherUsers(writer, request, *userInfo)
-
 	errUpdate := config.Db.UpdateUserEmail(request.Context(), data)
 	if errUpdate != nil {
 		userInfo.ErrorMessage = "Error on updating user email"
@@ -247,7 +235,7 @@ func (config *Config) handleEmail(
 	}
 	userInfo.SuccessMessage = "Email updated with success!"
 	userInfo.UserEmail = updateData
-	config.Renderer.Render(writer, "user", userInfo)
+	config.Renderer.Render(writer, "UserInformation", userInfo)
 }
 
 func (config *Config) handlePassword(
@@ -266,7 +254,6 @@ func (config *Config) handlePassword(
 		PasswordHash: hashedPassword,
 		ID:           userInfo.ID,
 	}
-	userInfo.Users = config.GetAllOtherUsers(writer, request, *userInfo)
 
 	errUpdate := config.Db.UpdateUserPassword(request.Context(), data)
 	if errUpdate != nil {
@@ -277,24 +264,6 @@ func (config *Config) handlePassword(
 
 	userInfo.SuccessMessage = "Password updated with success!"
 	config.Renderer.Render(writer, "user", userInfo)
-}
-
-func (config *Config) UpdateUserEmail(writer http.ResponseWriter, request *http.Request) {
-	log.Println("Update User Email endpoint called")
-	email := request.FormValue("email")
-	config.UpdateUser(writer, request, "email", email)
-}
-
-func (config *Config) UpdateUserName(writer http.ResponseWriter, request *http.Request) {
-	log.Println("Update User Name endpoint called")
-	name := request.FormValue("name")
-	config.UpdateUser(writer, request, "name", name)
-}
-
-func (config *Config) UpdateUserPassword(writer http.ResponseWriter, request *http.Request) {
-	log.Println("Update User Password endpoint called")
-	password := request.FormValue("password")
-	config.UpdateUser(writer, request, "password", password)
 }
 
 // TODO: Modify these admin functions to be more generic
