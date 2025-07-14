@@ -7,27 +7,21 @@ PantryPal is a comprehensive, user-friendly application designed to help you man
 ### Core Features
 - **Pantry Management**: Add, remove, or update items in your virtual pantry.
 - **Expiry Tracking**: Monitor items as they approach their expiration date with configurable alerts.
+
+### In Development
 - **Shopping Cart Integration**: Sync your cart with the pantry to track what's on hand and plan your shopping list.
 - **Recipe Suggestions**: Search and filter recipes based on available ingredients. Generate meal plans using your pantry items.
 - **AI-Powered Meal Planning**: Use your local AI model (LLM) or access an external AI provider to get personalized recipe recommendations.
-
-### Advanced Features
-- **Multi-User Support**: Collaborate with friends and family by sharing pantries and managing recipes collectively.
 - **Dark Mode**: Choose between light or dark user interfaces for a personalized experience.
-- **Admin Panel**: Manage users, permissions, and system settings from one central location.
 
 ## Getting Started
-
-### Prerequisites
-2. Have Docker installed if you're setting up the application on a server.
-
 ### Installation
 
 #### Option 1: Docker (Recommended)
 You can run PantrPal using Docker, use the docker-compose-template.yml file to set up your container. Make sure to define a port, and to create. JWT Secret before running the container. You can rename your file to pantry-pal.yaml and run the following command:
 
 ```bash
-docker-compose -f pantry-pal.yml up
+docker-compose -f docker-compose.yml up
 ```
 
 ### Option 2: Binary
