@@ -22,7 +22,6 @@ func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Requ
 		respondWithJSON(writer, http.StatusBadRequest, errUser.Error())
 		return
 	}
-
 	userInfo := UserInfoRequest{
 		ID:             userData.ID,
 		UserName:       userData.Name,
@@ -32,14 +31,14 @@ func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Requ
 		ErrorMessage:   "",
 		SuccessMessage: "",
 	}
-	userInfo.Users = config.GetAllOtherUsers(writer, request, userInfo)
+	config.GetAllOtherUsers(writer, request, &userInfo)
 	config.Renderer.Render(writer, "user", userInfo)
 }
 
 func (config *Config) GetAllOtherUsers(
 	writer http.ResponseWriter,
 	request *http.Request,
-	userInfo UserInfoRequest,
+	userInfo *UserInfoRequest,
 ) []User {
 	var usersSlice []User
 	if userInfo.IsAdmin {
@@ -53,7 +52,7 @@ func (config *Config) GetAllOtherUsers(
 			})
 		}
 	}
-	log.Println("All other available users:", usersSlice)
+	userInfo.Users = usersSlice
 	return usersSlice
 }
 
@@ -130,7 +129,7 @@ func (config *Config) DeleteUser(writer http.ResponseWriter, request *http.Reque
 		config.Renderer.Render(writer, "Admin", userInfo)
 		return
 	}
-	userInfo.Users = config.GetAllOtherUsers(writer, request, userInfo)
+	config.GetAllOtherUsers(writer, request, &userInfo)
 	config.Renderer.Render(writer, "Admin", userInfo)
 }
 
@@ -266,58 +265,50 @@ func (config *Config) handlePassword(
 	config.Renderer.Render(writer, "user", userInfo)
 }
 
-// TODO: Modify these admin functions to be more generic
 func (config *Config) AddUserAdmin(writer http.ResponseWriter, request *http.Request) {
-	toUpdateuserID := request.PathValue("userID")
-	log.Println("User Add Admin endpoint called")
+	returnUser, userToAddAdmin := config.prepareUserAdmin(request, writer)
 
-	AdminUserID, errUser := GetUserIDFromToken(request, writer, config)
-	if errUser != nil {
-		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
-		return
-	}
-
-	userData, errUser := config.Db.GetUserById(request.Context(), AdminUserID)
-	if errUser != nil {
-		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
-		return
-	}
-	returnUser := UserInfoRequest{
-		ID:             userData.ID,
-		UserName:       userData.Name,
-		UserEmail:      userData.Email,
-		IsAdmin:        true,
-		ErrorMessage:   "",
-		SuccessMessage: "",
-		Users:          []User{},
-	}
-
-	errADmin := config.Db.MakeUserAdmin(request.Context(), toUpdateuserID)
+	errADmin := config.Db.MakeUserAdmin(request.Context(), userToAddAdmin)
 	if errADmin != nil {
 		returnUser.ErrorMessage = "Unable to Assign Admin to User!"
 		config.Renderer.Render(writer, "ResponseMessage", returnUser)
 		return
 	}
 
-	returnUser.Users = config.GetAllOtherUsers(writer, request, returnUser)
+	config.GetAllOtherUsers(writer, request, &returnUser)
 	returnUser.SuccessMessage = "User Added as Admin with Success!"
 	config.Renderer.Render(writer, "Admin", returnUser)
 }
 
 func (config *Config) RemoveUserAdmin(writer http.ResponseWriter, request *http.Request) {
-	toUpdateuserID := request.PathValue("userID")
-	log.Println("User Remove Admin endpoint called")
+	returnUser, userToRemoveAdmin := config.prepareUserAdmin(request, writer)
+
+	errADmin := config.Db.RemoveUserAdmin(request.Context(), userToRemoveAdmin)
+	if errADmin != nil {
+		returnUser.ErrorMessage = "Unable to Remove Admin to user!"
+		config.Renderer.Render(writer, "ResponseMessage", returnUser)
+		return
+	}
+
+	config.GetAllOtherUsers(writer, request, &returnUser)
+	returnUser.SuccessMessage = "User Removed as Admin with Success!"
+	config.Renderer.Render(writer, "Admin", returnUser)
+}
+
+func (config *Config) prepareUserAdmin(request *http.Request, writer http.ResponseWriter) (UserInfoRequest, string) {
+	UserID := request.PathValue("userID")
+	log.Printf("User Add Admin endpoint called. Path Value User ID %s", UserID)
 
 	AdminUserID, errUser := GetUserIDFromToken(request, writer, config)
 	if errUser != nil {
 		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
-		return
+		return UserInfoRequest{}, ""
 	}
 
 	userData, errUser := config.Db.GetUserById(request.Context(), AdminUserID)
 	if errUser != nil {
 		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
-		return
+		return UserInfoRequest{}, ""
 	}
 	returnUser := UserInfoRequest{
 		ID:             userData.ID,
@@ -328,14 +319,6 @@ func (config *Config) RemoveUserAdmin(writer http.ResponseWriter, request *http.
 		SuccessMessage: "",
 		Users:          []User{},
 	}
-	errADmin := config.Db.RemoveUserAdmin(request.Context(), toUpdateuserID)
-	if errADmin != nil {
-		returnUser.ErrorMessage = "Unable to Remove Admin to user!"
-		config.Renderer.Render(writer, "ResponseMessage", returnUser)
-		return
-	}
+	return returnUser, UserID
 
-	returnUser.Users = config.GetAllOtherUsers(writer, request, returnUser)
-	returnUser.SuccessMessage = "User Removed as Admin with Success!"
-	config.Renderer.Render(writer, "Admin", returnUser)
 }
