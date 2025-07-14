@@ -73,7 +73,7 @@ func (config *Config) Logout(writer http.ResponseWriter, request *http.Request) 
 		Expires:  time.Now().Add(6 * time.Hour),
 		HttpOnly: true,
 	})
-	writer.Header().Set("HX-Redirect", "/")
+	writer.Header().Set("HX-Redirect", "/login")
 	log.Println("User logged out")
 }
 
