@@ -87,9 +87,9 @@ type PantryItem struct {
 }
 
 type PantryItems struct {
+	Items          []PantryItem `json:"items"`
 	SuccessMessage string       `json:"success_message"`
 	ErrorMessage   string       `json:"error_message"`
-	Items          []PantryItem `json:"items"`
 }
 
 type PantryStats struct {
