@@ -6,17 +6,16 @@ import (
 )
 
 type User struct {
-	UserID    string
-	Name      string
-	Email     string
-	UserAdmin int64
+	ID        string
+	UserName  string
+	UserEmail string
+	IsAdmin   bool
 }
 
 type Templates struct {
 	templates *template.Template
 }
 
-// To be used when we use javascript
 type CreateUserRequest struct {
 	Name     string
 	Email    string

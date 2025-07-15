@@ -10,52 +10,6 @@ import (
 	"github.com/google/uuid"
 )
 
-func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Request) {
-	userID, errUser := GetUserIDFromToken(request, writer, config)
-	if errUser != nil {
-		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
-		return
-	}
-	userData, errUser := config.Db.GetUserById(request.Context(), userID)
-
-	if errUser != nil {
-		respondWithJSON(writer, http.StatusBadRequest, errUser.Error())
-		return
-	}
-	userInfo := UserInfoRequest{
-		ID:             userData.ID,
-		UserName:       userData.Name,
-		UserEmail:      userData.Email,
-		IsAdmin:        userData.IsAdmin.Valid,
-		Users:          []User{},
-		ErrorMessage:   "",
-		SuccessMessage: "",
-	}
-	config.GetAllOtherUsers(writer, request, &userInfo)
-	config.Renderer.Render(writer, "user", userInfo)
-}
-
-func (config *Config) GetAllOtherUsers(
-	writer http.ResponseWriter,
-	request *http.Request,
-	userInfo *UserInfoRequest,
-) []User {
-	var usersSlice []User
-	if userInfo.IsAdmin {
-		allOtherUsers, _ := config.Db.GetAllUsers(request.Context(), userInfo.ID)
-		for _, user := range allOtherUsers {
-			usersSlice = append(usersSlice, User{
-				UserID:    user.ID,
-				Name:      user.Name,
-				Email:     user.Email,
-				UserAdmin: user.IsAdmin.Int64,
-			})
-		}
-	}
-	userInfo.Users = usersSlice
-	return usersSlice
-}
-
 func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Request) {
 	email := request.FormValue("email")
 	name := request.FormValue("name")
@@ -100,6 +54,50 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 	config.Index(writer, request)
 }
 
+func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Request) {
+	userID, errUser := GetUserIDFromToken(request, writer, config)
+	var UserPageData UserInfoRequest
+	// TODO: Create fuction to redirect to a 401 page
+	if errUser != nil {
+		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
+		return
+	}
+	userData, errUser := config.Db.GetUserById(request.Context(), userID)
+	if errUser != nil {
+		UserPageData.ErrorMessage = "Unable to load user info"
+		config.Renderer.Render(writer, "user", UserPageData)
+		return
+	}
+	UserPageData.ID = userData.ID
+	UserPageData.UserName = userData.Name
+	UserPageData.UserEmail = userData.Email
+	UserPageData.IsAdmin = userData.IsAdmin.Valid
+
+	config.GetAllOtherUsers(writer, request, &UserPageData)
+	config.Renderer.Render(writer, "user", UserPageData)
+}
+
+func (config *Config) GetAllOtherUsers(
+	writer http.ResponseWriter,
+	request *http.Request,
+	userInfo *UserInfoRequest,
+) []User {
+	var usersSlice []User
+	if userInfo.IsAdmin {
+		allOtherUsers, _ := config.Db.GetAllUsers(request.Context(), userInfo.ID)
+		for _, user := range allOtherUsers {
+			usersSlice = append(usersSlice, User{
+				ID:        user.ID,
+				UserName:  user.Name,
+				UserEmail: user.Email,
+				IsAdmin:   user.IsAdmin.Valid,
+			})
+		}
+	}
+	userInfo.Users = usersSlice
+	return usersSlice
+}
+
 func (config *Config) DeleteUser(writer http.ResponseWriter, request *http.Request) {
 	adminUserID, errUser := GetUserIDFromToken(request, writer, config)
 	if errUser != nil {
@@ -111,7 +109,6 @@ func (config *Config) DeleteUser(writer http.ResponseWriter, request *http.Reque
 		respondWithJSON(writer, http.StatusBadRequest, errUser.Error())
 		return
 	}
-
 	userInfo := UserInfoRequest{
 		ID:             userData.ID,
 		UserName:       userData.Name,
@@ -166,6 +163,7 @@ func (config *Config) UpdateUser(
 		respondWithJSON(writer, http.StatusBadRequest, errUser.Error())
 		return
 	}
+	// TODO: No need for the whole list of other users, just the updated user data
 	userInfo := UserInfoRequest{
 		ID:             userData.ID,
 		UserName:       userData.Name,
@@ -310,6 +308,7 @@ func (config *Config) prepareUserAdmin(request *http.Request, writer http.Respon
 		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
 		return UserInfoRequest{}, ""
 	}
+	// TODO: No need for the whole user info request, just a list of users
 	returnUser := UserInfoRequest{
 		ID:             userData.ID,
 		UserName:       userData.Name,
