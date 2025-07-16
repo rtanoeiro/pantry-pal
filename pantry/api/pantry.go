@@ -202,7 +202,7 @@ func (config *Config) DeleteItem(writer http.ResponseWriter, request *http.Reque
 }
 
 func (config *Config) RenderExpiringSoon(writer http.ResponseWriter, request *http.Request) {
-	var pantryItems PantryItems
+	var pantryItems PantryStats
 	userID, errUser := GetUserIDFromToken(request, writer, config)
 	if errUser != nil {
 		log.Printf("Unable to get expiring soon items. unauthorised User ID at %s", time.Now())
@@ -227,6 +227,6 @@ func (config *Config) RenderExpiringSoon(writer http.ResponseWriter, request *ht
 			ExpiryAt: item.ExpiryAt,
 		}
 	}
-	pantryItems.Items = expiringSoonItems
+	pantryItems.ExpiringSoon = expiringSoonItems
 	config.Renderer.Render(writer, "expiringSoonBlock", pantryItems)
 }
