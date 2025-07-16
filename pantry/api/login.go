@@ -20,12 +20,12 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 
 	if errEmail != nil {
 		config.Renderer.Render(writer, "errorLogin", CreateErrorMessageInterfaces("Invalid Email"))
-		log.Println("Invalid email during login:", errEmail)
+		log.Printf("Email %s failed login at %s:", email, time.Now())
 		return
 	}
 	if CheckPasswordHash(password, user.PasswordHash) != nil {
 		config.Renderer.Render(writer, "errorLogin", CreateErrorMessageInterfaces("Wrong Password"))
-		log.Println("Invalid password during login")
+		log.Printf("Email %s failed login with wrong password at %s:", email, time.Now())
 		return
 	}
 
@@ -36,10 +36,9 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 			"errorLogin",
 			CreateErrorMessageInterfaces("Error request on getting user, please try again"),
 		)
-		log.Println("Error on making JWT During Login:", errJWTToken)
+		log.Printf("Failed creating JWT Tokenat %s:", time.Now())
 		return
 	}
-	log.Println("JWT Token Created with Success during login:", userJWTToken)
 
 	http.SetCookie(writer, &http.Cookie{
 		Name:     "JWTToken",
@@ -48,7 +47,7 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 		HttpOnly: true,
 	})
 	writer.Header().Set("HX-Redirect", "/home")
-	log.Println("User logged in with success. Redirecting to Home Page...")
+	log.Printf("User %s logged in with success. Redirecting to Home Page...", email)
 }
 
 func (config *Config) Logout(writer http.ResponseWriter, request *http.Request) {
@@ -59,25 +58,26 @@ func (config *Config) Logout(writer http.ResponseWriter, request *http.Request) 
 		HttpOnly: true,
 	})
 	writer.Header().Set("HX-Redirect", "/login")
-	log.Println("User logged out")
+	userID, errUser := GetUserIDFromToken(request, writer, config)
+	if errUser != nil {
+		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
+		config.Renderer.Render(writer, "ResponseMessage", CreateErrorMessageInterfaces("Unable to retrieve user data"))
+		return
+	}
+
+	log.Printf("User %s logged out at %s", userID, time.Now())
 }
 
 func (config *Config) SignUp(writer http.ResponseWriter, request *http.Request) {
 	config.Renderer.Render(writer, "signup", nil)
-	log.Println("User entered SignUp Page...")
 }
 
-// TODO: Add Check UserID from JWT
 func (config *Config) Home(writer http.ResponseWriter, request *http.Request) {
-	returnPantry := map[string]interface{}{
-		"ErrorMessage":   "",
-		"SuccessMessage": "",
-	}
-
+	var returnPantry CurrentUserRequest
 	userID, errUser := GetUserIDFromToken(request, writer, config)
 	if errUser != nil {
 		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
-		returnPantry["ErrorMessage"] = "Unable to retrieve user Pantry Items"
+		returnPantry.ErrorMessage = "Unable to retrieve user Pantry Items"
 		config.Renderer.Render(writer, "ResponseMessage", returnPantry)
 		return
 	}
@@ -85,13 +85,13 @@ func (config *Config) Home(writer http.ResponseWriter, request *http.Request) {
 	user, userError := config.Db.GetUserById(request.Context(), userID)
 	if userError != nil {
 		respondWithJSON(writer, http.StatusUnauthorized, userError.Error())
-		returnPantry["ErrorMessage"] = "Unable to retrieve user Pantry Items"
+		returnPantry.ErrorMessage = "Unable to retrieve user Pantry Items"
 		config.Renderer.Render(writer, "ResponseMessage", returnPantry)
 		writer.Header().Set("HX-Redirect", "/")
 		return
 	}
 
-	returnPantry["UserName"] = user.Name
+	returnPantry.UserName = user.Name
 	config.Renderer.Render(writer, "home", returnPantry)
 	log.Println("User entered Home Page...")
 }
