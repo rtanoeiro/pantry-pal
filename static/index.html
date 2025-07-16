@@ -50,10 +50,10 @@
 {{ end }}
 
 {{ block "errorLogin" . }}
-{{ if .Message }}
+{{ if .ErrorMessage }}
 <div class="alert alert-error">
     <span class="alert-icon">✕</span>
-    {{ .Message }}
+    {{ .ErrorMessage }}
 </div>
 {{ end }}
 {{ end }}
