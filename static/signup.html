@@ -18,23 +18,27 @@
                 <p class="auth-subtitle">Join Pantry Pal and start managing your kitchen smarter</p>
             </div>
 
-            <form id="signupForm" action="signup" method="POST" hx-target="#error-signup" hx-swap="innerHTML" class="auth-form">
+            <form id="signupForm" action="signup" method="POST" hx-target="#error-signup" hx-swap="innerHTML"
+                class="auth-form">
                 <div class="form-group">
                     <label for="name" class="form-label">Full Name</label>
-                    <input type="text" id="name" name="name" class="form-input" placeholder="Enter your full name" required>
+                    <input type="text" id="name" name="name" class="form-input" placeholder="Enter your full name"
+                        required>
                 </div>
 
                 <div class="form-group">
                     <label for="email" class="form-label">Email Address</label>
-                    <input type="email" id="email" name="email" class="form-input" placeholder="Enter your email" required>
+                    <input type="email" id="email" name="email" class="form-input" placeholder="Enter your email"
+                        required>
                 </div>
 
                 <div class="form-group">
                     <label for="password" class="form-label">Password</label>
-                    <input type="password" id="password" name="password" class="form-input" placeholder="Create a secure password" required>
+                    <input type="password" id="password" name="password" class="form-input"
+                        placeholder="Create a secure password" required>
                 </div>
 
-            {{ template "errorSignup" . }}
+                {{ template "errorSignup" . }}
 
                 <button type="submit" class="btn btn-primary btn-full">Create Account</button>
             </form>
@@ -53,11 +57,11 @@
 {{ end }}
 
 {{ block "errorSignup" .}}
-{{ if .Message }}
-<div id="error-signup" class="error-message">
-    <div class="error-content">
-        {{ .Message }}
-    </div>
+{{ if .ErrorMessage }}
+<div class="alert alert-error">
+    <span class="alert-icon">✕</span>
+    {{ .ErrorMessage }}
 </div>
+
 {{ end }}
 {{ end }}
