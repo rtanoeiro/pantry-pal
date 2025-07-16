@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -11,6 +12,7 @@ import (
 )
 
 func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Request) {
+	var returnResponse SuccessErrorResponse
 	email := request.FormValue("email")
 	name := request.FormValue("name")
 	password := request.FormValue("password")
@@ -18,17 +20,15 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 	_, userError := config.Db.GetUserByEmail(request.Context(), email)
 
 	if userError == nil {
-		config.Renderer.Render(
-			writer,
-			"signup",
-			CreateErrorMessageInterfaces("User already exists"),
-		)
+		returnResponse.ErrorMessage = "Email already registered, please try again"
+		config.Renderer.Render(writer, "signup", returnResponse)
 		return
 	}
 
 	hashedPassword, errPwd := HashPassword(password)
 	if errPwd != nil {
-		respondWithJSON(writer, http.StatusInternalServerError, errPwd.Error())
+		returnResponse.ErrorMessage = "Server error, please try again"
+		config.Renderer.Render(writer, "signup", returnResponse)
 		return
 	}
 	createUser := database.CreateUserParams{
@@ -41,7 +41,8 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 	}
 	userAdd, errAdd := config.Db.CreateUser(request.Context(), createUser)
 	if errAdd != nil {
-		respondWithJSON(writer, http.StatusInternalServerError, errAdd.Error())
+		returnResponse.ErrorMessage = "Failed adding user to our systems, please try again"
+		config.Renderer.Render(writer, "signup", returnResponse)
 		return
 	}
 	log.Printf(
@@ -59,12 +60,13 @@ func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Requ
 	var UserPageData UserInfoRequest
 	// TODO: Create fuction to redirect to a 401 page
 	if errUser != nil {
-		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
+		UserPageData.ErrorMessage = fmt.Sprintf("Unable to load user info. Error: %s", errUser.Error())
+		config.Renderer.Render(writer, "user", UserPageData)
 		return
 	}
 	userData, errUser := config.Db.GetUserById(request.Context(), userID)
 	if errUser != nil {
-		UserPageData.ErrorMessage = "Unable to load user info"
+		UserPageData.ErrorMessage = fmt.Sprintf("Unable to load user info. Error: %s", errUser.Error())
 		config.Renderer.Render(writer, "user", UserPageData)
 		return
 	}
@@ -100,30 +102,29 @@ func (config *Config) GetAllOtherUsers(
 }
 
 func (config *Config) DeleteUser(writer http.ResponseWriter, request *http.Request) {
+	var userInfo UserInfoRequest
 	adminUserID, errUser := GetUserIDFromToken(request, writer, config)
 	if errUser != nil {
-		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
+		userInfo.ErrorMessage = fmt.Sprintf("Unable to get current user data. Error: %s", errUser.Error())
+		config.Renderer.Render(writer, "ResponseMessage", userInfo)
 		return
 	}
 	userData, errUser := config.Db.GetUserById(request.Context(), adminUserID)
 	if errUser != nil {
-		respondWithJSON(writer, http.StatusBadRequest, errUser.Error())
+		userInfo.ErrorMessage = fmt.Sprintf("Unable to get current user data. Error: %s", errUser.Error())
+		config.Renderer.Render(writer, "ResponseMessage", userInfo)
 		return
 	}
-	userInfo := UserInfoRequest{
-		ID:             userData.ID,
-		UserName:       userData.Name,
-		UserEmail:      userData.Email,
-		IsAdmin:        userData.IsAdmin.Int64,
-		Users:          []User{},
-		ErrorMessage:   "",
-		SuccessMessage: "",
-	}
+	userInfo.ID = userData.ID
+	userInfo.UserName = userData.Name
+	userInfo.UserEmail = userData.Email
+	userInfo.IsAdmin = userData.IsAdmin.Int64
+	userInfo.Users = []User{}
+
 	userIDToDelete := request.PathValue("UserID")
 	errDelete := config.Db.DeleteUser(request.Context(), userIDToDelete)
 	if errDelete != nil {
-		respondWithJSON(writer, http.StatusBadRequest, errDelete.Error())
-		userInfo.ErrorMessage = "Error on deleting user"
+		userInfo.ErrorMessage = fmt.Sprintf("Unable to delete user. Please try again. Error: %s", errDelete.Error())
 		config.Renderer.Render(writer, "Admin", userInfo)
 		return
 	}
@@ -154,22 +155,23 @@ func (config *Config) UpdateUser(
 	request *http.Request,
 	updateType, updateData string,
 ) {
+	var userInfo CurrentUserRequest
 	userID, errUser := GetUserIDFromToken(request, writer, config)
 	if errUser != nil {
-		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
+		userInfo.ErrorMessage = fmt.Sprintf("Unable to get current user data. Error: %s", errUser.Error())
+		config.Renderer.Render(writer, "ResponseMessage", userInfo)
 		return
 	}
 	userData, errUser := config.Db.GetUserById(request.Context(), userID)
 	if errUser != nil {
-		respondWithJSON(writer, http.StatusBadRequest, errUser.Error())
+		userInfo.ErrorMessage = fmt.Sprintf("Unable to get current user data. Error: %s", errUser.Error())
+		config.Renderer.Render(writer, "ResponseMessage", userInfo)
 		return
 	}
-	userInfo := CurrentUserRequest{
-		ID:        userData.ID,
-		UserName:  userData.Name,
-		UserEmail: userData.Email,
-		IsAdmin:   userData.IsAdmin.Int64,
-	}
+	userInfo.ID = userData.ID
+	userInfo.UserName = userData.Name
+	userInfo.UserEmail = userData.Email
+	userInfo.IsAdmin = userData.IsAdmin.Int64
 
 	switch updateType {
 	case "password":
@@ -240,8 +242,7 @@ func (config *Config) handlePassword(
 ) {
 	hashedPassword, errPWD := HashPassword(updateData)
 	if errPWD != nil {
-		respondWithJSON(writer, http.StatusInternalServerError, errPWD.Error())
-		userInfo.ErrorMessage = "Error on hashing password"
+		userInfo.ErrorMessage = "Error on changing password, please try again"
 		config.Renderer.Render(writer, "user", userInfo)
 	}
 	data := database.UpdateUserPasswordParams{
@@ -290,27 +291,24 @@ func (config *Config) RevokeUserAdmin(writer http.ResponseWriter, request *http.
 
 func (config *Config) prepareUserAdmin(request *http.Request, writer http.ResponseWriter) (UserInfoRequest, string) {
 	UserID := request.PathValue("UserID")
+	var userInfo UserInfoRequest
 	AdminUserID, errUser := GetUserIDFromToken(request, writer, config)
 	if errUser != nil {
-		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
+		userInfo.ErrorMessage = "Unable to get current user data" + errUser.Error()
+		config.Renderer.Render(writer, "ResponseMessage", userInfo)
 		return UserInfoRequest{}, ""
 	}
 
 	userData, errUser := config.Db.GetUserById(request.Context(), AdminUserID)
 	if errUser != nil {
-		respondWithJSON(writer, http.StatusUnauthorized, errUser.Error())
+		userInfo.ErrorMessage = "Unable to get current user data" + errUser.Error()
+		config.Renderer.Render(writer, "ResponseMessage", userInfo)
 		return UserInfoRequest{}, ""
 	}
-	// TODO: No need for the whole user info request, just a list of users
-	returnUser := UserInfoRequest{
-		ID:             userData.ID,
-		UserName:       userData.Name,
-		UserEmail:      userData.Email,
-		IsAdmin:        1,
-		ErrorMessage:   "",
-		SuccessMessage: "",
-		Users:          []User{},
-	}
-	return returnUser, UserID
+	userInfo.ID = userData.ID
+	userInfo.UserName = userData.Name
+	userInfo.UserEmail = userData.Email
+	userInfo.IsAdmin = 1
+	return userInfo, UserID
 
 }
