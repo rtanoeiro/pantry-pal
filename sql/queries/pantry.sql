@@ -36,11 +36,6 @@ FROM pantry
 WHERE user_id = ?
 ORDER BY expiry_at DESC;
 
--- name: GetTotalNumberOfItems :one
-SELECT COUNT(distinct item_name) as total
-FROM pantry
-WHERE user_id = ?;
-
 -- name: GetExpiringSoon :many
 select item_name, quantity, expiry_at
 from pantry
