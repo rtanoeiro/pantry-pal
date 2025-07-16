@@ -102,7 +102,9 @@ type PantryItems struct {
 }
 
 type PantryStats struct {
-	ExpiringSoon []PantryItem
+	ExpiringSoon   []PantryItem
+	SuccessMessage string
+	ErrorMessage   string
 }
 
 type SuccessErrorResponse struct {
