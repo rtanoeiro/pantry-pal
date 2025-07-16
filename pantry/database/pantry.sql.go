@@ -163,19 +163,6 @@ func (q *Queries) GetExpiringSoon(ctx context.Context, userID string) ([]GetExpi
 	return items, nil
 }
 
-const getTotalNumberOfItems = `-- name: GetTotalNumberOfItems :one
-SELECT COUNT(distinct item_name) as total
-FROM pantry
-WHERE user_id = ?
-`
-
-func (q *Queries) GetTotalNumberOfItems(ctx context.Context, userID string) (int64, error) {
-	row := q.db.QueryRowContext(ctx, getTotalNumberOfItems, userID)
-	var total int64
-	err := row.Scan(&total)
-	return total, err
-}
-
 const removeItem = `-- name: RemoveItem :one
 DELETE FROM pantry
 WHERE id = ?

@@ -67,7 +67,3 @@ SELECT id, name, email, password_hash, created_at, updated_at, is_admin
 FROM users
 WHERE id != ?
 ORDER BY created_at DESC;
-
--- name: ResetTable :exec
-DELETE FROM users
-WHERE email != 'admin@admin.com';

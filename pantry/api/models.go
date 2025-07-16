@@ -6,17 +6,16 @@ import (
 )
 
 type User struct {
-	UserID    string
-	Name      string
-	Email     string
-	UserAdmin int64
+	UserID      string
+	UserName    string
+	UserEmail   string
+	IsUserAdmin int64
 }
 
 type Templates struct {
 	templates *template.Template
 }
 
-// To be used when we use javascript
 type CreateUserRequest struct {
 	Name     string
 	Email    string
@@ -29,17 +28,20 @@ type CreateUserResponse struct {
 	Email string `json:"email"`
 }
 
-// To be used when we use javascript
-type LoginUserRequest struct {
-	Email    string
-	Password string
+type CurrentUserRequest struct {
+	ID             string
+	UserName       string
+	UserEmail      string
+	IsAdmin        int64
+	ErrorMessage   string `json:"error_message"`
+	SuccessMessage string `json:"success_message"`
 }
 
 type UserInfoRequest struct {
 	ID             string `json:"id"`
 	UserName       string `json:"name"`
 	UserEmail      string `json:"email"`
-	IsAdmin        bool   `json:"is_admin"`
+	IsAdmin        int64  `json:"is_admin"`
 	Users          []User `json:"users"`
 	ErrorMessage   string `json:"error_message"`
 	SuccessMessage string `json:"success_message"`
@@ -86,7 +88,6 @@ type UpdateItemResponse struct {
 	ExpiryAt string `json:"expiry_at"`
 }
 
-// To Be used in HomePage
 type PantryItem struct {
 	ItemID   string `json:"item_id"`
 	ItemName string `json:"item_name"`
@@ -95,18 +96,13 @@ type PantryItem struct {
 }
 
 type PantryItems struct {
+	Items          []PantryItem `json:"items"`
 	SuccessMessage string       `json:"success_message"`
 	ErrorMessage   string       `json:"error_message"`
-	Items          []PantryItem `json:"items"`
-}
-type ItemShopping struct {
-	ItemName string `json:"item_id"`
-	Quantity int    `json:"quantity"`
 }
 
 type PantryStats struct {
 	ExpiringSoon []PantryItem
-	ShoppingList []ItemShopping
 }
 
 type SuccessErrorResponse struct {

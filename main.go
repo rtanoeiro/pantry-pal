@@ -36,9 +36,6 @@ func main() {
 
 	httpServerMux.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("css"))))
 
-	// Reset - Used in dev for testing
-	httpServerMux.Handle("POST /reset", http.HandlerFunc(config.ResetUsers))
-
 	// Login
 	httpServerMux.Handle("GET /login", http.HandlerFunc(config.Index))
 	httpServerMux.Handle("POST /login", http.HandlerFunc(config.Login))
@@ -49,19 +46,18 @@ func main() {
 
 	// Users endpoints
 	httpServerMux.Handle("GET /user", http.HandlerFunc(config.GetUserInfo))
-	httpServerMux.Handle("DELETE /user/{userID}", http.HandlerFunc(config.DeleteUser))
-	httpServerMux.Handle("POST /user/admin/{userID}", http.HandlerFunc(config.AddUserAdmin))
-	httpServerMux.Handle("DELETE /user/admin/{userID}", http.HandlerFunc(config.RemoveUserAdmin))
+	httpServerMux.Handle("DELETE /user/{UserID}", http.HandlerFunc(config.DeleteUser))
+	httpServerMux.Handle("POST /user/admin/{UserID}", http.HandlerFunc(config.AddUserAdmin))
+	httpServerMux.Handle("DELETE /user/admin/{UserID}", http.HandlerFunc(config.RevokeUserAdmin))
 	httpServerMux.Handle("POST /user/email", http.HandlerFunc(config.UpdateUserEmail))
 	httpServerMux.Handle("POST /user/name", http.HandlerFunc(config.UpdateUserName))
 	httpServerMux.Handle("POST /user/password", http.HandlerFunc(config.UpdateUserPassword))
 
 	// Pantry endpoints
 	httpServerMux.Handle("POST /pantry", http.HandlerFunc(config.HandleNewItem))
-	httpServerMux.Handle("GET /pantry/{itemName}", http.HandlerFunc(config.GetItemByName))
 	httpServerMux.Handle("GET /pantry", http.HandlerFunc(config.GetAllPantryItems))
 	httpServerMux.Handle("GET /expiring", http.HandlerFunc(config.RenderExpiringSoon))
-	httpServerMux.Handle("DELETE /pantry/{itemID}", http.HandlerFunc(config.DeleteItem))
+	httpServerMux.Handle("DELETE /pantry/{ItemID}", http.HandlerFunc(config.DeleteItem))
 
 	httpServer := http.Server{
 		Handler:           httpServerMux,

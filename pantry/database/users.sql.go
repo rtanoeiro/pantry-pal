@@ -186,16 +186,6 @@ func (q *Queries) RemoveUserAdmin(ctx context.Context, id string) error {
 	return err
 }
 
-const resetTable = `-- name: ResetTable :exec
-DELETE FROM users
-WHERE email != 'admin@admin.com'
-`
-
-func (q *Queries) ResetTable(ctx context.Context) error {
-	_, err := q.db.ExecContext(ctx, resetTable)
-	return err
-}
-
 const updateUserEmail = `-- name: UpdateUserEmail :exec
 UPDATE users
 SET 
