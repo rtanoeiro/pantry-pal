@@ -2,7 +2,6 @@ package api
 
 import (
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"html/template"
 	"io"
@@ -33,23 +32,6 @@ func CloseDB(dbConn *sql.DB) {
 		log.Println("Error closing database connection:", err)
 	} else {
 		log.Println("Database connection closed successfully.")
-	}
-}
-
-func respondWithJSON(writer http.ResponseWriter, code int, data interface{}) {
-	writer.Header().Set("Content-Type", "application/json; charset=utf-8")
-	writer.WriteHeader(code)
-	results, _ := json.Marshal(data)
-	_, errorWriter := writer.Write(results)
-	if errorWriter != nil {
-		log.Println("Error writing response:", errorWriter)
-		return
-	}
-}
-
-func CreateErrorMessageInterfaces(message string) map[string]interface{} {
-	return map[string]interface{}{
-		"Message": message,
 	}
 }
 
@@ -104,7 +86,7 @@ func GetJWTFromCookie(request *http.Request) (string, error) {
 	return jwtToken.Value, nil
 }
 
-func checkDate(givenDate string) bool {
+func ValidateDate(givenDate string) bool {
 	dateLayout := "2006-01-02"
 	formattedDate, errParse := time.Parse(dateLayout, givenDate)
 
