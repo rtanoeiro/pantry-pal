@@ -32,7 +32,7 @@ func (config *Config) HandleNewItem(writer http.ResponseWriter, request *http.Re
 		return
 	}
 
-	userID, errUser := GetUserIDFromToken(request, writer, config)
+	userID, errUser := GetUserIDFromTokenAndValidate(request, config)
 	if errUser != nil {
 		returnPantry.ErrorMessage = fmt.Sprintf("Unable to retrieve user Pantry Items. Error: %s", errUser.Error())
 		config.Renderer.Render(writer, "ResponseMessage", returnPantry)
@@ -142,7 +142,7 @@ func (config *Config) ItemAdd(
 
 func (config *Config) GetAllPantryItems(writer http.ResponseWriter, request *http.Request) {
 	var returnPantry PantryItems
-	userID, errUser := GetUserIDFromToken(request, writer, config)
+	userID, errUser := GetUserIDFromTokenAndValidate(request, config)
 	if errUser != nil {
 		log.Printf("Unable to retrieve pantry items from user %s at %s. Error on User Token", userID, time.Now())
 		returnPantry.ErrorMessage = fmt.Sprintf("Unable to retrieve user Pantry Items. Error: %s", errUser.Error())
@@ -175,7 +175,7 @@ func (config *Config) GetAllPantryItems(writer http.ResponseWriter, request *htt
 func (config *Config) DeleteItem(writer http.ResponseWriter, request *http.Request) {
 	var returnMessage SuccessErrorResponse
 	itemID := request.PathValue("ItemID")
-	userID, errUser := GetUserIDFromToken(request, writer, config)
+	userID, errUser := GetUserIDFromTokenAndValidate(request, config)
 	if errUser != nil {
 		log.Printf("Error on deleting item from user %s at %s. Invalid token", userID, time.Now())
 		returnMessage.ErrorMessage = fmt.Sprintf("Unable to retrieve user Pantry Items. Error: %s", errUser.Error())
@@ -203,7 +203,7 @@ func (config *Config) DeleteItem(writer http.ResponseWriter, request *http.Reque
 
 func (config *Config) RenderExpiringSoon(writer http.ResponseWriter, request *http.Request) {
 	var pantryItems PantryStats
-	userID, errUser := GetUserIDFromToken(request, writer, config)
+	userID, errUser := GetUserIDFromTokenAndValidate(request, config)
 	if errUser != nil {
 		log.Printf("Unable to get expiring soon items. unauthorised User ID at %s", time.Now())
 		pantryItems.ErrorMessage = fmt.Sprintf("Unable to retrieve expiring soon items. Error: %s", errUser.Error())

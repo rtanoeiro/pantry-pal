@@ -60,7 +60,7 @@ func (config *Config) Logout(writer http.ResponseWriter, request *http.Request) 
 		HttpOnly: true,
 	})
 	writer.Header().Set("HX-Redirect", "/login")
-	userID, errUser := GetUserIDFromToken(request, writer, config)
+	userID, errUser := GetUserIDFromTokenAndValidate(request, config)
 	if errUser != nil {
 		renderLogout.ErrorMessage = fmt.Sprintf("Unable to retrieve user data. Error: %s", errUser.Error())
 		config.Renderer.Render(writer, "ResponseMessage", renderLogout)
@@ -76,7 +76,7 @@ func (config *Config) SignUp(writer http.ResponseWriter, request *http.Request) 
 
 func (config *Config) Home(writer http.ResponseWriter, request *http.Request) {
 	var returnPantry CurrentUserRequest
-	userID, errUser := GetUserIDFromToken(request, writer, config)
+	userID, errUser := GetUserIDFromTokenAndValidate(request, config)
 	if errUser != nil {
 		returnPantry.ErrorMessage = fmt.Sprintf("Unable to retrieve user Pantry Items. Error: %s", errUser.Error())
 		config.Renderer.Render(writer, "ResponseMessage", returnPantry)

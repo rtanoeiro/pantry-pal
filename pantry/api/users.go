@@ -56,7 +56,7 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 }
 
 func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Request) {
-	userID, errUser := GetUserIDFromToken(request, writer, config)
+	userID, errUser := GetUserIDFromTokenAndValidate(request, config)
 	var UserPageData UserInfoRequest
 	// TODO: Create fuction to redirect to a 401 page
 	if errUser != nil {
@@ -103,7 +103,7 @@ func (config *Config) GetAllOtherUsers(
 
 func (config *Config) DeleteUser(writer http.ResponseWriter, request *http.Request) {
 	var userInfo UserInfoRequest
-	adminUserID, errUser := GetUserIDFromToken(request, writer, config)
+	adminUserID, errUser := GetUserIDFromTokenAndValidate(request, config)
 	if errUser != nil {
 		userInfo.ErrorMessage = fmt.Sprintf("Unable to get current user data. Error: %s", errUser.Error())
 		config.Renderer.Render(writer, "ResponseMessage", userInfo)
@@ -156,7 +156,7 @@ func (config *Config) UpdateUser(
 	updateType, updateData string,
 ) {
 	var userInfo CurrentUserRequest
-	userID, errUser := GetUserIDFromToken(request, writer, config)
+	userID, errUser := GetUserIDFromTokenAndValidate(request, config)
 	if errUser != nil {
 		userInfo.ErrorMessage = fmt.Sprintf("Unable to get current user data. Error: %s", errUser.Error())
 		config.Renderer.Render(writer, "ResponseMessage", userInfo)
@@ -292,7 +292,7 @@ func (config *Config) RevokeUserAdmin(writer http.ResponseWriter, request *http.
 func (config *Config) prepareUserAdmin(request *http.Request, writer http.ResponseWriter) (UserInfoRequest, string) {
 	UserID := request.PathValue("UserID")
 	var userInfo UserInfoRequest
-	AdminUserID, errUser := GetUserIDFromToken(request, writer, config)
+	AdminUserID, errUser := GetUserIDFromTokenAndValidate(request, config)
 	if errUser != nil {
 		userInfo.ErrorMessage = "Unable to get current user data" + errUser.Error()
 		config.Renderer.Render(writer, "ResponseMessage", userInfo)
