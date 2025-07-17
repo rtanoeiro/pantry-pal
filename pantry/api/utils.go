@@ -96,10 +96,8 @@ func ValidateDate(givenDate string) bool {
 	return !formattedDate.Before(time.Now())
 }
 
-// Split into two functions one to get JWT and another to validate it
-func GetUserIDFromToken(
+func GetUserIDFromTokenAndValidate(
 	request *http.Request,
-	writer http.ResponseWriter,
 	config *Config,
 ) (string, error) {
 	token, errTk := GetJWTFromCookie(request)
