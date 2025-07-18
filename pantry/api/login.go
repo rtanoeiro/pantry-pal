@@ -12,6 +12,29 @@ func (config *Config) Index(writer http.ResponseWriter, request *http.Request) {
 	config.Renderer.Render(writer, "index", nil)
 }
 
+func (config *Config) Logout(writer http.ResponseWriter, request *http.Request) {
+	var renderLogout SuccessErrorResponse
+	http.SetCookie(writer, &http.Cookie{
+		Name:     "JWTToken",
+		Value:    "",
+		Expires:  time.Now().Add(6 * time.Hour),
+		HttpOnly: true,
+	})
+	writer.Header().Set("HX-Redirect", "/login")
+	userID, errUser := GetUserIDFromTokenAndValidate(request, config)
+	if errUser != nil {
+		renderLogout.ErrorMessage = fmt.Sprintf("Unable to retrieve user data. Error: %s", errUser.Error())
+		config.Renderer.Render(writer, "ResponseMessage", renderLogout)
+		return
+	}
+
+	log.Printf("User %s logged out at %s", userID, time.Now())
+}
+
+func (config *Config) SignUp(writer http.ResponseWriter, request *http.Request) {
+	config.Renderer.Render(writer, "signup", nil)
+}
+
 func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 	var returnResponse SuccessErrorResponse
 	email := request.FormValue("email")
@@ -48,29 +71,6 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 	})
 	writer.Header().Set("HX-Redirect", "/home")
 	log.Printf("User %s logged in with success. Redirecting to Home Page...", email)
-}
-
-func (config *Config) Logout(writer http.ResponseWriter, request *http.Request) {
-	var renderLogout SuccessErrorResponse
-	http.SetCookie(writer, &http.Cookie{
-		Name:     "JWTToken",
-		Value:    "",
-		Expires:  time.Now().Add(6 * time.Hour),
-		HttpOnly: true,
-	})
-	writer.Header().Set("HX-Redirect", "/login")
-	userID, errUser := GetUserIDFromTokenAndValidate(request, config)
-	if errUser != nil {
-		renderLogout.ErrorMessage = fmt.Sprintf("Unable to retrieve user data. Error: %s", errUser.Error())
-		config.Renderer.Render(writer, "ResponseMessage", renderLogout)
-		return
-	}
-
-	log.Printf("User %s logged out at %s", userID, time.Now())
-}
-
-func (config *Config) SignUp(writer http.ResponseWriter, request *http.Request) {
-	config.Renderer.Render(writer, "signup", nil)
 }
 
 func (config *Config) Home(writer http.ResponseWriter, request *http.Request) {
