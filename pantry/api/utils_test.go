@@ -7,10 +7,6 @@ import (
 	"time"
 )
 
-var TestConfig = Config{
-	Secret: "SuperTestSecret",
-}
-
 func TestHashing(t *testing.T) {
 	passwordMap := []string{
 		"admin",

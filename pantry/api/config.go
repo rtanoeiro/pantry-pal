@@ -6,7 +6,9 @@ import (
 
 type Config struct {
 	Db       *database.Queries
-	Renderer *Templates
+	Port     string
+	DBUrl    string
+	Renderer Renderer
 	Env      string
 	Secret   string
 }
