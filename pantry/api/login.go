@@ -9,7 +9,12 @@ import (
 
 func (config *Config) Index(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("HX-Replace-Url", "/login")
+	writer.WriteHeader(http.StatusOK)
 	_ = config.Renderer.Render(writer, "index", nil)
+}
+
+func (config *Config) SignUp(writer http.ResponseWriter, request *http.Request) {
+	_ = config.Renderer.Render(writer, "signup", nil)
 }
 
 func (config *Config) Logout(writer http.ResponseWriter, request *http.Request) {
@@ -24,15 +29,13 @@ func (config *Config) Logout(writer http.ResponseWriter, request *http.Request) 
 	userID, errUser := GetUserIDFromTokenAndValidate(request, config)
 	if errUser != nil {
 		renderLogout.ErrorMessage = fmt.Sprintf("Unable to retrieve user data. Error: %s", errUser.Error())
+		writer.WriteHeader(http.StatusUnauthorized)
 		_ = config.Renderer.Render(writer, "ResponseMessage", renderLogout)
 		return
 	}
 
+	writer.WriteHeader(http.StatusOK)
 	log.Printf("User %s logged out at %s", userID, time.Now())
-}
-
-func (config *Config) SignUp(writer http.ResponseWriter, request *http.Request) {
-	_ = config.Renderer.Render(writer, "signup", nil)
 }
 
 func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {

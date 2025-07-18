@@ -27,3 +27,9 @@ func TestIndex(t *testing.T) {
 		t.Errorf("Expected 200 status code. Got: %d", writer.Result().StatusCode)
 	}
 }
+
+func TestSignup(t *testing.T) {
+	writer := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/signup", nil)
+	TestConfig.SignUp(writer, request)
+}
