@@ -21,14 +21,14 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 
 	if userError == nil {
 		returnResponse.ErrorMessage = "Email already registered, please try again"
-		config.Renderer.Render(writer, "signup", returnResponse)
+		_ = config.Renderer.Render(writer, "signup", returnResponse)
 		return
 	}
 
 	hashedPassword, errPwd := HashPassword(password)
 	if errPwd != nil {
 		returnResponse.ErrorMessage = "Server error, please try again"
-		config.Renderer.Render(writer, "signup", returnResponse)
+		_ = config.Renderer.Render(writer, "signup", returnResponse)
 		return
 	}
 	createUser := database.CreateUserParams{
@@ -42,7 +42,7 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 	userAdd, errAdd := config.Db.CreateUser(request.Context(), createUser)
 	if errAdd != nil {
 		returnResponse.ErrorMessage = "Failed adding user to our systems, please try again"
-		config.Renderer.Render(writer, "signup", returnResponse)
+		_ = config.Renderer.Render(writer, "signup", returnResponse)
 		return
 	}
 	log.Printf(
@@ -61,13 +61,13 @@ func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Requ
 	// TODO: Create fuction to redirect to a 401 page
 	if errUser != nil {
 		UserPageData.ErrorMessage = fmt.Sprintf("Unable to load user info. Error: %s", errUser.Error())
-		config.Renderer.Render(writer, "user", UserPageData)
+		_ = config.Renderer.Render(writer, "user", UserPageData)
 		return
 	}
 	userData, errUser := config.Db.GetUserById(request.Context(), userID)
 	if errUser != nil {
 		UserPageData.ErrorMessage = fmt.Sprintf("Unable to load user info. Error: %s", errUser.Error())
-		config.Renderer.Render(writer, "user", UserPageData)
+		_ = config.Renderer.Render(writer, "user", UserPageData)
 		return
 	}
 	UserPageData.ID = userData.ID
@@ -76,7 +76,7 @@ func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Requ
 	UserPageData.IsAdmin = userData.IsAdmin.Int64
 
 	config.GetAllOtherUsers(writer, request, &UserPageData)
-	config.Renderer.Render(writer, "user", UserPageData)
+	_ = config.Renderer.Render(writer, "user", UserPageData)
 }
 
 func (config *Config) GetAllOtherUsers(
@@ -106,13 +106,13 @@ func (config *Config) DeleteUser(writer http.ResponseWriter, request *http.Reque
 	adminUserID, errUser := GetUserIDFromTokenAndValidate(request, config)
 	if errUser != nil {
 		userInfo.ErrorMessage = fmt.Sprintf("Unable to get current user data. Error: %s", errUser.Error())
-		config.Renderer.Render(writer, "ResponseMessage", userInfo)
+		_ = config.Renderer.Render(writer, "ResponseMessage", userInfo)
 		return
 	}
 	userData, errUser := config.Db.GetUserById(request.Context(), adminUserID)
 	if errUser != nil {
 		userInfo.ErrorMessage = fmt.Sprintf("Unable to get current user data. Error: %s", errUser.Error())
-		config.Renderer.Render(writer, "ResponseMessage", userInfo)
+		_ = config.Renderer.Render(writer, "ResponseMessage", userInfo)
 		return
 	}
 	userInfo.ID = userData.ID
@@ -125,11 +125,11 @@ func (config *Config) DeleteUser(writer http.ResponseWriter, request *http.Reque
 	errDelete := config.Db.DeleteUser(request.Context(), userIDToDelete)
 	if errDelete != nil {
 		userInfo.ErrorMessage = fmt.Sprintf("Unable to delete user. Please try again. Error: %s", errDelete.Error())
-		config.Renderer.Render(writer, "Admin", userInfo)
+		_ = config.Renderer.Render(writer, "Admin", userInfo)
 		return
 	}
 	config.GetAllOtherUsers(writer, request, &userInfo)
-	config.Renderer.Render(writer, "Admin", userInfo)
+	_ = config.Renderer.Render(writer, "Admin", userInfo)
 }
 
 func (config *Config) UpdateUserEmail(writer http.ResponseWriter, request *http.Request) {
@@ -159,13 +159,13 @@ func (config *Config) UpdateUser(
 	userID, errUser := GetUserIDFromTokenAndValidate(request, config)
 	if errUser != nil {
 		userInfo.ErrorMessage = fmt.Sprintf("Unable to get current user data. Error: %s", errUser.Error())
-		config.Renderer.Render(writer, "ResponseMessage", userInfo)
+		_ = config.Renderer.Render(writer, "ResponseMessage", userInfo)
 		return
 	}
 	userData, errUser := config.Db.GetUserById(request.Context(), userID)
 	if errUser != nil {
 		userInfo.ErrorMessage = fmt.Sprintf("Unable to get current user data. Error: %s", errUser.Error())
-		config.Renderer.Render(writer, "ResponseMessage", userInfo)
+		_ = config.Renderer.Render(writer, "ResponseMessage", userInfo)
 		return
 	}
 	userInfo.ID = userData.ID
@@ -206,11 +206,11 @@ func (config *Config) handleName(
 	errUpdate := config.Db.UpdateUserName(request.Context(), data)
 	if errUpdate != nil {
 		userInfo.ErrorMessage = "Error on updating user Name"
-		config.Renderer.Render(writer, "user", userInfo)
+		_ = config.Renderer.Render(writer, "user", userInfo)
 	}
 	userInfo.SuccessMessage = "Name updated with success!"
 	userInfo.UserName = updateData
-	config.Renderer.Render(writer, "UserInformation", userInfo)
+	_ = config.Renderer.Render(writer, "UserInformation", userInfo)
 }
 
 func (config *Config) handleEmail(
@@ -226,12 +226,12 @@ func (config *Config) handleEmail(
 	errUpdate := config.Db.UpdateUserEmail(request.Context(), data)
 	if errUpdate != nil {
 		userInfo.ErrorMessage = "Error on updating user email"
-		config.Renderer.Render(writer, "user", userInfo)
+		_ = config.Renderer.Render(writer, "user", userInfo)
 		return
 	}
 	userInfo.SuccessMessage = "Email updated with success!"
 	userInfo.UserEmail = updateData
-	config.Renderer.Render(writer, "UserInformation", userInfo)
+	_ = config.Renderer.Render(writer, "UserInformation", userInfo)
 }
 
 func (config *Config) handlePassword(
@@ -243,7 +243,7 @@ func (config *Config) handlePassword(
 	hashedPassword, errPWD := HashPassword(updateData)
 	if errPWD != nil {
 		userInfo.ErrorMessage = "Error on changing password, please try again"
-		config.Renderer.Render(writer, "user", userInfo)
+		_ = config.Renderer.Render(writer, "user", userInfo)
 	}
 	data := database.UpdateUserPasswordParams{
 		PasswordHash: hashedPassword,
@@ -253,12 +253,12 @@ func (config *Config) handlePassword(
 	errUpdate := config.Db.UpdateUserPassword(request.Context(), data)
 	if errUpdate != nil {
 		userInfo.ErrorMessage = "Error on updating password"
-		config.Renderer.Render(writer, "user", userInfo)
+		_ = config.Renderer.Render(writer, "user", userInfo)
 		return
 	}
 
 	userInfo.SuccessMessage = "Password updated with success!"
-	config.Renderer.Render(writer, "user", userInfo)
+	_ = config.Renderer.Render(writer, "user", userInfo)
 }
 
 func (config *Config) AddUserAdmin(writer http.ResponseWriter, request *http.Request) {
@@ -266,13 +266,13 @@ func (config *Config) AddUserAdmin(writer http.ResponseWriter, request *http.Req
 	errADmin := config.Db.MakeUserAdmin(request.Context(), userToAddAdmin)
 	if errADmin != nil {
 		returnUser.ErrorMessage = "Unable to Assign Admin to User!"
-		config.Renderer.Render(writer, "ResponseMessage", returnUser)
+		_ = config.Renderer.Render(writer, "ResponseMessage", returnUser)
 		return
 	}
 	config.GetAllOtherUsers(writer, request, &returnUser)
 	log.Printf("User %s has been assigned adming privileges at %s from %s", userToAddAdmin, time.Now(), returnUser.UserName)
 	returnUser.SuccessMessage = "User Added as Admin with Success!"
-	config.Renderer.Render(writer, "Admin", returnUser)
+	_ = config.Renderer.Render(writer, "Admin", returnUser)
 }
 
 func (config *Config) RevokeUserAdmin(writer http.ResponseWriter, request *http.Request) {
@@ -280,13 +280,13 @@ func (config *Config) RevokeUserAdmin(writer http.ResponseWriter, request *http.
 	errADmin := config.Db.RemoveUserAdmin(request.Context(), userToRemoveAdmin)
 	if errADmin != nil {
 		returnUser.ErrorMessage = "Unable to Remove Admin to user!"
-		config.Renderer.Render(writer, "ResponseMessage", returnUser)
+		_ = config.Renderer.Render(writer, "ResponseMessage", returnUser)
 		return
 	}
 	config.GetAllOtherUsers(writer, request, &returnUser)
 	log.Printf("User %s has lost adming privileges at %s from %s", userToRemoveAdmin, time.Now(), returnUser.UserName)
 	returnUser.SuccessMessage = "User Removed as Admin with Success!"
-	config.Renderer.Render(writer, "Admin", returnUser)
+	_ = config.Renderer.Render(writer, "Admin", returnUser)
 }
 
 func (config *Config) prepareUserAdmin(request *http.Request, writer http.ResponseWriter) (UserInfoRequest, string) {
@@ -295,14 +295,14 @@ func (config *Config) prepareUserAdmin(request *http.Request, writer http.Respon
 	AdminUserID, errUser := GetUserIDFromTokenAndValidate(request, config)
 	if errUser != nil {
 		userInfo.ErrorMessage = "Unable to get current user data" + errUser.Error()
-		config.Renderer.Render(writer, "ResponseMessage", userInfo)
+		_ = config.Renderer.Render(writer, "ResponseMessage", userInfo)
 		return UserInfoRequest{}, ""
 	}
 
 	userData, errUser := config.Db.GetUserById(request.Context(), AdminUserID)
 	if errUser != nil {
 		userInfo.ErrorMessage = "Unable to get current user data" + errUser.Error()
-		config.Renderer.Render(writer, "ResponseMessage", userInfo)
+		_ = config.Renderer.Render(writer, "ResponseMessage", userInfo)
 		return UserInfoRequest{}, ""
 	}
 	userInfo.ID = userData.ID
