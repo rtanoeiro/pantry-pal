@@ -27,7 +27,9 @@ func main() {
 
 	config := api.Config{
 		Db:       database.New(newDB),
-		Renderer: api.MyTemplates(),
+		Port:     port,
+		DBUrl:    dbURL,
+		Renderer: api.MyTemplates("static/*.html"),
 		Env:      "dev",
 		Secret:   jwtSecret,
 	}

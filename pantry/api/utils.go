@@ -13,18 +13,27 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (tmplt *Templates) Render(writer io.Writer, name string, data interface{}) {
-	errorTemplate := tmplt.templates.ExecuteTemplate(writer, name, data)
-	if errorTemplate != nil {
-		log.Println("Error rendering template:", errorTemplate)
-	}
+type Renderer interface {
+	Render(w io.Writer, name string, data interface{}) error
 }
 
-func MyTemplates() *Templates {
-	templates, _ := template.ParseGlob("static/*.html")
+// We implement this MockRenderer so we can create a Render function for it. Enabling it to return nil when rendering on tests!
+type MockRenderer struct{}
+
+// This function is used in live config, as it returns *Templates, that implements a Render method
+func MyTemplates(path string) *Templates {
+	templates, _ := template.ParseGlob(path)
 	return &Templates{
 		templates: templates,
 	}
+}
+
+func (tmplt *Templates) Render(writer io.Writer, name string, data interface{}) error {
+	return tmplt.templates.ExecuteTemplate(writer, name, data)
+}
+
+func (mock *MockRenderer) Render(writer io.Writer, name string, data interface{}) error {
+	return nil
 }
 
 func CloseDB(dbConn *sql.DB) {
