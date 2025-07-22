@@ -1,4 +1,5 @@
 test:
+	sh scripts/migrate_up.sh dev
 	go test ./... --cover
 
 check-sec:
@@ -17,8 +18,8 @@ checks:
 	make lint
 
 build-docker:
-	mkdir data
-	chmod +x ./scripts/migrate_up.sh && ./scripts/migrate_up.sh
+	mkdir -p data
+	chmod +x ./scripts/migrate_up.sh prod
 	docker build --tag mrramonster/pantry_pal:latest .
 
 push-docker:
