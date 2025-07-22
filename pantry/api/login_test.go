@@ -25,11 +25,11 @@ var badEmail = "notadmin@admin.com"
 var goodPass = "admin"
 var badPass = "notadmin"
 
-func BuildLogin(email, password string) url.Values {
+func BuildLogin(email, password string) *url.Values {
 	form := url.Values{}
 	form.Set("email", email)
 	form.Set("password", password)
-	return form
+	return &form
 }
 
 func TestMain(m *testing.M) {
@@ -47,7 +47,7 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func TestIndex(t *testing.T) {
+func TestIndexOK(t *testing.T) {
 	writer := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/login", nil)
 
@@ -69,13 +69,20 @@ func TestSignup(t *testing.T) {
 }
 
 func TestLogin(t *testing.T) {
-	goodForm := BuildLogin(goodEmail, goodPass)
-	writer := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodPost, "/login", strings.NewReader(goodForm.Encode()))
-	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	TestConfig.Login(writer, request)
-	if writer.Result().Status == "200" {
-		t.Errorf("Expected 200 status code, got %s.", writer.Result().Status)
+	testCases := map[*url.Values]string{
+		BuildLogin(badEmail, goodPass):  "400",
+		BuildLogin(goodEmail, badPass):  "400",
+		BuildLogin(goodEmail, goodPass): "200",
+	}
+
+	for form, statusCode := range testCases {
+		writer := httptest.NewRecorder()
+		request := httptest.NewRequest(http.MethodPost, "/login", strings.NewReader(form.Encode()))
+		request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		TestConfig.Login(writer, request)
+		if writer.Result().Status == statusCode {
+			t.Errorf("Got wrong StatusCode. Expected: %s. Got: %s.", statusCode, writer.Result().Status)
+		}
 	}
 }
