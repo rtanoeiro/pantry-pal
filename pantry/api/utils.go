@@ -113,12 +113,9 @@ func GetUserIDFromTokenAndValidate(
 	if errTk != nil {
 		return "", errTk
 	}
-
 	userID, errJWT := ValidateJWT(token, config.Secret)
 	if errJWT != nil {
 		return "", errJWT
 	}
-	log.Println("User ID from token:", userID)
-
 	return userID, nil
 }
