@@ -25,10 +25,15 @@ var badEmail = "notadmin@admin.com"
 var goodPass = "admin"
 var badPass = "notadmin"
 
-var LoginLogoutCases = map[*url.Values]string{
-	BuildLogin(badEmail, goodPass):  "400",
-	BuildLogin(goodEmail, badPass):  "400",
-	BuildLogin(goodEmail, goodPass): "200",
+type LoginCase struct {
+	Email    string
+	Password string
+}
+
+var LoginLogoutCases = map[LoginCase]string{
+	{Email: badEmail, Password: badPass}:   "400",
+	{Email: badEmail, Password: goodPass}:  "400",
+	{Email: goodEmail, Password: goodPass}: "200",
 }
 
 func BuildLogin(email, password string) *url.Values {
@@ -36,6 +41,15 @@ func BuildLogin(email, password string) *url.Values {
 	form.Set("email", email)
 	form.Set("password", password)
 	return &form
+}
+
+func Login(email, password string) (*httptest.ResponseRecorder, *http.Request) {
+	loginForm := BuildLogin(email, password)
+	writer := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPost, "/login", strings.NewReader(loginForm.Encode()))
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	TestConfig.Login(writer, request)
+	return writer, request
 }
 
 func TestMain(m *testing.M) {
@@ -75,12 +89,8 @@ func TestSignup(t *testing.T) {
 }
 
 func TestLoginLogout(t *testing.T) {
-	for form, statusCode := range LoginLogoutCases {
-		writer := httptest.NewRecorder()
-		request := httptest.NewRequest(http.MethodPost, "/login", strings.NewReader(form.Encode()))
-		request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-		TestConfig.Login(writer, request)
+	for login, statusCode := range LoginLogoutCases {
+		writer, request := Login(login.Email, login.Password)
 		if writer.Result().Status == statusCode {
 			t.Errorf("Got wrong StatusCode during Login. Expected: %s. Got: %s.", statusCode, writer.Result().Status)
 		}
@@ -89,5 +99,18 @@ func TestLoginLogout(t *testing.T) {
 		if writer.Result().Status == statusCode {
 			t.Errorf("Got wrong StatusCode during Logout. Expected: %s. Got: %s.", statusCode, writer.Result().Status)
 		}
+	}
+}
+
+func TestHome(t *testing.T) {
+	writer, request := Login(goodEmail, goodPass)
+	expectedStatusCode := "200"
+	if writer.Result().Status == expectedStatusCode {
+		t.Errorf("Got wrong StatusCode during Login. Expected: %s. Got: %s.", expectedStatusCode, writer.Result().Status)
+	}
+
+	TestConfig.Home(writer, request)
+	if writer.Result().Status == expectedStatusCode {
+		t.Errorf("Got wrong StatusCode during Logout. Expected: %s. Got: %s.", expectedStatusCode, writer.Result().Status)
 	}
 }
