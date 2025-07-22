@@ -29,7 +29,7 @@ func (config *Config) Logout(writer http.ResponseWriter, request *http.Request) 
 	userID, errUser := GetUserIDFromTokenAndValidate(request, config)
 	if errUser != nil {
 		renderLogout.ErrorMessage = fmt.Sprintf("Unable to retrieve user data. Error: %s", errUser.Error())
-		writer.WriteHeader(http.StatusUnauthorized)
+		writer.WriteHeader(http.StatusBadRequest)
 		_ = config.Renderer.Render(writer, "ResponseMessage", renderLogout)
 		return
 	}
