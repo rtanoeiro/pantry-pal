@@ -25,6 +25,12 @@ var badEmail = "notadmin@admin.com"
 var goodPass = "admin"
 var badPass = "notadmin"
 
+var LoginLogoutCases = map[*url.Values]string{
+	BuildLogin(badEmail, goodPass):  "400",
+	BuildLogin(goodEmail, badPass):  "400",
+	BuildLogin(goodEmail, goodPass): "200",
+}
+
 func BuildLogin(email, password string) *url.Values {
 	form := url.Values{}
 	form.Set("email", email)
@@ -68,21 +74,20 @@ func TestSignup(t *testing.T) {
 	TestConfig.SignUp(writer, request)
 }
 
-func TestLogin(t *testing.T) {
-
-	testCases := map[*url.Values]string{
-		BuildLogin(badEmail, goodPass):  "400",
-		BuildLogin(goodEmail, badPass):  "400",
-		BuildLogin(goodEmail, goodPass): "200",
-	}
-
-	for form, statusCode := range testCases {
+func TestLoginLogout(t *testing.T) {
+	for form, statusCode := range LoginLogoutCases {
 		writer := httptest.NewRecorder()
 		request := httptest.NewRequest(http.MethodPost, "/login", strings.NewReader(form.Encode()))
 		request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
 		TestConfig.Login(writer, request)
 		if writer.Result().Status == statusCode {
-			t.Errorf("Got wrong StatusCode. Expected: %s. Got: %s.", statusCode, writer.Result().Status)
+			t.Errorf("Got wrong StatusCode during Login. Expected: %s. Got: %s.", statusCode, writer.Result().Status)
+		}
+
+		TestConfig.Logout(writer, request)
+		if writer.Result().Status == statusCode {
+			t.Errorf("Got wrong StatusCode during Logout. Expected: %s. Got: %s.", statusCode, writer.Result().Status)
 		}
 	}
 }
