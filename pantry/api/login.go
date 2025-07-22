@@ -85,6 +85,7 @@ func (config *Config) Home(writer http.ResponseWriter, request *http.Request) {
 	userID, errUser := GetUserIDFromTokenAndValidate(request, config)
 	if errUser != nil {
 		returnPantry.ErrorMessage = fmt.Sprintf("Unable to retrieve user Pantry Items. Error: %s", errUser.Error())
+		writer.WriteHeader(http.StatusUnauthorized)
 		_ = config.Renderer.Render(writer, "ResponseMessage", returnPantry)
 		return
 	}
@@ -93,11 +94,13 @@ func (config *Config) Home(writer http.ResponseWriter, request *http.Request) {
 	if userError != nil {
 		returnPantry.ErrorMessage = fmt.Sprintf("Unable to retrieve user Pantry Items. Error: %s", userError.Error())
 		_ = config.Renderer.Render(writer, "ResponseMessage", returnPantry)
-		writer.Header().Set("HX-Redirect", "/")
+		writer.WriteHeader(http.StatusUnauthorized)
+		writer.Header().Set("HX-Redirect", "/login")
 		return
 	}
 
 	returnPantry.UserName = user.Name
+	writer.WriteHeader(http.StatusOK)
 	_ = config.Renderer.Render(writer, "home", returnPantry)
 	log.Println("User entered Home Page...")
 }
