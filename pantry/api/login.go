@@ -73,6 +73,7 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 		HttpOnly: true,
 	})
 	writer.Header().Set("HX-Redirect", "/home")
+	writer.WriteHeader(http.StatusOK)
 	log.Printf("User %s logged in with success. Redirecting to Home Page...", email)
 }
 
