@@ -2,6 +2,4 @@
 # Trying to set up an env file for the variables above make the scipt fails
 ENV=$1
 
-echo $ENV
-
 goose -dir sql/schema sqlite3 ./data/pantry_pal_${ENV}.db down
