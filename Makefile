@@ -1,6 +1,6 @@
 test:
 	sh scripts/migrate_up.sh dev
-	go test ./... --cover
+	go test ./... --cover -v
 
 check-sec:
 	gosec -exclude=G101,G104 ./...
