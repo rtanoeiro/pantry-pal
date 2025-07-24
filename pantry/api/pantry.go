@@ -21,6 +21,7 @@ func (config *Config) HandleNewItem(writer http.ResponseWriter, request *http.Re
 	itemQuantity, errQuantity := strconv.Atoi(request.FormValue("itemQuantity"))
 	if errQuantity != nil {
 		returnPantry.ErrorMessage = "Invalid quantity"
+		writer.WriteHeader(http.StatusBadRequest)
 		_ = config.Renderer.Render(writer, "ResponseMessage", returnPantry)
 		return
 	}
@@ -28,6 +29,7 @@ func (config *Config) HandleNewItem(writer http.ResponseWriter, request *http.Re
 
 	if !ValidateDate(itemExpiry) {
 		returnPantry.ErrorMessage = "Invalid Date. Please send in the Format YYYY-MM-DD or Date is already expired"
+		writer.WriteHeader(http.StatusBadRequest)
 		_ = config.Renderer.Render(writer, "ResponseMessage", returnPantry)
 		return
 	}
@@ -61,6 +63,7 @@ func (config *Config) HandleNewItem(writer http.ResponseWriter, request *http.Re
 				ExpiryAt:          currentItem.ExpiryAt,
 			}
 			config.ItemUpdate(writer, request, toUpdate)
+			writer.WriteHeader(http.StatusOK)
 			writer.Header().Set("HX-Redirect", "/home")
 			return
 		}
@@ -72,6 +75,7 @@ func (config *Config) HandleNewItem(writer http.ResponseWriter, request *http.Re
 		ExpiryAt: itemExpiry,
 	}
 	config.ItemAdd(writer, request, addItem)
+	writer.WriteHeader(http.StatusOK)
 	writer.Header().Set("HX-Redirect", "/home")
 }
 
