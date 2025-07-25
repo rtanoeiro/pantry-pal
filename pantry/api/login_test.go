@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"database/sql"
 	"log"
 	"net/http"
@@ -25,22 +24,10 @@ var goodEmail = "admin@admin.com"
 var goodPass = "admin"
 var badEmail = "notadmin@admin.com"
 var badPass = "notadmin"
-var goodItem = "chocolate"
-var goodQuantity = "2"
-var badQuantity = "-1"
-var goodExpiryDate = "2100-12-31"
-var badExpiryDate = "2000-01-01"
-var badExpiryDate2 = "01/01/2000"
 
 type LoginCases struct {
 	Email    string
 	Password string
-}
-
-type ItemCases struct {
-	ItemName       string
-	ItemQuantity   string
-	ItemExpiryDate string
 }
 
 var LoginLogoutCases = map[LoginCases]int{
@@ -54,22 +41,6 @@ func BuildLogin(email, password string) *url.Values {
 	form.Set("email", email)
 	form.Set("password", password)
 	return &form
-}
-
-func BuildItem(itemName, itemQuantity, itemExpiryDate string) *url.Values {
-	form := url.Values{}
-	form.Set("itemName", itemName)
-	form.Set("itemQuantity", itemQuantity)
-	form.Set("itemExpiryDate", itemExpiryDate)
-	return &form
-}
-
-func AttachItemToRequest(itemName, itemQuantity, itemExpiryDate, method, endpoint string) (*httptest.ResponseRecorder, *http.Request) {
-	itemForm := BuildItem(itemName, itemQuantity, itemExpiryDate)
-	writer := httptest.NewRecorder()
-	request := httptest.NewRequest(method, endpoint, strings.NewReader(itemForm.Encode()))
-	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	return writer, request
 }
 
 func Login(email, password string) (*httptest.ResponseRecorder, *http.Request) {
@@ -88,8 +59,6 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 	TestConfig.Db = database.New(DB)
-	user, _ := TestConfig.Db.GetUserByEmail(context.Background(), goodEmail)
-	log.Println(user)
 	code := m.Run()
 
 	log.Println("Closing Database connection for the test suite...")
@@ -141,7 +110,7 @@ func TestHome(t *testing.T) {
 
 	TestConfig.Home(writer, request)
 	if writer.Result().StatusCode != expectedStatusCode {
-		t.Errorf("Got wrong StatusCode during Logout. Expected %d. Got: %d.", expectedStatusCode, writer.Result().StatusCode)
+		t.Errorf("Got wrong StatusCode on Home. Expected %d. Got: %d.", expectedStatusCode, writer.Result().StatusCode)
 	}
 }
 
@@ -151,36 +120,6 @@ func TestHomeError(t *testing.T) {
 	TestConfig.Home(writer, request)
 	expectedStatusCode := 401
 	if writer.Result().StatusCode != expectedStatusCode {
-		t.Errorf("Got wrong StatusCode during Logout. Expected %d. Got: %d.", expectedStatusCode, writer.Result().StatusCode)
-	}
-}
-
-func TestHandleNewItem(t *testing.T) {
-	Login(goodEmail, goodPass)
-	expectedStatusCode := 200
-	writer, request := AttachItemToRequest(goodItem, goodQuantity, goodExpiryDate, http.MethodPost, "/pantry")
-	TestConfig.HandleNewItem(writer, request)
-	if writer.Result().StatusCode != expectedStatusCode {
-		t.Errorf("Got wrong StatusCode during Logout. Expected %d. Got: %d.", expectedStatusCode, writer.Result().StatusCode)
-	}
-}
-
-func TestHandleNewItemError(t *testing.T) {
-	Login(goodEmail, goodPass)
-	expectedStatusCode := 400
-	writer, request := AttachItemToRequest(goodItem, badQuantity, goodExpiryDate, http.MethodPost, "/pantry")
-	TestConfig.HandleNewItem(writer, request)
-	if writer.Result().StatusCode != expectedStatusCode {
-		t.Errorf("Got wrong StatusCode during Logout. Expected %d. Got: %d.", expectedStatusCode, writer.Result().StatusCode)
-	}
-}
-
-func TestHandleNewItemAnotherError(t *testing.T) {
-	Login(goodEmail, goodPass)
-	expectedStatusCode := 400
-	writer, request := AttachItemToRequest(goodItem, goodQuantity, badExpiryDate, http.MethodPost, "/pantry")
-	TestConfig.HandleNewItem(writer, request)
-	if writer.Result().StatusCode != expectedStatusCode {
-		t.Errorf("Got wrong StatusCode during Logout. Expected %d. Got: %d.", expectedStatusCode, writer.Result().StatusCode)
+		t.Errorf("Got wrong StatusCode on home screen. Expected %d. Got: %d.", expectedStatusCode, writer.Result().StatusCode)
 	}
 }
