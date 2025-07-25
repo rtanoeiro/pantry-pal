@@ -15,7 +15,6 @@ var badQuantity = "2x"
 var negativeQuantity = "-10"
 var goodExpiryDate = "2100-12-31"
 var badExpiryDate = "2000-01-01"
-var badExpiryDate2 = "01/01/2000"
 
 type ItemCases struct {
 	ItemName       string
