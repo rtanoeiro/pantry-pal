@@ -8,9 +8,10 @@
     <title>Pantry Pal - Sign In</title>
     <link rel="stylesheet" href="/css/styles.css">
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.4/dist/ext/response-targets.js"></script>
 </head>
 
-<body>
+<body hx-ext="response-targets">
     <div class="auth-container">
         <div class="auth-card">
             <div class="auth-header">
@@ -18,7 +19,7 @@
                 <p class="auth-subtitle">Sign in to manage your kitchen smarter</p>
             </div>
 
-            <form id="loginForm" hx-post="/login" hx-target="#error-login" hx-swap="innerHTML" class="auth-form">
+            <form id="loginForm" hx-post="/login" hx-target-error="#error-login" hx-swap="innerHTML" class="auth-form">
                 <div class="form-group">
                     <label for="email" class="form-label">Email Address</label>
                     <input type="email" id="email" name="email" class="form-input" placeholder="Enter your email" required>
