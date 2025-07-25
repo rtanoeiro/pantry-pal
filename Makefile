@@ -1,4 +1,5 @@
 test:
+	mkdir -p data
 	sh scripts/migrate_down.sh dev
 	sh scripts/migrate_up.sh dev
 	go test ./... --cover
