@@ -25,10 +25,10 @@ jobs:
         run: go install github.com/securego/gosec/v2/cmd/gosec@latest
         
       - name: go test
-        run: go test ./... -cover
+        run: make test
 
       - name: gosec
-        run: gosec -exclude=G101,G104 ./...
+        run: make check-sec
 
   Style:
     name: Style
