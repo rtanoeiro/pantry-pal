@@ -28,15 +28,6 @@ type CreateUserResponse struct {
 	Email string `json:"email"`
 }
 
-type CurrentUserRequest struct {
-	ID             string
-	UserName       string
-	UserEmail      string
-	IsAdmin        int64
-	ErrorMessage   string `json:"error_message"`
-	SuccessMessage string `json:"success_message"`
-}
-
 type UserInfoRequest struct {
 	ID             string `json:"id"`
 	UserName       string `json:"name"`

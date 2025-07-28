@@ -62,7 +62,7 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 
 	userJWTToken, errJWTToken := MakeJWT(user.ID, config.Secret, time.Second*3600*6)
 	if errJWTToken != nil {
-		log.Printf("Failed creating JWT Tokenat %s:", time.Now())
+		log.Printf("Failed creating JWT Token at %s:", time.Now())
 		returnResponse.ErrorMessage = "Error request on getting user, please try again"
 		writer.WriteHeader(http.StatusInternalServerError)
 		_ = config.Renderer.Render(writer, "errorLogin", returnResponse)
@@ -81,26 +81,17 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 }
 
 func (config *Config) Home(writer http.ResponseWriter, request *http.Request) {
-	var returnPantry CurrentUserRequest
+	var userInfo UserInfoRequest
 	userID, errUser := GetUserIDFromTokenAndValidate(request, config)
 	if errUser != nil {
-		returnPantry.ErrorMessage = fmt.Sprintf("Unable to retrieve user Pantry Items. Error: %s", errUser.Error())
+		userInfo.ErrorMessage = fmt.Sprintf("Unable to retrieve user Pantry Items. Error: %s", errUser.Error())
 		writer.WriteHeader(http.StatusUnauthorized)
-		_ = config.Renderer.Render(writer, "ResponseMessage", returnPantry)
+		_ = config.Renderer.Render(writer, "ResponseMessage", userInfo)
 		return
 	}
 
-	user, userError := config.Db.GetUserById(request.Context(), userID)
-	if userError != nil {
-		returnPantry.ErrorMessage = fmt.Sprintf("Unable to retrieve user Pantry Items. Error: %s", userError.Error())
-		_ = config.Renderer.Render(writer, "ResponseMessage", returnPantry)
-		writer.WriteHeader(http.StatusUnauthorized)
-		writer.Header().Set("HX-Redirect", "/login")
-		return
-	}
-
-	returnPantry.UserName = user.Name
+	userInfo = config.getUserInformation(userID, userInfo, writer)
 	writer.WriteHeader(http.StatusOK)
-	_ = config.Renderer.Render(writer, "home", returnPantry)
+	_ = config.Renderer.Render(writer, "home", userInfo)
 	log.Println("User entered Home Page...")
 }

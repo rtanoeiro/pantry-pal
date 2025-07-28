@@ -12,7 +12,7 @@ import (
 var goodItem = "chocolate"
 var goodQuantity = "2"
 var badQuantity = "2x"
-var negativeQuantity = "-10"
+var negativeQuantity = "-20"
 var goodExpiryDate = "2100-12-31"
 var badExpiryDate = "2000-01-01"
 
@@ -87,7 +87,6 @@ func TestHandleItemUpdateMoreThanitExists(t *testing.T) {
 	secondExpectedStatusCode := 400
 	pantryWriter, pantryRequest := AttachItemToRequest(goodItem, goodQuantity, goodExpiryDate, http.MethodPost, "/pantry")
 	// After login cookies are added to the writer and passed to the request. So we need to add them back to following requests.
-
 	for _, cookie := range loginWriter.Result().Cookies() {
 		pantryRequest.AddCookie(cookie)
 	}
@@ -101,8 +100,8 @@ func TestHandleItemUpdateMoreThanitExists(t *testing.T) {
 	for _, cookie := range loginWriter.Result().Cookies() {
 		secondPantryRequest.AddCookie(cookie)
 	}
-	TestConfig.HandleNewItem(secondPantryWriter, secondPantryRequest)
 
+	TestConfig.HandleNewItem(secondPantryWriter, secondPantryRequest)
 	if secondPantryWriter.Result().StatusCode != secondExpectedStatusCode {
 		t.Errorf("Got wrong StatusCode during item update. Expected %d. Got: %d.", secondExpectedStatusCode, secondPantryWriter.Result().StatusCode)
 	}
@@ -179,6 +178,16 @@ func TestDeleteItem(t *testing.T) {
 }
 
 func TestRenderExpiringSoon(t *testing.T) {
+	loginWriter, loginRequest := Login(goodEmail, goodPass)
+	expectedStatusCode := 200
+
+	TestConfig.RenderExpiringSoon(loginWriter, loginRequest)
+	if loginWriter.Result().StatusCode != expectedStatusCode {
+		t.Errorf("Got wrong StatusCode during item update. Expected %d. Got: %d.", expectedStatusCode, loginWriter.Result().StatusCode)
+	}
+}
+
+func TestRenderExpiringSoonFail(t *testing.T) {
 	loginWriter, loginRequest := Login(goodEmail, goodPass)
 	expectedStatusCode := 200
 

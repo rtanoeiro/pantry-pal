@@ -21,6 +21,13 @@ func TestHashing(t *testing.T) {
 	}
 }
 
+func TestMyTemplates(t *testing.T) {
+	templates := MyTemplates("../../static/*.html")
+	if templates == nil {
+		t.Logf("Expected to load templates, but failed")
+	}
+}
+
 func TestCompareHashing(t *testing.T) {
 	passwordMap := map[string]string{
 		"admin":  "$2a$10$2WP4ssk27deQ7hGKWhwYl.DUlN740Gc0jDQwUT7eHIR8qXUcKnCw2",
@@ -43,6 +50,22 @@ func TestValidateDate(t *testing.T) {
 		result := ValidateDate(date)
 		if result != expectedResults {
 			t.Errorf("Date %s failed to evaluate. Expected %t, got %t.", date, expectedResults, result)
+		}
+	}
+}
+
+func TestInvalidDateFormat(t *testing.T) {
+	invalidDates := []string{
+		"2025-13-40",
+		"2025/12/12",
+		"12-12-2025",
+		"some garbage",
+		"2025-12",
+	}
+
+	for _, d := range invalidDates {
+		if ValidateDate(d) {
+			t.Errorf("Expected false for invalid date %s, got true", d)
 		}
 	}
 }

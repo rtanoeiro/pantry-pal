@@ -144,7 +144,7 @@ func (config *Config) ItemAdd(
 		_ = config.Renderer.Render(writer, "ResponseMessage", returnPantry)
 		return
 	}
-	returnPantry.SuccessMessage = fmt.Sprintf(addedItem.ItemName, " added to pantry")
+	returnPantry.SuccessMessage = fmt.Sprintf("%s added to pantry", addedItem.ItemName)
 	log.Printf("User %s successfully added %d of %s items into pantry at %s.", toAdd.UserID, toAdd.Quantity, toAdd.ItemName, time.Now())
 	_ = config.Renderer.Render(writer, "ResponseMessage", returnPantry)
 }

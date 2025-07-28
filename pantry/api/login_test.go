@@ -89,31 +89,23 @@ func TestSignup(t *testing.T) {
 
 func TestLoginLogout(t *testing.T) {
 	for login, statusCode := range LoginLogoutCases {
-		writer, request := Login(login.Email, login.Password)
+		writer, _ := Login(login.Email, login.Password)
 		if writer.Result().StatusCode != statusCode {
 			t.Errorf("Got wrong StatusCode during Login. Expected %d. Got: %d.", statusCode, writer.Result().StatusCode)
 		}
 
-		TestConfig.Logout(writer, request)
+		homeWriter := httptest.NewRecorder()
+		homeRequest := httptest.NewRequest(http.MethodGet, "/home", nil)
+		for _, cookie := range writer.Result().Cookies() {
+			homeRequest.AddCookie(cookie)
+		}
+
+		TestConfig.Logout(homeWriter, homeRequest)
 		if writer.Result().StatusCode != statusCode {
 			t.Errorf("Got wrong StatusCode during Logout. Expected %d. Got: %d.", statusCode, writer.Result().StatusCode)
 		}
 	}
 }
-
-func TestHome(t *testing.T) {
-	writer, request := Login(goodEmail, goodPass)
-	expectedStatusCode := 200
-	if writer.Result().StatusCode != expectedStatusCode {
-		t.Errorf("Got wrong StatusCode during Login. Expected %d. Got: %d.", expectedStatusCode, writer.Result().StatusCode)
-	}
-
-	TestConfig.Home(writer, request)
-	if writer.Result().StatusCode != expectedStatusCode {
-		t.Errorf("Got wrong StatusCode on Home. Expected %d. Got: %d.", expectedStatusCode, writer.Result().StatusCode)
-	}
-}
-
 func TestHomeError(t *testing.T) {
 	writer := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/home", nil)
@@ -121,5 +113,24 @@ func TestHomeError(t *testing.T) {
 	expectedStatusCode := 401
 	if writer.Result().StatusCode != expectedStatusCode {
 		t.Errorf("Got wrong StatusCode on home screen. Expected %d. Got: %d.", expectedStatusCode, writer.Result().StatusCode)
+	}
+}
+
+func TestHome(t *testing.T) {
+	writer, _ := Login(goodEmail, goodPass)
+	expectedStatusCode := 200
+	if writer.Result().StatusCode != expectedStatusCode {
+		t.Errorf("Got wrong StatusCode during Login. Expected %d. Got: %d.", expectedStatusCode, writer.Result().StatusCode)
+	}
+
+	//We have to build a new request, as the one from Login is pointing to a POST/login
+	request := httptest.NewRequest(http.MethodGet, "/home", nil)
+	for _, cookie := range writer.Result().Cookies() {
+		request.AddCookie(cookie)
+	}
+
+	TestConfig.Home(writer, request)
+	if writer.Result().StatusCode != expectedStatusCode {
+		t.Errorf("Got wrong StatusCode on Home. Expected %d. Got: %d.", expectedStatusCode, writer.Result().StatusCode)
 	}
 }
