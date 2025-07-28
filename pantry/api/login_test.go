@@ -20,31 +20,31 @@ var TestConfig = Config{
 	Port:     "8080",
 	Renderer: &MockRenderer{},
 }
-var goodEmail = "admin@admin.com"
+var goodUser = "admin"
 var goodPass = "admin"
-var badEmail = "notadmin@admin.com"
+var badUser = "notadmin"
 var badPass = "notadmin"
 
 type LoginCases struct {
-	Email    string
+	User     string
 	Password string
 }
 
 var LoginLogoutCases = map[LoginCases]int{
-	{Email: badEmail, Password: badPass}:   400,
-	{Email: badEmail, Password: goodPass}:  400,
-	{Email: goodEmail, Password: goodPass}: 200,
+	{User: badUser, Password: badPass}:   400,
+	{User: badUser, Password: goodPass}:  400,
+	{User: goodUser, Password: goodPass}: 200,
 }
 
-func BuildLogin(email, password string) *url.Values {
+func BuildLogin(user, password string) *url.Values {
 	form := url.Values{}
-	form.Set("email", email)
+	form.Set("user", user)
 	form.Set("password", password)
 	return &form
 }
 
-func Login(email, password string) (*httptest.ResponseRecorder, *http.Request) {
-	loginForm := BuildLogin(email, password)
+func Login(user, password string) (*httptest.ResponseRecorder, *http.Request) {
+	loginForm := BuildLogin(user, password)
 	writer := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPost, "/login", strings.NewReader(loginForm.Encode()))
 	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -89,7 +89,7 @@ func TestSignup(t *testing.T) {
 
 func TestLoginLogout(t *testing.T) {
 	for login, statusCode := range LoginLogoutCases {
-		writer, _ := Login(login.Email, login.Password)
+		writer, _ := Login(login.User, login.Password)
 		if writer.Result().StatusCode != statusCode {
 			t.Errorf("Got wrong StatusCode during Login. Expected %d. Got: %d.", statusCode, writer.Result().StatusCode)
 		}
@@ -117,7 +117,7 @@ func TestHomeError(t *testing.T) {
 }
 
 func TestHome(t *testing.T) {
-	writer, _ := Login(goodEmail, goodPass)
+	writer, _ := Login(goodUser, goodPass)
 	expectedStatusCode := 200
 	if writer.Result().StatusCode != expectedStatusCode {
 		t.Errorf("Got wrong StatusCode during Login. Expected %d. Got: %d.", expectedStatusCode, writer.Result().StatusCode)

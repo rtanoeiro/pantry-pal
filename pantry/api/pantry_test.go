@@ -39,7 +39,7 @@ func AttachItemToRequest(itemName, itemQuantity, itemExpiryDate, method, endpoin
 }
 
 func TestHandleNewItem(t *testing.T) {
-	loginWriter, _ := Login(goodEmail, goodPass)
+	loginWriter, _ := Login(goodUser, goodPass)
 	expectedStatusCode := 200
 
 	pantryWriter, pantryRequest := AttachItemToRequest(goodItem, goodQuantity, goodExpiryDate, http.MethodPost, "/pantry")
@@ -54,7 +54,7 @@ func TestHandleNewItem(t *testing.T) {
 }
 
 func TestHandleNewItemQuantityError(t *testing.T) {
-	loginWriter, _ := Login(goodEmail, goodPass)
+	loginWriter, _ := Login(goodUser, goodPass)
 	expectedStatusCode := 400
 	pantryWriter, pantryRequest := AttachItemToRequest(goodItem, badQuantity, goodExpiryDate, http.MethodPost, "/pantry")
 	// After login cookies are added to the writer and passed to the request. So we need to add them back to following requests.
@@ -68,7 +68,7 @@ func TestHandleNewItemQuantityError(t *testing.T) {
 }
 
 func TestHandleNewItemDateError(t *testing.T) {
-	loginWriter, _ := Login(goodEmail, goodPass)
+	loginWriter, _ := Login(goodUser, goodPass)
 	expectedStatusCode := 400
 	pantryWriter, pantryRequest := AttachItemToRequest(goodItem, goodQuantity, badExpiryDate, http.MethodPost, "/pantry")
 	// After login cookies are added to the writer and passed to the request. So we need to add them back to following requests.
@@ -82,7 +82,7 @@ func TestHandleNewItemDateError(t *testing.T) {
 }
 
 func TestHandleItemUpdateMoreThanitExists(t *testing.T) {
-	loginWriter, _ := Login(goodEmail, goodPass)
+	loginWriter, _ := Login(goodUser, goodPass)
 	firstExpectedStatusCode := 200
 	secondExpectedStatusCode := 400
 	pantryWriter, pantryRequest := AttachItemToRequest(goodItem, goodQuantity, goodExpiryDate, http.MethodPost, "/pantry")
@@ -108,7 +108,7 @@ func TestHandleItemUpdateMoreThanitExists(t *testing.T) {
 }
 
 func TestHandleItemUpdate(t *testing.T) {
-	loginWriter, _ := Login(goodEmail, goodPass)
+	loginWriter, _ := Login(goodUser, goodPass)
 	firstExpectedStatusCode := 200
 	secondExpectedStatusCode := 200
 	pantryWriter, pantryRequest := AttachItemToRequest(goodItem, goodQuantity, goodExpiryDate, http.MethodPost, "/pantry")
@@ -134,7 +134,7 @@ func TestHandleItemUpdate(t *testing.T) {
 }
 
 func TestGetAllPantryItems(t *testing.T) {
-	loginWriter, loginRequest := Login(goodEmail, goodPass)
+	loginWriter, loginRequest := Login(goodUser, goodPass)
 	expectedStatusCode := 200
 	// After login cookies are added to the writer and passed to the request. So we need to add them back to following requests.
 	for _, cookie := range loginWriter.Result().Cookies() {
@@ -148,7 +148,7 @@ func TestGetAllPantryItems(t *testing.T) {
 }
 
 func TestDeleteItem(t *testing.T) {
-	loginWriter, _ := Login(goodEmail, goodPass)
+	loginWriter, _ := Login(goodUser, goodPass)
 	expectedStatusCode := 200
 
 	pantryWriter, pantryRequest := AttachItemToRequest(goodItem, goodQuantity, goodExpiryDate, http.MethodPost, "/pantry")
@@ -178,7 +178,7 @@ func TestDeleteItem(t *testing.T) {
 }
 
 func TestRenderExpiringSoon(t *testing.T) {
-	loginWriter, _ := Login(goodEmail, goodPass)
+	loginWriter, _ := Login(goodUser, goodPass)
 	expectedStatusCode := 200
 
 	writer := httptest.NewRecorder()
@@ -194,7 +194,7 @@ func TestRenderExpiringSoon(t *testing.T) {
 }
 
 func TestRenderExpiringSoonFail(t *testing.T) {
-	loginWriter, _ := Login(goodEmail, goodPass)
+	loginWriter, _ := Login(goodUser, goodPass)
 	expectedStatusCode := 403
 
 	writer := httptest.NewRecorder()

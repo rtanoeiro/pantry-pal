@@ -8,7 +8,7 @@ CREATE TABLE users (
     created_at timestamp NOT NULL,
     updated_at timestamp NOT NULL,
     is_admin integer DEFAULT 0,
-    UNIQUE(email)
+    UNIQUE(name)
 );
 
 INSERT INTO users (

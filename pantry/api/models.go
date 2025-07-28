@@ -8,7 +8,6 @@ import (
 type User struct {
 	UserID      string
 	UserName    string
-	UserEmail   string
 	IsUserAdmin int64
 }
 
@@ -18,20 +17,17 @@ type Templates struct {
 
 type CreateUserRequest struct {
 	Name     string
-	Email    string
 	Password string
 }
 
 type CreateUserResponse struct {
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 type UserInfoRequest struct {
 	ID             string `json:"id"`
 	UserName       string `json:"name"`
-	UserEmail      string `json:"email"`
 	IsAdmin        int64  `json:"is_admin"`
 	Users          []User `json:"users"`
 	ErrorMessage   string `json:"error_message"`
@@ -43,7 +39,6 @@ type LoginUserResponse struct {
 	Name      string    `json:"name"`
 	UpdatedAt time.Time `json:"updated_at"`
 	CreatedAt time.Time `json:"created_at"`
-	Email     string    `json:"email"`
 	JWTToken  *string   `json:"token,omitempty"`
 }
 
