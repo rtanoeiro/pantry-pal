@@ -93,5 +93,4 @@ func (config *Config) Home(writer http.ResponseWriter, request *http.Request) {
 	userInfo = config.getUserInformation(userID, userInfo, writer)
 	writer.WriteHeader(http.StatusOK)
 	_ = config.Renderer.Render(writer, "home", userInfo)
-	log.Println("User entered Home Page...")
 }

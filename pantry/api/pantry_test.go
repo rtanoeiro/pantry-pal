@@ -178,21 +178,30 @@ func TestDeleteItem(t *testing.T) {
 }
 
 func TestRenderExpiringSoon(t *testing.T) {
-	loginWriter, loginRequest := Login(goodEmail, goodPass)
+	loginWriter, _ := Login(goodEmail, goodPass)
 	expectedStatusCode := 200
 
-	TestConfig.RenderExpiringSoon(loginWriter, loginRequest)
-	if loginWriter.Result().StatusCode != expectedStatusCode {
+	writer := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/pantry", nil)
+
+	for _, cookie := range loginWriter.Result().Cookies() {
+		request.AddCookie(cookie)
+	}
+	TestConfig.RenderExpiringSoon(writer, request)
+	if writer.Result().StatusCode != expectedStatusCode {
 		t.Errorf("Got wrong StatusCode during item update. Expected %d. Got: %d.", expectedStatusCode, loginWriter.Result().StatusCode)
 	}
 }
 
 func TestRenderExpiringSoonFail(t *testing.T) {
-	loginWriter, loginRequest := Login(goodEmail, goodPass)
-	expectedStatusCode := 200
+	loginWriter, _ := Login(goodEmail, goodPass)
+	expectedStatusCode := 403
 
-	TestConfig.RenderExpiringSoon(loginWriter, loginRequest)
-	if loginWriter.Result().StatusCode != expectedStatusCode {
+	writer := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/pantry", nil)
+
+	TestConfig.RenderExpiringSoon(writer, request)
+	if writer.Result().StatusCode != expectedStatusCode {
 		t.Errorf("Got wrong StatusCode during item update. Expected %d. Got: %d.", expectedStatusCode, loginWriter.Result().StatusCode)
 	}
 }
