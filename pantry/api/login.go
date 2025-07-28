@@ -36,7 +36,7 @@ func (config *Config) Logout(writer http.ResponseWriter, request *http.Request) 
 
 func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 	var returnResponse SuccessErrorResponse
-	user := request.FormValue("user")
+	user := request.FormValue("username")
 	password := request.FormValue("password")
 
 	userData, errUser := config.Db.GetUserByName(request.Context(), user)
