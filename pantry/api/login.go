@@ -29,7 +29,7 @@ func (config *Config) Logout(writer http.ResponseWriter, request *http.Request) 
 	userID, errUser := GetUserIDFromTokenAndValidate(request, config)
 	if errUser != nil {
 		renderLogout.ErrorMessage = fmt.Sprintf("Unable to retrieve user data. Error: %s", errUser.Error())
-		writer.WriteHeader(http.StatusUnauthorized)
+		writer.WriteHeader(http.StatusBadRequest)
 		_ = config.Renderer.Render(writer, "ResponseMessage", renderLogout)
 		return
 	}
@@ -48,20 +48,23 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 	if errEmail != nil {
 		log.Printf("Email %s failed login at %s:", email, time.Now())
 		returnResponse.ErrorMessage = "Invalid Email"
+		writer.WriteHeader(http.StatusBadRequest)
 		_ = config.Renderer.Render(writer, "errorLogin", returnResponse)
 		return
 	}
 	if CheckPasswordHash(password, user.PasswordHash) != nil {
 		log.Printf("Email %s failed login with wrong password at %s:", email, time.Now())
 		returnResponse.ErrorMessage = "Wrong Password"
+		writer.WriteHeader(http.StatusBadRequest)
 		_ = config.Renderer.Render(writer, "errorLogin", returnResponse)
 		return
 	}
 
 	userJWTToken, errJWTToken := MakeJWT(user.ID, config.Secret, time.Second*3600*6)
 	if errJWTToken != nil {
-		log.Printf("Failed creating JWT Tokenat %s:", time.Now())
+		log.Printf("Failed creating JWT Token at %s:", time.Now())
 		returnResponse.ErrorMessage = "Error request on getting user, please try again"
+		writer.WriteHeader(http.StatusInternalServerError)
 		_ = config.Renderer.Render(writer, "errorLogin", returnResponse)
 		return
 	}
@@ -73,27 +76,21 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 		HttpOnly: true,
 	})
 	writer.Header().Set("HX-Redirect", "/home")
+	writer.WriteHeader(http.StatusOK)
 	log.Printf("User %s logged in with success. Redirecting to Home Page...", email)
 }
 
 func (config *Config) Home(writer http.ResponseWriter, request *http.Request) {
-	var returnPantry CurrentUserRequest
+	var userInfo UserInfoRequest
 	userID, errUser := GetUserIDFromTokenAndValidate(request, config)
 	if errUser != nil {
-		returnPantry.ErrorMessage = fmt.Sprintf("Unable to retrieve user Pantry Items. Error: %s", errUser.Error())
-		_ = config.Renderer.Render(writer, "ResponseMessage", returnPantry)
+		userInfo.ErrorMessage = fmt.Sprintf("Unable to retrieve user Pantry Items. Error: %s", errUser.Error())
+		writer.WriteHeader(http.StatusUnauthorized)
+		_ = config.Renderer.Render(writer, "ResponseMessage", userInfo)
 		return
 	}
 
-	user, userError := config.Db.GetUserById(request.Context(), userID)
-	if userError != nil {
-		returnPantry.ErrorMessage = fmt.Sprintf("Unable to retrieve user Pantry Items. Error: %s", userError.Error())
-		_ = config.Renderer.Render(writer, "ResponseMessage", returnPantry)
-		writer.Header().Set("HX-Redirect", "/")
-		return
-	}
-
-	returnPantry.UserName = user.Name
-	_ = config.Renderer.Render(writer, "home", returnPantry)
-	log.Println("User entered Home Page...")
+	userInfo = config.getUserInformation(userID, userInfo, writer)
+	writer.WriteHeader(http.StatusOK)
+	_ = config.Renderer.Render(writer, "home", userInfo)
 }

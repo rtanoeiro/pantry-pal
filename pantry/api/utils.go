@@ -105,20 +105,14 @@ func ValidateDate(givenDate string) bool {
 	return !formattedDate.Before(time.Now())
 }
 
-func GetUserIDFromTokenAndValidate(
-	request *http.Request,
-	config *Config,
-) (string, error) {
+func GetUserIDFromTokenAndValidate(request *http.Request, config *Config) (string, error) {
 	token, errTk := GetJWTFromCookie(request)
 	if errTk != nil {
 		return "", errTk
 	}
-
 	userID, errJWT := ValidateJWT(token, config.Secret)
 	if errJWT != nil {
 		return "", errJWT
 	}
-	log.Println("User ID from token:", userID)
-
 	return userID, nil
 }

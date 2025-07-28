@@ -21,14 +21,17 @@ jobs:
       - name: Build
         run: go build -v ./...
 
+      - name: Install goose
+        run : go install github.com/pressly/goose/v3/cmd/goose@latest
+
+      - name: go test
+        run: make test
+
       - name: Install gosec
         run: go install github.com/securego/gosec/v2/cmd/gosec@latest
-        
-      - name: go test
-        run: go test ./... -cover
 
       - name: gosec
-        run: gosec -exclude=G101,G104 ./...
+        run: make check-sec
 
   Style:
     name: Style
