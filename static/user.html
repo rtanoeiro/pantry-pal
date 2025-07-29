@@ -61,17 +61,6 @@
             </div>
         </form>
 
-        <form id="emailForm" hx-post="/user/email" hx-target=".settings-section" hx-swap="innerHTML"
-            hx-on::after-request="this.reset()" class="settings-form">
-            <div class="form-group">
-                <label for="email-input" class="form-label">Email Address</label>
-                <div class="current-value">Current: {{ .UserEmail }}</div>
-                <input type="email" id="email-input" name="email" class="account-input" placeholder="Enter new email"
-                    required>
-                <button type="submit" class="btn btn-secondary">Update Email</button>
-            </div>
-        </form>
-
         <form id="passwordForm" hx-post="/user/password" hx-target=".settings-section" hx-swap="innerHTML"
             hx-on::after-request="this.reset()" class="settings-form">
             <div class="form-group">
@@ -106,7 +95,6 @@
                 <div class="user-item">
                     <div class="user-info">
                         <div class="user-name">{{ .UserName }}</div>
-                        <div class="user-email">{{ .UserEmail }}</div>
                         {{ if .IsUserAdmin }}
                         <span class="admin-badge">Admin</span>
                         {{ end }}

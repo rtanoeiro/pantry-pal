@@ -9,62 +9,57 @@ import (
 	"testing"
 )
 
-var goodUsermail = "goodemail@email.com"
 var goodUserName = "John Doe"
 var goodUserPass = "testpass"
 var badUserName = ""
 var badUserPass = ""
-var badUserEmail = ""
-var newEmail = "newgoodemail@email.com"
 var newName = "New John"
 var newPass = "newtestpass"
 
 type CreateUserCases struct {
-	Email    string
 	Name     string
 	Password string
 }
 
-func BuildPerson(email, name, password string) *url.Values {
+func BuildPerson(name, password string) *url.Values {
 	form := url.Values{}
 	form.Set("name", name)
-	form.Set("email", email)
 	form.Set("password", password)
 	return &form
 }
 
-func AttachUserToRequest(email, name, password, method, endpoint string) (*httptest.ResponseRecorder, *http.Request) {
-	itemForm := BuildPerson(email, name, password)
+func AttachUserToRequest(name, password, method, endpoint string) (*httptest.ResponseRecorder, *http.Request) {
+	itemForm := BuildPerson(name, password)
 	writer := httptest.NewRecorder()
 	request := httptest.NewRequest(method, endpoint, strings.NewReader(itemForm.Encode()))
 	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	return writer, request
 }
 
-func AddUser(email, name, password string) (*httptest.ResponseRecorder, *http.Request) {
-	writer, request := AttachUserToRequest(email, name, password, http.MethodPost, "/signup")
+func AddUser(name, password string) (*httptest.ResponseRecorder, *http.Request) {
+	writer, request := AttachUserToRequest(name, password, http.MethodPost, "/signup")
 	TestConfig.CreateUser(writer, request)
 	return writer, request
 }
 
 func TestCreateUser(t *testing.T) {
-	writer, _ := Login(goodEmail, goodPass)
+	writer, _ := Login(goodUser, goodPass)
 	expectedStatusCodes := map[CreateUserCases]int{
-		{Email: goodUsermail, Name: goodUserName, Password: goodUserPass}: 200,
-		{Email: goodUsermail, Name: goodUserName, Password: badUserPass}:  400,
-		{Email: goodUsermail, Name: badUserName, Password: badUserPass}:   400,
-		{Email: badUserEmail, Name: badUserName, Password: badUserPass}:   400,
-		{Email: badUserEmail, Name: goodUserName, Password: badUserPass}:  400,
-		{Email: goodUsermail, Name: goodUserName, Password: badUserPass}:  400,
+		{Name: goodUserName, Password: goodUserPass}: 200,
+		{Name: goodUserName, Password: badUserPass}:  400,
+		{Name: badUserName, Password: badUserPass}:   400,
+		{Name: badUserName, Password: badUserPass}:   400,
+		{Name: goodUserName, Password: badUserPass}:  400,
+		{Name: goodUserName, Password: badUserPass}:  400,
 	}
 
 	for userCase, expectedCode := range expectedStatusCodes {
-		userWriter, userRequest := AddUser(userCase.Email, userCase.Name, userCase.Password)
+		userWriter, userRequest := AddUser(userCase.Name, userCase.Password)
 		if userWriter.Result().StatusCode != expectedCode {
 			t.Errorf("Got wrong StatusCode during user addition. Expected %d. Got: %d.", expectedCode, userWriter.Result().StatusCode)
 		}
 		if userWriter.Result().StatusCode == 200 {
-			addedUser, _ := TestConfig.Db.GetUserByEmail(userRequest.Context(), userCase.Email)
+			addedUser, _ := TestConfig.Db.GetUserByName(userRequest.Context(), userCase.Name)
 			DeleteWriter := httptest.NewRecorder()
 			DeleteRequest := httptest.NewRequest(http.MethodDelete, "/user", nil)
 			DeleteRequest.SetPathValue("UserID", addedUser.ID)
@@ -78,7 +73,7 @@ func TestCreateUser(t *testing.T) {
 }
 
 func TestGetUserInfo(t *testing.T) {
-	writer, request := Login(goodEmail, goodPass)
+	writer, request := Login(goodUser, goodPass)
 	expectedCode := 200
 	for _, cookie := range writer.Result().Cookies() {
 		request.AddCookie(cookie)
@@ -101,25 +96,16 @@ func TestGetUserInfoError(t *testing.T) {
 
 func TestCreateUpdateDeleteUser(t *testing.T) {
 	expectedCodeCreate := 200
-	addWriter, _ := AddUser(goodUsermail, goodUserName, goodUserPass)
+	addWriter, _ := AddUser(goodUserName, goodUserPass)
 	if addWriter.Result().StatusCode != expectedCodeCreate {
 		t.Errorf("Got wrong StatusCode during user addition. Expected %d. Got: %d.", expectedCodeCreate, addWriter.Result().StatusCode)
 	}
 
-	loginWriter, _ := Login(goodUsermail, goodUserPass)
+	loginWriter, _ := Login(goodUser, goodPass)
 	expectedCodeUpdate := 200
 	expectedCodeDelete := 200
 
-	updateEmailWriter, updateEmailRequest := AttachUserToRequest(newEmail, "", "", http.MethodPost, "/user/email")
-	for _, cookie := range loginWriter.Result().Cookies() {
-		updateEmailRequest.AddCookie(cookie)
-	}
-	TestConfig.UpdateUserEmail(updateEmailWriter, updateEmailRequest)
-	if updateEmailWriter.Result().StatusCode != expectedCodeUpdate {
-		t.Errorf("Got wrong StatusCode when Updatin User Email. Expected %d. Got: %d.", expectedCodeDelete, updateEmailWriter.Result().StatusCode)
-	}
-
-	updateWriter, updateRequest := AttachUserToRequest("", newName, "", http.MethodPost, "/user/name")
+	updateWriter, updateRequest := AttachUserToRequest(newName, "", http.MethodPost, "/user/name")
 	for _, cookie := range loginWriter.Result().Cookies() {
 		updateRequest.AddCookie(cookie)
 	}
@@ -128,7 +114,7 @@ func TestCreateUpdateDeleteUser(t *testing.T) {
 		t.Errorf("Got wrong StatusCode when Updatin User Name. Expected %d. Got: %d.", expectedCodeDelete, updateWriter.Result().StatusCode)
 	}
 
-	updateWriter, updateRequest = AttachUserToRequest("", "", newPass, http.MethodPost, "/user/password")
+	updateWriter, updateRequest = AttachUserToRequest("", newPass, http.MethodPost, "/user/password")
 	for _, cookie := range loginWriter.Result().Cookies() {
 		updateRequest.AddCookie(cookie)
 	}
@@ -137,7 +123,7 @@ func TestCreateUpdateDeleteUser(t *testing.T) {
 		t.Errorf("Got wrong StatusCode when Updatin User Password. Expected %d. Got: %d.", expectedCodeDelete, updateWriter.Result().StatusCode)
 	}
 
-	addedUser, _ := TestConfig.Db.GetUserByEmail(updateRequest.Context(), newEmail)
+	addedUser, _ := TestConfig.Db.GetUserByName(updateRequest.Context(), newName)
 	DeleteWriter := httptest.NewRecorder()
 	DeleteRequest := httptest.NewRequest(http.MethodDelete, "/user", nil)
 	DeleteRequest.SetPathValue("UserID", addedUser.ID)
@@ -149,11 +135,10 @@ func TestCreateUpdateDeleteUser(t *testing.T) {
 	if DeleteWriter.Result().StatusCode != expectedCodeDelete {
 		t.Errorf("Got wrong StatusCode when Deleting User. Expected %d. Got: %d.", expectedCodeDelete, DeleteWriter.Result().StatusCode)
 	}
-
 }
 
 func TestAddRevokeAdmin(t *testing.T) {
-	userWriter, userRequest := AddUser(goodEmail, goodUserName, goodUserPass)
+	userWriter, userRequest := AddUser(goodUserName, goodUserPass)
 	for _, cookie := range userWriter.Result().Cookies() {
 		userRequest.AddCookie(cookie)
 	}
@@ -161,11 +146,11 @@ func TestAddRevokeAdmin(t *testing.T) {
 	writer := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/user", nil)
 
-	loginWriter, _ := Login(goodEmail, goodPass)
+	loginWriter, _ := Login(goodUser, goodPass)
 	for _, cookie := range loginWriter.Result().Cookies() {
 		request.AddCookie(cookie)
 	}
-	addedUser, _ := TestConfig.Db.GetUserByEmail(context.Background(), goodUserName)
+	addedUser, _ := TestConfig.Db.GetUserByName(context.Background(), goodUserName)
 	request.SetPathValue("UserID", addedUser.ID)
 	TestConfig.AddUserAdmin(writer, request)
 	TestConfig.RevokeUserAdmin(writer, request)

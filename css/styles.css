@@ -725,11 +725,6 @@ body {
   margin-bottom: var(--space-1);
 }
 
-.user-email {
-  font-size: var(--text-sm);
-  color: var(--gray-600);
-}
-
 .admin-badge {
   display: inline-block;
   background: var(--primary-100);

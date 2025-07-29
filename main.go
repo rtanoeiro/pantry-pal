@@ -51,7 +51,6 @@ func main() {
 	httpServerMux.Handle("DELETE /user/{UserID}", http.HandlerFunc(config.DeleteUser))
 	httpServerMux.Handle("POST /user/admin/{UserID}", http.HandlerFunc(config.AddUserAdmin))
 	httpServerMux.Handle("DELETE /user/admin/{UserID}", http.HandlerFunc(config.RevokeUserAdmin))
-	httpServerMux.Handle("POST /user/email", http.HandlerFunc(config.UpdateUserEmail))
 	httpServerMux.Handle("POST /user/name", http.HandlerFunc(config.UpdateUserName))
 	httpServerMux.Handle("POST /user/password", http.HandlerFunc(config.UpdateUserPassword))
 
