@@ -13,7 +13,6 @@ var goodUserName = "John Doe"
 var goodUserPass = "testpass"
 var badUserName = ""
 var badUserPass = ""
-var badUserEmail = ""
 var newName = "New John"
 var newPass = "newtestpass"
 
@@ -102,7 +101,7 @@ func TestCreateUpdateDeleteUser(t *testing.T) {
 		t.Errorf("Got wrong StatusCode during user addition. Expected %d. Got: %d.", expectedCodeCreate, addWriter.Result().StatusCode)
 	}
 
-	loginWriter, _ := Login(goodUser, goodUserPass)
+	loginWriter, _ := Login(goodUser, goodPass)
 	expectedCodeUpdate := 200
 	expectedCodeDelete := 200
 
@@ -136,7 +135,6 @@ func TestCreateUpdateDeleteUser(t *testing.T) {
 	if DeleteWriter.Result().StatusCode != expectedCodeDelete {
 		t.Errorf("Got wrong StatusCode when Deleting User. Expected %d. Got: %d.", expectedCodeDelete, DeleteWriter.Result().StatusCode)
 	}
-
 }
 
 func TestAddRevokeAdmin(t *testing.T) {

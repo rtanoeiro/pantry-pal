@@ -20,7 +20,7 @@ var TestConfig = Config{
 	Port:     "8080",
 	Renderer: &MockRenderer{},
 }
-var goodUser = "admin"
+var goodUser = "Admin"
 var goodPass = "admin"
 var badUser = "notadmin"
 var badPass = "notadmin"
@@ -33,18 +33,19 @@ type LoginCases struct {
 var LoginLogoutCases = map[LoginCases]int{
 	{User: badUser, Password: badPass}:   400,
 	{User: badUser, Password: goodPass}:  400,
+	{User: goodUser, Password: badPass}:  400,
 	{User: goodUser, Password: goodPass}: 200,
 }
 
-func BuildLogin(user, password string) *url.Values {
+func BuildLogin(username, password string) *url.Values {
 	form := url.Values{}
-	form.Set("user", user)
+	form.Set("username", username)
 	form.Set("password", password)
 	return &form
 }
 
-func Login(user, password string) (*httptest.ResponseRecorder, *http.Request) {
-	loginForm := BuildLogin(user, password)
+func Login(username, password string) (*httptest.ResponseRecorder, *http.Request) {
+	loginForm := BuildLogin(username, password)
 	writer := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPost, "/login", strings.NewReader(loginForm.Encode()))
 	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
