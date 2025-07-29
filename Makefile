@@ -21,7 +21,7 @@ checks:
 
 build-docker:
 	mkdir -p data
-	chmod +x ./scripts/migrate_up.sh prod
+	chmod +x scripts/migrate_up.sh
 	docker build --tag mrramonster/pantry_pal:latest .
 
 push-docker:
