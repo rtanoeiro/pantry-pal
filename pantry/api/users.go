@@ -122,12 +122,6 @@ func (config *Config) DeleteUser(writer http.ResponseWriter, request *http.Reque
 	_ = config.Renderer.Render(writer, "Admin", userInfo)
 }
 
-func (config *Config) UpdateUserEmail(writer http.ResponseWriter, request *http.Request) {
-	log.Println("Update User Email endpoint called")
-	email := request.FormValue("email")
-	config.UpdateUser(writer, request, "email", email)
-}
-
 func (config *Config) UpdateUserName(writer http.ResponseWriter, request *http.Request) {
 	log.Println("Update User Name endpoint called")
 	name := request.FormValue("name")
