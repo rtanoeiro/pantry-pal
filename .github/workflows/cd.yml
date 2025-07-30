@@ -24,7 +24,7 @@ jobs:
       - name: Migrate DB
         run: |
           mkdir data
-          chmod +x ./scripts/migrate_up.sh prod && ./scripts/migrate_up.sh prod
+          chmod +x ./scripts/migrate_up.sh && sh scripts/migrate_up.sh prod
 
       - name: Login Docker
         uses: docker/login-action@v3
