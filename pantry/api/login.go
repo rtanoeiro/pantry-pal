@@ -43,7 +43,7 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 
 	if errUser != nil {
 		log.Printf("User %s failed login at %s:", user, time.Now())
-		returnResponse.ErrorMessage = "Invalid Email"
+		returnResponse.ErrorMessage = "Invalid Username"
 		writer.WriteHeader(http.StatusBadRequest)
 		_ = config.Renderer.Render(writer, "errorLogin", returnResponse)
 		return
