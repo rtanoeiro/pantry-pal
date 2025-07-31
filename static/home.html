@@ -41,28 +41,29 @@
                         <h2 class="card-title">Add New Item</h2>
                         <p class="card-subtitle">Keep track of your pantry items and expiration dates</p>
                     </div>
-                    
+
                     <form id="add-item-form" hx-post="/pantry" hx-target="#responseMessage" hx-swap="innerHTML"
                         hx-on::after-request="this.reset()" class="add-item-form">
                         <div class="form-grid">
                             <div class="form-group">
                                 <label for="nameInput" class="form-label">Item Name</label>
-                                <input type="text" id="nameInput" name="itemName" class="form-input" 
+                                <input type="text" id="nameInput" name="itemName" class="form-input"
                                     placeholder="e.g., Milk, Bread, Apples" required />
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="quantityInput" class="form-label">Quantity</label>
                                 <input type="number" id="quantityInput" name="itemQuantity" class="form-input"
                                     placeholder="1" min="1" required />
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="expirationDateInput" class="form-label">Expiration Date</label>
-                                <input type="date" id="expirationDateInput" name="itemExpiryDate" class="form-input" required />
+                                <input type="date" id="expirationDateInput" name="itemExpiryDate" class="form-input"
+                                    required />
                             </div>
                         </div>
-                        
+
                         <button type="submit" class="btn btn-primary btn-full" id="addItemButton">
                             <span class="btn-icon">+</span>
                             Add Item to Pantry
@@ -98,29 +99,30 @@
         </div>
         <div class="card-content">
             {{ if .ExpiringSoon }}
-                <div class="item-grid">
-                    {{ range .ExpiringSoon }}
-                    <div class="item-card expiring">
-                        <div class="item-header">
-                            <span class="item-name">{{ .ItemName }}</span>
-                            <span class="item-quantity">×{{ .Quantity }}</span>
-                        </div>
-                        <div class="item-footer">
-                            <span class="expiry-date">{{ .ExpiryAt }}</span>
-                        </div>
+            <div class="item-grid">
+                {{ range .ExpiringSoon }}
+                <div class="item-card expiring">
+                    <div class="item-header">
+                        <span class="item-name">{{ .ItemName }}</span>
+                        <span class="item-quantity">×{{ .Quantity }}</span>
                     </div>
-                    {{ end }}
+                    <div class="item-footer">
+                        <span class="expiry-date">{{ .ExpiryAt }}</span>
+                    </div>
                 </div>
+                {{ end }}
+            </div>
             {{ else }}
-                <div class="empty-state">
-                    <p class="empty-text">No items expiring soon</p>
-                    <p class="empty-subtitle">Great job managing your pantry!</p>
-                </div>
+            <div class="empty-state">
+                <p class="empty-text">No items expiring soon</p>
+                <p class="empty-subtitle">Great job managing your pantry!</p>
+            </div>
             {{ end }}
         </div>
     </div>
 </div>
 
+// TODO: Split expiring soon from shopping cart and load on page load
 <div class="dashboard-card">
     <div class="card">
         <div class="card-header">
@@ -128,22 +130,22 @@
             <p class="card-subtitle">Items to buy next</p>
         </div>
         <div class="card-content">
-            {{ if .ShoppingList }}
-                <div class="item-grid">
-                    {{ range .ShoppingList }}
-                    <div class="item-card shopping">
-                        <div class="item-header">
-                            <span class="item-name">{{ .ItemName }}</span>
-                            <span class="item-quantity">×{{ .Quantity }}</span>
-                        </div>
+            {{ if .CartItems }}
+            <div class="item-grid">
+                {{ range .CartItems }}
+                <div class="item-card shopping">
+                    <div class="item-header">
+                        <span class="item-name">{{ .ItemName }}</span>
+                        <span class="item-quantity">×{{ .Quantity }}</span>
                     </div>
-                    {{ end }}
                 </div>
+                {{ end }}
+            </div>
             {{ else }}
-                <div class="empty-state">
-                    <p class="empty-text">Shopping list is empty</p>
-                    <p class="empty-subtitle">Add items as they run low</p>
-                </div>
+            <div class="empty-state">
+                <p class="empty-text">Shopping list is empty</p>
+                <p class="empty-subtitle">Add items as they run low</p>
+            </div>
             {{ end }}
         </div>
     </div>
