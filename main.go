@@ -60,6 +60,11 @@ func main() {
 	httpServerMux.Handle("GET /expiring", http.HandlerFunc(config.RenderExpiringSoon))
 	httpServerMux.Handle("DELETE /pantry/{ItemID}", http.HandlerFunc(config.DeleteItem))
 
+	// Shopping Cart endpoints
+	httpServerMux.Handle("GET /shopping", http.HandlerFunc(config.GetAllShopping))
+	httpServerMux.Handle("POST /shopping", http.HandlerFunc(config.AddItemShopping))
+	httpServerMux.Handle("DELETE /shopping", http.HandlerFunc(config.RemoveItemShopping))
+
 	httpServer := http.Server{
 		Handler:           httpServerMux,
 		Addr:              ":" + port,
