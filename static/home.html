@@ -59,15 +59,20 @@
 
                             <div class="form-group">
                                 <label for="expirationDateInput" class="form-label">Expiration Date</label>
-                                <input type="date" id="expirationDateInput" name="itemExpiryDate" class="form-input"
-                                    required />
+                                <input type="date" id="expirationDateInput" name="itemExpiryDate" class="form-input"/>
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary btn-full" id="addItemButton">
-                            <span class="btn-icon">+</span>
-                            Add Item to Pantry
-                        </button>
+                        <div class="button-group">
+                            <button type="submit" class="btn btn-primary btn-full" id="addItemButton">
+                                <span class="btn-icon">+</span>
+                                Add Item to Pantry
+                            </button>
+                            <button type="submit" class="btn btn-primary btn-full" id="addShoppingButton">
+                                <span class="btn-icon">+</span>
+                                Add Item to Shopping Cart
+                            </button>
+                        </div>
                     </form>
 
                     <div id="responseMessage" class="response-container"></div>
@@ -83,7 +88,7 @@
             </section>
             <section class="dashboard-grid">
                 <div id="shopping-section" hx-get="/shopping" hx-target="#shopping-section" hx-swap="innerHTML"
-                    hx-trigger="load, click delay:1.5s from:#addItemButton">
+                    hx-trigger="load, click delay:1.5s from:#addShoppingButton">
                 </div>
             </section>
 

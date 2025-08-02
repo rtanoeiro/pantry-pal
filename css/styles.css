@@ -480,6 +480,16 @@ body {
   line-height: 1;
 }
 
+.button-group {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.button-group .btn {
+  flex: 1;
+}
+
 /* ===== DASHBOARD COMPONENTS ===== */
 .dashboard-grid {
   display: grid;
