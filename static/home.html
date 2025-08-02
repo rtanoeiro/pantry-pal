@@ -70,19 +70,23 @@
                         </button>
                     </form>
 
-                    <div id="responseMessage" class="response-container">
-                        {{ template "ResponseMessage" . }}
-                    </div>
+                    <div id="responseMessage" class="response-container"></div>
                 </div>
             </section>
 
             <!-- Dashboard Grid -->
+
             <section class="dashboard-grid">
-                <div id="right-section" hx-get="/expiring" hx-target="#right-section" hx-swap="innerHTML"
+                <div id="expiring-section" hx-get="/expiring" hx-target="#expiring-section" hx-swap="innerHTML"
                     hx-trigger="load, click delay:1.5s from:#addItemButton">
-                    {{ template "expiringSoonBlock" . }}
                 </div>
             </section>
+            <section class="dashboard-grid">
+                <div id="shopping-section" hx-get="/shopping" hx-target="#shopping-section" hx-swap="innerHTML"
+                    hx-trigger="load, click delay:1.5s from:#addItemButton">
+                </div>
+            </section>
+
         </main>
     </div>
 </body>
@@ -90,67 +94,6 @@
 </html>
 {{ end }}
 
-{{ block "expiringSoonBlock" . }}
-<div class="dashboard-card">
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">⚠️ Expiring Soon</h3>
-            <p class="card-subtitle">Items that need your attention</p>
-        </div>
-        <div class="card-content">
-            {{ if .ExpiringSoon }}
-            <div class="item-grid">
-                {{ range .ExpiringSoon }}
-                <div class="item-card expiring">
-                    <div class="item-header">
-                        <span class="item-name">{{ .ItemName }}</span>
-                        <span class="item-quantity">×{{ .Quantity }}</span>
-                    </div>
-                    <div class="item-footer">
-                        <span class="expiry-date">{{ .ExpiryAt }}</span>
-                    </div>
-                </div>
-                {{ end }}
-            </div>
-            {{ else }}
-            <div class="empty-state">
-                <p class="empty-text">No items expiring soon</p>
-                <p class="empty-subtitle">Great job managing your pantry!</p>
-            </div>
-            {{ end }}
-        </div>
-    </div>
-</div>
-
-// TODO: Split expiring soon from shopping cart and load on page load
-<div class="dashboard-card">
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">🛒 Shopping List</h3>
-            <p class="card-subtitle">Items to buy next</p>
-        </div>
-        <div class="card-content">
-            {{ if .CartItems }}
-            <div class="item-grid">
-                {{ range .CartItems }}
-                <div class="item-card shopping">
-                    <div class="item-header">
-                        <span class="item-name">{{ .ItemName }}</span>
-                        <span class="item-quantity">×{{ .Quantity }}</span>
-                    </div>
-                </div>
-                {{ end }}
-            </div>
-            {{ else }}
-            <div class="empty-state">
-                <p class="empty-text">Shopping list is empty</p>
-                <p class="empty-subtitle">Add items as they run low</p>
-            </div>
-            {{ end }}
-        </div>
-    </div>
-</div>
-{{ end }}
 
 {{ block "ResponseMessage" .}}
 <div class="response-messages">
