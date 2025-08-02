@@ -18,15 +18,14 @@ func (config *Config) GetAllShopping(writer http.ResponseWriter, request *http.R
 
 	cartItems, errCart := config.Db.GetAllShopping(context.Background(), userID)
 	if errCart != nil {
-		cartInfo.ErrorMessage = fmt.Sprintf("Unable to get current user cart info. Error: %s", errUser.Error())
+		cartInfo.ErrorMessage = fmt.Sprintf("Unable to get current user cart info. Error: %s ", errCart.Error())
 		writer.WriteHeader(http.StatusForbidden)
 		_ = config.Renderer.Render(writer, "ResponseMessage", cartInfo)
-
 	}
 
 	cartInfo.CartItems = cartItems
-	_ = config.Renderer.Render(writer, "shoppingCartBlock", cartInfo)
 	writer.WriteHeader(http.StatusOK)
+	_ = config.Renderer.Render(writer, "shoppingCart", cartInfo)
 }
 
 func (config *Config) AddItemShopping(writer http.ResponseWriter, request *http.Request) {
