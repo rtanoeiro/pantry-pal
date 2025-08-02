@@ -10,11 +10,9 @@ import (
 )
 
 type CartItem struct {
-	CartID   string
-	ItemID   string
+	UserID   string
 	ItemName string
 	Quantity int64
-	AddedAt  string
 }
 
 type Pantry struct {
@@ -24,12 +22,6 @@ type Pantry struct {
 	Quantity int64
 	AddedAt  string
 	ExpiryAt string
-}
-
-type ShoppingCart struct {
-	ID        string
-	UserID    string
-	CreatedAt string
 }
 
 type User struct {
