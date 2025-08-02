@@ -4,14 +4,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"pantry-pal/pantry/database"
 	"testing"
 )
-
-var ItemCardTestCases = map[database.GetAllShoppingRow]int{
-	{ItemName: "Test item", Quantity: 2}:          200,
-	{ItemName: "Another Test Item", Quantity: -1}: 400,
-}
 
 func BuildAddItemShopping(itemName, itemQuantity string) *url.Values {
 	form := url.Values{}
