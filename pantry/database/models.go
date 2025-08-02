@@ -9,6 +9,12 @@ import (
 	"time"
 )
 
+type CartItem struct {
+	UserID   string
+	ItemName string
+	Quantity int64
+}
+
 type Pantry struct {
 	ID       string
 	UserID   string
