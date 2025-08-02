@@ -9,74 +9,67 @@ import (
 	"context"
 )
 
-const addItemShopping = `-- name: AddItemShopping :one
-INSERT INTO cart_items (item_id, cart_id, item_name, quantity, added_at)
-VALUES (?, ?, ?, ?, ?)
-
-RETURNING cart_id, item_id, item_name, quantity, added_at
+const addItemShopping = `-- name: AddItemShopping :exec
+INSERT INTO cart_items (user_id, item_name, quantity)
+VALUES (?, ?, ?)
 `
 
 type AddItemShoppingParams struct {
-	ItemID   string
-	CartID   string
+	UserID   string
 	ItemName string
 	Quantity int64
-	AddedAt  string
 }
 
-func (q *Queries) AddItemShopping(ctx context.Context, arg AddItemShoppingParams) (CartItem, error) {
-	row := q.db.QueryRowContext(ctx, addItemShopping,
-		arg.ItemID,
-		arg.CartID,
-		arg.ItemName,
-		arg.Quantity,
-		arg.AddedAt,
-	)
-	var i CartItem
-	err := row.Scan(
-		&i.CartID,
-		&i.ItemID,
-		&i.ItemName,
-		&i.Quantity,
-		&i.AddedAt,
-	)
+func (q *Queries) AddItemShopping(ctx context.Context, arg AddItemShoppingParams) error {
+	_, err := q.db.ExecContext(ctx, addItemShopping, arg.UserID, arg.ItemName, arg.Quantity)
+	return err
+}
+
+const findItemShopping = `-- name: FindItemShopping :one
+SELECT
+    item_name,
+    quantity
+FROM cart_items
+WHERE item_name = ?
+AND user_id = ?
+`
+
+type FindItemShoppingParams struct {
+	ItemName string
+	UserID   string
+}
+
+type FindItemShoppingRow struct {
+	ItemName string
+	Quantity int64
+}
+
+func (q *Queries) FindItemShopping(ctx context.Context, arg FindItemShoppingParams) (FindItemShoppingRow, error) {
+	row := q.db.QueryRowContext(ctx, findItemShopping, arg.ItemName, arg.UserID)
+	var i FindItemShoppingRow
+	err := row.Scan(&i.ItemName, &i.Quantity)
 	return i, err
 }
 
 const getAllShopping = `-- name: GetAllShopping :many
-SELECT 
-    cart_items.cart_id, 
-    cart_items.item_name, 
-    cart_items.quantity, 
-    cart_items.added_at 
+SELECT
+    user_id,
+    item_name, 
+    quantity
 FROM cart_items
-INNER JOIN shopping_cart
-ON shopping_cart.id = cart_items.cart_id
-WHERE shopping_cart.user_id = ?
+WHERE user_id = ?
 `
 
-type GetAllShoppingRow struct {
-	CartID   string
-	ItemName string
-	Quantity int64
-	AddedAt  string
-}
-
-func (q *Queries) GetAllShopping(ctx context.Context, userID string) ([]GetAllShoppingRow, error) {
+func (q *Queries) GetAllShopping(ctx context.Context, userID string) ([]CartItem, error) {
 	rows, err := q.db.QueryContext(ctx, getAllShopping, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetAllShoppingRow
+	var items []CartItem
 	for rows.Next() {
-		var i GetAllShoppingRow
-		if err := rows.Scan(
-			&i.CartID,
-			&i.ItemName,
-			&i.Quantity,
-			&i.AddedAt,
-		); err != nil {
+		var i CartItem
+		if err := rows.Scan(&i.UserID, &i.ItemName, &i.Quantity); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -92,10 +85,35 @@ func (q *Queries) GetAllShopping(ctx context.Context, userID string) ([]GetAllSh
 
 const removeItemShopping = `-- name: RemoveItemShopping :exec
 DELETE FROM cart_items
-WHERE item_id = ?
+WHERE item_name = ?
+AND user_id = ?
 `
 
-func (q *Queries) RemoveItemShopping(ctx context.Context, itemID string) error {
-	_, err := q.db.ExecContext(ctx, removeItemShopping, itemID)
+type RemoveItemShoppingParams struct {
+	ItemName string
+	UserID   string
+}
+
+func (q *Queries) RemoveItemShopping(ctx context.Context, arg RemoveItemShoppingParams) error {
+	_, err := q.db.ExecContext(ctx, removeItemShopping, arg.ItemName, arg.UserID)
+	return err
+}
+
+const updateItemShopping = `-- name: UpdateItemShopping :exec
+UPDATE cart_items
+SET
+    quantity = ?
+WHERE item_name = ?
+AND user_id = ?
+`
+
+type UpdateItemShoppingParams struct {
+	Quantity int64
+	ItemName string
+	UserID   string
+}
+
+func (q *Queries) UpdateItemShopping(ctx context.Context, arg UpdateItemShoppingParams) error {
+	_, err := q.db.ExecContext(ctx, updateItemShopping, arg.Quantity, arg.ItemName, arg.UserID)
 	return err
 }
