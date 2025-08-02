@@ -20,7 +20,7 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 	if name == "" || password == "" {
 		userInfo.ErrorMessage = "Please provide valid date for all fields"
 		writer.WriteHeader(http.StatusBadRequest)
-		_ = config.Renderer.Render(writer, "signup", userInfo)
+		_ = config.Renderer.Render(writer, "errorLoginSignup", userInfo)
 		return
 	}
 	config.validateUniqueName(name, &userInfo, writer)
@@ -29,7 +29,7 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 	if errPwd != nil {
 		userInfo.ErrorMessage = "Server error, please try again"
 		writer.WriteHeader(http.StatusInternalServerError)
-		_ = config.Renderer.Render(writer, "signup", userInfo)
+		_ = config.Renderer.Render(writer, "errorLoginSignup", userInfo)
 		return
 	}
 	createUser := database.CreateUserParams{
@@ -43,7 +43,7 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 	if errAdd != nil {
 		userInfo.ErrorMessage = "Failed adding user to our systems, please try again"
 		writer.WriteHeader(http.StatusInternalServerError)
-		_ = config.Renderer.Render(writer, "signup", userInfo)
+		_ = config.Renderer.Render(writer, "errorLoginSignup", userInfo)
 		return
 	}
 	log.Printf(

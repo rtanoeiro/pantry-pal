@@ -45,14 +45,14 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 		log.Printf("User %s failed login at %s:", user, time.Now())
 		returnResponse.ErrorMessage = "Invalid Username"
 		writer.WriteHeader(http.StatusBadRequest)
-		_ = config.Renderer.Render(writer, "errorLogin", returnResponse)
+		_ = config.Renderer.Render(writer, "errorLoginSignup", returnResponse)
 		return
 	}
 	if CheckPasswordHash(password, userData.PasswordHash) != nil {
 		log.Printf("User %s failed login with wrong password at %s:", user, time.Now())
 		returnResponse.ErrorMessage = "Wrong Password"
 		writer.WriteHeader(http.StatusBadRequest)
-		_ = config.Renderer.Render(writer, "errorLogin", returnResponse)
+		_ = config.Renderer.Render(writer, "errorLoginSignup", returnResponse)
 		return
 	}
 
@@ -61,7 +61,7 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 		log.Printf("Failed creating JWT Token at %s:", time.Now())
 		returnResponse.ErrorMessage = "Error request on getting user, please try again"
 		writer.WriteHeader(http.StatusInternalServerError)
-		_ = config.Renderer.Render(writer, "errorLogin", returnResponse)
+		_ = config.Renderer.Render(writer, "errorLoginSignup", returnResponse)
 		return
 	}
 
