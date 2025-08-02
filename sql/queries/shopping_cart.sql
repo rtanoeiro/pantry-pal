@@ -1,20 +1,31 @@
--- name: AddItemShopping :one
-INSERT INTO cart_items (item_id, cart_id, item_name, quantity, added_at)
-VALUES (?, ?, ?, ?, ?)
+-- name: AddItemShopping :exec
+INSERT INTO cart_items (user_id, item_name, quantity)
+VALUES (?, ?, ?);
 
-RETURNING *;
+-- name: UpdateItemShopping :exec
+UPDATE cart_items
+SET
+    quantity = ?
+WHERE item_name = ?
+AND user_id = ?;
 
 -- name: RemoveItemShopping :exec
 DELETE FROM cart_items
-WHERE item_id = ?;
+WHERE item_name = ?
+AND user_id = ?;
 
 -- name: GetAllShopping :many
-SELECT 
-    cart_items.cart_id, 
-    cart_items.item_name, 
-    cart_items.quantity, 
-    cart_items.added_at 
+SELECT
+    user_id,
+    item_name, 
+    quantity
 FROM cart_items
-INNER JOIN shopping_cart
-ON shopping_cart.id = cart_items.cart_id
-WHERE shopping_cart.user_id = ?;
+WHERE user_id = ?;
+
+-- name: FindItemShopping :one
+SELECT
+    item_name,
+    quantity
+FROM cart_items
+WHERE item_name = ?
+AND user_id = ?;
