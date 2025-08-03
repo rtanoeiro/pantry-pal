@@ -1,6 +1,6 @@
 -- name: AddItemShopping :exec
-INSERT INTO cart_items (user_id, item_name, quantity)
-VALUES (?, ?, ?);
+INSERT INTO cart_items (id, user_id, item_name, quantity)
+VALUES (?, ?, ?, ?);
 
 -- name: UpdateItemShopping :exec
 UPDATE cart_items
@@ -12,7 +12,7 @@ AND user_id = ?;
 -- name: RemoveItemShopping :exec
 DELETE FROM cart_items
 WHERE item_name = ?
-AND user_id = ?;
+AND id = ?;
 
 -- name: GetAllShopping :many
 SELECT
@@ -24,6 +24,7 @@ WHERE user_id = ?;
 
 -- name: FindItemShopping :one
 SELECT
+    user_id,
     item_name,
     quantity
 FROM cart_items
