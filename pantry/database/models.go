@@ -10,7 +10,6 @@ import (
 )
 
 type CartItem struct {
-	ID       string
 	UserID   string
 	ItemName string
 	Quantity int64
