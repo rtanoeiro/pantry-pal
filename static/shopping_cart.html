@@ -12,15 +12,15 @@
                 <div class="item-card shopping">
                     <div class="item-header">
                         <span class="item-name">{{ .ItemName }}</span>
-                        <span class="item-quantity">×{{ .Quantity }}</span>
+                        <span class="item-quantity">{{ .Quantity }}</span>
                     </div>
 
                     <div class="item-actions">
-                        <button class="btn btn-sm btn-decrement" hx-delete="/shopping/{{ .ItemID }}"
+                        <button class="btn btn-sm btn-decrement" hx-post="/shopping/removeone"
                             hx-target="#shopping-section" hx-swap="innerHTML">
-                            /
+                            -
                         </button>
-                        <button class="btn btn-sm btn-increment" hx-post="/shopping"
+                        <button class="btn btn-sm btn-increment" hx-post="/shopping/addone"
                             hx-target="#shopping-section" hx-swap="innerHTML">
                             +
                         </button>
