@@ -63,6 +63,7 @@ func main() {
 	// Shopping Cart endpoints
 	httpServerMux.Handle("GET /shopping", http.HandlerFunc(config.GetAllShopping))
 	httpServerMux.Handle("POST /shopping", http.HandlerFunc(config.AddItemShopping))
+	httpServerMux.Handle("POST /shopping/addone", http.HandlerFunc(config.AddOneItemShopping))
 	httpServerMux.Handle("DELETE /shopping/{ItemID}", http.HandlerFunc(config.RemoveItemShopping))
 
 	httpServer := http.Server{
