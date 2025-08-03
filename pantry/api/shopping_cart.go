@@ -102,6 +102,21 @@ func (config *Config) AddOneItemShopping(writer http.ResponseWriter, request *ht
 	config.AddItemShopping(writer, request)
 }
 
+func (config *Config) RemoveOneItemShopping(writer http.ResponseWriter, request *http.Request) {
+	var cartInfo SuccessErrorResponse
+	userID, errUser := GetUserIDFromTokenAndValidate(request, config)
+	if errUser != nil {
+		cartInfo.ErrorMessage = fmt.Sprintf("Unable to retrieve user. Error: %s", errUser.Error())
+		writer.WriteHeader(http.StatusInternalServerError)
+		_ = config.Renderer.Render(writer, "ResponseMessage", cartInfo)
+		return
+	}
+	log.Printf("User %s is trying to add one item of %s", userID, request.FormValue("itemName"))
+	request.Form.Add("itemName", request.FormValue("itemName"))
+	request.Form.Add("itemQuantity", "-1")
+	config.AddItemShopping(writer, request)
+}
+
 func (config *Config) UpdateItemShopping(writer http.ResponseWriter, request *http.Request, newQuantity int64, itemName, userID string) {
 	var cartInfo SuccessErrorResponse
 	updateItem := database.UpdateItemShoppingParams{
