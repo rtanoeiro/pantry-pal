@@ -100,7 +100,7 @@ type SuccessErrorResponse struct {
 }
 
 type CartInfo struct {
-	CartItems      []database.GetAllShoppingRow `json:"cart_items"`
-	ErrorMessage   string                       `json:"success_message"`
-	SuccessMessage string                       `json:"error_message"`
+	CartItems      []database.CartItem `json:"cart_items"`
+	ErrorMessage   string              `json:"success_message"`
+	SuccessMessage string              `json:"error_message"`
 }
