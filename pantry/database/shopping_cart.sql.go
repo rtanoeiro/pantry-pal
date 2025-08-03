@@ -10,24 +10,18 @@ import (
 )
 
 const addItemShopping = `-- name: AddItemShopping :exec
-INSERT INTO cart_items (id, user_id, item_name, quantity)
-VALUES (?, ?, ?, ?)
+INSERT INTO cart_items (user_id, item_name, quantity)
+VALUES (?, ?, ?)
 `
 
 type AddItemShoppingParams struct {
-	ID       string
 	UserID   string
 	ItemName string
 	Quantity int64
 }
 
 func (q *Queries) AddItemShopping(ctx context.Context, arg AddItemShoppingParams) error {
-	_, err := q.db.ExecContext(ctx, addItemShopping,
-		arg.ID,
-		arg.UserID,
-		arg.ItemName,
-		arg.Quantity,
-	)
+	_, err := q.db.ExecContext(ctx, addItemShopping, arg.UserID, arg.ItemName, arg.Quantity)
 	return err
 }
 
@@ -46,15 +40,9 @@ type FindItemShoppingParams struct {
 	UserID   string
 }
 
-type FindItemShoppingRow struct {
-	UserID   string
-	ItemName string
-	Quantity int64
-}
-
-func (q *Queries) FindItemShopping(ctx context.Context, arg FindItemShoppingParams) (FindItemShoppingRow, error) {
+func (q *Queries) FindItemShopping(ctx context.Context, arg FindItemShoppingParams) (CartItem, error) {
 	row := q.db.QueryRowContext(ctx, findItemShopping, arg.ItemName, arg.UserID)
-	var i FindItemShoppingRow
+	var i CartItem
 	err := row.Scan(&i.UserID, &i.ItemName, &i.Quantity)
 	return i, err
 }
@@ -68,21 +56,15 @@ FROM cart_items
 WHERE user_id = ?
 `
 
-type GetAllShoppingRow struct {
-	UserID   string
-	ItemName string
-	Quantity int64
-}
-
-func (q *Queries) GetAllShopping(ctx context.Context, userID string) ([]GetAllShoppingRow, error) {
+func (q *Queries) GetAllShopping(ctx context.Context, userID string) ([]CartItem, error) {
 	rows, err := q.db.QueryContext(ctx, getAllShopping, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetAllShoppingRow
+	var items []CartItem
 	for rows.Next() {
-		var i GetAllShoppingRow
+		var i CartItem
 		if err := rows.Scan(&i.UserID, &i.ItemName, &i.Quantity); err != nil {
 			return nil, err
 		}
@@ -100,16 +82,16 @@ func (q *Queries) GetAllShopping(ctx context.Context, userID string) ([]GetAllSh
 const removeItemShopping = `-- name: RemoveItemShopping :exec
 DELETE FROM cart_items
 WHERE item_name = ?
-AND id = ?
+AND user_id = ?
 `
 
 type RemoveItemShoppingParams struct {
 	ItemName string
-	ID       string
+	UserID   string
 }
 
 func (q *Queries) RemoveItemShopping(ctx context.Context, arg RemoveItemShoppingParams) error {
-	_, err := q.db.ExecContext(ctx, removeItemShopping, arg.ItemName, arg.ID)
+	_, err := q.db.ExecContext(ctx, removeItemShopping, arg.ItemName, arg.UserID)
 	return err
 }
 
