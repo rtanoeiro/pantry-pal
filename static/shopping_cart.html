@@ -14,6 +14,17 @@
                         <span class="item-name">{{ .ItemName }}</span>
                         <span class="item-quantity">×{{ .Quantity }}</span>
                     </div>
+
+                    <div class="item-actions">
+                        <button class="btn btn-sm btn-decrement" hx-delete="/shopping/{{ .ItemID }}"
+                            hx-target="#shopping-section" hx-swap="innerHTML">
+                            /
+                        </button>
+                        <button class="btn btn-sm btn-increment" hx-post="/shopping"
+                            hx-target="#shopping-section" hx-swap="innerHTML">
+                            +
+                        </button>
+                    </div>
                 </div>
                 {{ end }}
             </div>

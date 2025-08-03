@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"pantry-pal/pantry/database"
 	"strconv"
+
+	"github.com/google/uuid"
 )
 
 func (config *Config) GetAllShopping(writer http.ResponseWriter, request *http.Request) {
@@ -51,6 +53,7 @@ func (config *Config) AddItemShopping(writer http.ResponseWriter, request *http.
 	userID, errUser := GetUserIDFromTokenAndValidate(request, config)
 	if errUser != nil {
 		cartInfo.ErrorMessage = fmt.Sprintf("Unable to retrieve user. Error: %s", errUser.Error())
+		writer.WriteHeader(http.StatusInternalServerError)
 		_ = config.Renderer.Render(writer, "ResponseMessage", cartInfo)
 		return
 	}
@@ -63,12 +66,12 @@ func (config *Config) AddItemShopping(writer http.ResponseWriter, request *http.
 	currentItem, errFind := config.Db.FindItemShopping(request.Context(), findItem)
 	if errFind == nil {
 		currentItem.Quantity = currentItem.Quantity + int64(itemQuantity)
-		log.Printf("Item already exists. User %s is updating %s into its shopping cart to %d items", userID, itemName, currentItem.Quantity)
 		config.UpdateItemShopping(writer, request, currentItem)
 		return
 	}
 
 	addItem := database.AddItemShoppingParams{
+		ID:       uuid.New().String(),
 		UserID:   userID,
 		ItemName: itemName,
 		Quantity: int64(itemQuantity),
@@ -76,11 +79,12 @@ func (config *Config) AddItemShopping(writer http.ResponseWriter, request *http.
 	errAdd := config.Db.AddItemShopping(request.Context(), addItem)
 	if errAdd != nil {
 		cartInfo.ErrorMessage = fmt.Sprintf("Unable to add items to your Shopping Cart. Error: %s", errAdd.Error())
-		config.UpdateItemShopping(writer, request, currentItem)
+		writer.WriteHeader(http.StatusInternalServerError)
+		_ = config.Renderer.Render(writer, "ResponseMessage", cartInfo)
 		return
 	}
 
-	writer.WriteHeader(http.StatusBadRequest)
+	writer.WriteHeader(http.StatusOK)
 	cartInfo.SuccessMessage = fmt.Sprintf("Successfully added x%d - %s", addItem.Quantity, addItem.ItemName)
 	_ = config.Renderer.Render(writer, "ResponseMessage", cartInfo)
 }
@@ -90,6 +94,7 @@ func (config *Config) UpdateItemShopping(writer http.ResponseWriter, request *ht
 	updateItem := database.UpdateItemShoppingParams{
 		Quantity: item.Quantity,
 		ItemName: item.ItemName,
+		UserID:   item.UserID,
 	}
 	errUpdate := config.Db.UpdateItemShopping(request.Context(), updateItem)
 	if errUpdate != nil {
@@ -99,6 +104,7 @@ func (config *Config) UpdateItemShopping(writer http.ResponseWriter, request *ht
 		return
 	}
 	returnPantry.SuccessMessage = fmt.Sprintf("Added %d items of %s", updateItem.Quantity, updateItem.ItemName)
+	writer.WriteHeader(http.StatusOK)
 	_ = config.Renderer.Render(writer, "ResponseMessage", returnPantry)
 }
 

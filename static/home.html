@@ -42,8 +42,7 @@
                         <p class="card-subtitle">Keep track of your pantry items and expiration dates</p>
                     </div>
 
-                    <form id="add-item-form" hx-post="/pantry" hx-target="#responseMessage" hx-swap="innerHTML"
-                        hx-on::after-request="this.reset()" class="add-item-form">
+                    <form id="add-item-form" class="add-item-form">
                         <div class="form-grid">
                             <div class="form-group">
                                 <label for="nameInput" class="form-label">Item Name</label>
@@ -59,16 +58,19 @@
 
                             <div class="form-group">
                                 <label for="expirationDateInput" class="form-label">Expiration Date</label>
-                                <input type="date" id="expirationDateInput" name="itemExpiryDate" class="form-input"/>
+                                <input type="date" id="expirationDateInput" name="itemExpiryDate" class="form-input" />
                             </div>
                         </div>
 
                         <div class="button-group">
-                            <button type="submit" class="btn btn-primary btn-full" id="addItemButton">
+                            <button type="submit" hx-post="/pantry" hx-target="#responseMessage" hx-swap="innerHTML"
+                                hx-on::after-request="this.reset()" class="btn btn-primary btn-full" id="addItemButton">
                                 <span class="btn-icon">+</span>
                                 Add Item to Pantry
                             </button>
-                            <button type="submit" class="btn btn-primary btn-full" id="addShoppingButton">
+                            <button type="submit" hx-post="/shopping" hx-target="#responseMessage" hx-swap="innerHTML"
+                                hx-on::after-request="this.reset()" class="btn btn-primary btn-full"
+                                id="addShoppingButton">
                                 <span class="btn-icon">+</span>
                                 Add Item to Shopping Cart
                             </button>
