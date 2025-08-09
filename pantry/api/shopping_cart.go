@@ -94,7 +94,6 @@ func (config *Config) AddItemShopping(writer http.ResponseWriter, request *http.
 	writer.WriteHeader(http.StatusOK)
 	_ = config.Renderer.Render(writer, "HomeResponseMessage", cartInfo)
 	config.RenderShoppingCart(writer, request)
-	return
 }
 
 func (config *Config) AddOneItemShopping(writer http.ResponseWriter, request *http.Request) {
@@ -111,7 +110,6 @@ func (config *Config) AddOneItemShopping(writer http.ResponseWriter, request *ht
 	request.Form.Add("itemName", itemName)
 	request.Form.Add("itemQuantity", "1")
 	config.AddItemShopping(writer, request)
-	return
 }
 
 func (config *Config) RemoveOneItemShopping(writer http.ResponseWriter, request *http.Request) {
@@ -146,7 +144,6 @@ func (config *Config) UpdateItemShopping(writer http.ResponseWriter, request *ht
 	}
 	writer.WriteHeader(http.StatusOK)
 	_ = config.Renderer.Render(writer, "HomeResponseMessage", cartInfo)
-
 }
 
 func (config *Config) RemoveItemShopping(writer http.ResponseWriter, request *http.Request) {
