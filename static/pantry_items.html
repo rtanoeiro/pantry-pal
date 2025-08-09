@@ -1,0 +1,46 @@
+{{ block "pantryItems" . }}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">All Items</h2>
+        <p class="card-subtitle">{{ len .Items }} items in your pantry</p>
+    </div>
+
+    <div class="card-content">
+        {{ if .Items }}
+        <div class="item-grid">
+            {{ range .Items }}
+            <div class="item-card pantry-item">
+                <div class="item-header">
+                    <span class="item-name">{{ .ItemName }}</span>
+                    <span class="item-quantity">{{ .Quantity }}</span>
+                </div>
+                <div class="item-footer">
+                    <span class="expiry-label">Expires:</span>
+                    <span class="expiry-date">{{ .ExpiryAt }}</span>
+                </div>
+                <div class="item-actions">
+                    <button class="btn btn-sm btn-decrement" hx-delete="/pantry/{{ .ItemID }}"
+                        hx-target=".pantry-container" hx-swap="innerHTML">
+                        -
+                    </button>
+                    <button class="btn btn-sm btn-increment" hx-post="/pantry/{{ .ItemID }}"
+                        hx-target=".pantry-container" hx-swap="innerHTML">
+                        +
+                    </button>
+                </div>
+            </div>
+            {{ end }}
+        </div>
+        {{ else }}
+        <div class="empty-state large">
+            <div class="empty-icon">📦</div>
+            <h3 class="empty-title">Your pantry is empty</h3>
+            <p class="empty-text">Start by adding some items to track their expiration dates</p>
+            <button class="btn btn-primary" hx-get="/home" hx-target="body" hx-swap="innerHTML" hx-push-url="/home">
+                Add Your First Item
+            </button>
+        </div>
+        {{ end }}
+    </div>
+</div>
+{{ end }}

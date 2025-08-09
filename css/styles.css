@@ -466,6 +466,12 @@ body {
   box-shadow: var(--shadow-md);
 }
 
+.item-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
 .btn-full {
   width: 100%;
 }
@@ -473,11 +479,22 @@ body {
 .btn-sm {
   padding: var(--space-2) var(--space-3);
   font-size: var(--text-xs);
+  border-radius: var(--radius-md);
 }
 
 .btn-icon {
   font-size: var(--text-lg);
   line-height: 1;
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.button-group .btn {
+  flex: 1;
 }
 
 /* ===== DASHBOARD COMPONENTS ===== */

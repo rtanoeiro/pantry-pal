@@ -8,6 +8,7 @@
     <title>Account Settings - Pantry Pal</title>
     <link rel="stylesheet" href="/css/styles.css">
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.4/dist/ext/response-targets.js"></script>
 </head>
 
 <body hx-boost="true">
@@ -111,8 +112,9 @@
                             Make Admin
                         </button>
                         {{ end }}
-                        <button class="btn btn-sm btn-danger" hx-delete="/user/{{ .UserID }}" hx-target="#users-container"
-                            hx-swap="innerHTML" hx-confirm="Are you sure you want to delete this user?">
+                        <button class="btn btn-sm btn-danger" hx-delete="/user/{{ .UserID }}"
+                            hx-target="#users-container" hx-swap="innerHTML"
+                            hx-confirm="Are you sure you want to delete this user?">
                             Delete User
                         </button>
                     </div>

@@ -101,7 +101,7 @@ func TestCreateUpdateDeleteUser(t *testing.T) {
 		t.Errorf("Got wrong StatusCode during user addition. Expected %d. Got: %d.", expectedCodeCreate, addWriter.Result().StatusCode)
 	}
 
-	loginWriter, _ := Login(goodUser, goodPass)
+	loginWriter, _ := Login(goodUserName, goodUserPass)
 	expectedCodeUpdate := 200
 	expectedCodeDelete := 200
 

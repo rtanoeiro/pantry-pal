@@ -1,0 +1,43 @@
+{{ block "shoppingCart" . }}
+<div class="dashboard-card">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">🛒 Shopping List</h3>
+            <p class="card-subtitle">Items to buy next</p>
+        </div>
+        <div class="card-content">
+            {{ if .CartItems }}
+            <div class="item-grid">
+                {{ range .CartItems }}
+                <div class="item-card shopping">
+                    <div class="item-header">
+                        <span class="item-name">{{ .ItemName }}</span>
+                        <span class="item-quantity">{{ .Quantity }}</span>
+                    </div>
+
+                    <div class="item-actions">
+                        <!-- htmx.trigger searchs for the refreshCart tag in the shopping section, and triggers a reload of that section-->
+                        <form hx-post="/shopping/removeone" hx-target="#responseMessage" hx-swap="innerHTML"
+                            hx-on::after-request="htmx.trigger('#shopping-section', 'refreshCart')">
+                            <input type="hidden" name="itemName" value="{{ .ItemName }}">
+                            <button id="removeOneButton" class="btn btn-sm btn-decrement" type="submit">-</button>
+                        </form>
+                        <form hx-post="/shopping/addone" hx-target="#responseMessage" hx-swap="innerHTML"
+                            hx-on::after-request="htmx.trigger('#shopping-section', 'refreshCart')">
+                            <input type="hidden" name="itemName" value="{{ .ItemName }}">
+                            <button id="addOneButton" class="btn btn-sm btn-increment" type="submit">+</button>
+                        </form>
+                    </div>
+                </div>
+                {{ end }}
+            </div>
+            {{ else }}
+            <div class="empty-state">
+                <p class="empty-text">Shopping list is empty</p>
+                <p class="empty-subtitle">Add items as they run low</p>
+            </div>
+            {{ end }}
+        </div>
+    </div>
+</div>
+{{ end }}

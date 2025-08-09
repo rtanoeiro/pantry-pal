@@ -2,6 +2,7 @@ package api
 
 import (
 	"html/template"
+	"pantry-pal/pantry/database"
 	"time"
 )
 
@@ -96,4 +97,10 @@ type PantryStats struct {
 type SuccessErrorResponse struct {
 	SuccessMessage string `json:"success_message"`
 	ErrorMessage   string `json:"error_message"`
+}
+
+type CartInfo struct {
+	CartItems      []database.CartItem `json:"cart_items"`
+	ErrorMessage   string              `json:"success_message"`
+	SuccessMessage string              `json:"error_message"`
 }
