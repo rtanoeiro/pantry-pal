@@ -77,23 +77,22 @@
                         </div>
                     </form>
 
-                    <div id="responseMessage" class="response-container"></div>
+                    <div id="responseMessage" class="response-container">{{ template "HomeResponseMessage" . }}</div>
                 </div>
             </section>
 
             <!-- Dashboard Grid -->
 
             <section class="dashboard-grid">
-                <div id="expiring-section" hx-get="/expiring" hx-target="#expiring-section" hx-swap="innerHTML"
-                    hx-trigger="load, click delay:1.5s from:#addItemButton">
+                <div id="shopping-section" hx-get="/shopping" hx-target="#shopping-section" hx-swap="innerHTML"
+                    hx-trigger="load, refreshCart delay:0.25s from:body, click delay:0.25s from:button">
                 </div>
             </section>
             <section class="dashboard-grid">
-                <div id="shopping-section" hx-get="/shopping" hx-target="#shopping-section" hx-swap="innerHTML"
-                    hx-trigger="load, click delay:1.5s from:#addShoppingButton">
+                <div id="expiring-section" hx-get="/expiring" hx-target="#expiring-section" hx-swap="innerHTML"
+                    hx-trigger="load, refreshExpiring delay:0.25s from:body, click delay:0.25s from:button">
                 </div>
             </section>
-
         </main>
     </div>
 </body>
@@ -102,7 +101,7 @@
 {{ end }}
 
 
-{{ block "ResponseMessage" .}}
+{{ block "HomeResponseMessage" .}}
 <div class="response-messages">
     {{ if .SuccessMessage }}
     <div class="alert alert-success-home">

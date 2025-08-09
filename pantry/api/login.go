@@ -24,7 +24,7 @@ func (config *Config) Logout(writer http.ResponseWriter, request *http.Request) 
 	if errUser != nil {
 		returnResponse.ErrorMessage = fmt.Sprintf("Unable to retrieve user data. Error: %s", errUser.Error())
 		writer.WriteHeader(http.StatusBadRequest)
-		_ = config.Renderer.Render(writer, "ResponseMessage", returnResponse)
+		_ = config.Renderer.Render(writer, "HomeResponseMessage", returnResponse)
 		return
 	}
 	http.SetCookie(writer, &http.Cookie{})
@@ -82,7 +82,7 @@ func (config *Config) Home(writer http.ResponseWriter, request *http.Request) {
 	if errUser != nil {
 		userInfo.ErrorMessage = fmt.Sprintf("Unable to retrieve user Pantry Items. Error: %s", errUser.Error())
 		writer.WriteHeader(http.StatusUnauthorized)
-		_ = config.Renderer.Render(writer, "ResponseMessage", userInfo)
+		_ = config.Renderer.Render(writer, "HomeResponseMessage", userInfo)
 		return
 	}
 
