@@ -23,8 +23,8 @@
         <div id="responseMessage" class="response-container">{{ template "PantryResponseMessage" . }}</div>
 
         <main class="main-content">
-            <div id="pantry-container" class="pantry-container" hx-get="/pantry" hx-target="#main-container"
-                hx-swap="ïnnerHTML">
+            <div id="pantryContainer" class="pantry-container" hx-get="/items" hx-target="#pantryContainer"
+                hx-swap="innerHTML">
             </div>
         </main>
     </div>

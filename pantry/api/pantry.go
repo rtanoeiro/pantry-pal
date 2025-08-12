@@ -205,7 +205,21 @@ func (config *Config) ItemAdd(
 
 // TODO: RIght now when hitting this API, we're returning only portion of the HTML, which is causing CSS issues when rendering it.
 // TODO: Adjust how data is returned when rendering this, so the whole page load doesn't fail.
-func (config *Config) GetAllPantryItems(writer http.ResponseWriter, request *http.Request) {
+func (config *Config) RenderPantryPage(writer http.ResponseWriter, request *http.Request) {
+	var returnPantry SuccessErrorResponse
+	userID, errUser := GetUserIDFromTokenAndValidate(request, config)
+	if errUser != nil {
+		log.Printf("Unable to retrieve pantry items from user %s at %s. Error on User Token", userID, time.Now())
+		returnPantry.ErrorMessage = fmt.Sprintf("Unable to retrieve user Pantry Items. Error: %s", errUser.Error())
+		writer.WriteHeader(http.StatusForbidden)
+		_ = config.Renderer.Render(writer, "pantry", returnPantry)
+		return
+	}
+	writer.WriteHeader(http.StatusOK)
+	_ = config.Renderer.Render(writer, "pantry", returnPantry)
+}
+
+func (config *Config) GetPantryItems(writer http.ResponseWriter, request *http.Request) {
 	var returnPantry PantryItems
 	userID, errUser := GetUserIDFromTokenAndValidate(request, config)
 	if errUser != nil {
@@ -238,6 +252,7 @@ func (config *Config) GetAllPantryItems(writer http.ResponseWriter, request *htt
 	returnPantry.Items = PantrySlice
 	writer.WriteHeader(http.StatusOK)
 	_ = config.Renderer.Render(writer, "pantryItems", returnPantry)
+
 }
 
 func (config *Config) DeleteItem(writer http.ResponseWriter, request *http.Request) {

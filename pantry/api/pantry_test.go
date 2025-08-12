@@ -140,7 +140,7 @@ func TestGetAllPantryItems(t *testing.T) {
 	for _, cookie := range loginWriter.Result().Cookies() {
 		loginRequest.AddCookie(cookie)
 	}
-	TestConfig.GetAllPantryItems(loginWriter, loginRequest)
+	TestConfig.RenderPantryPage(loginWriter, loginRequest)
 	if loginWriter.Result().StatusCode != expectedStatusCode {
 		t.Errorf("Got wrong StatusCode during item update. Expected %d. Got: %d.", expectedStatusCode, loginWriter.Result().StatusCode)
 	}
