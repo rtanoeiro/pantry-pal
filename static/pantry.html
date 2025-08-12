@@ -20,14 +20,32 @@
                 </button>
             </div>
         </header>
+        <div id="responseMessage" class="response-container">{{ template "PantryResponseMessage" . }}</div>
 
         <main class="main-content">
-            <div class="pantry-container">
-                {{ template "pantryItems" . }}
+            <div id="pantry-container" class="pantry-container" hx-get="/pantry" hx-target="#main-container"
+                hx-swap="ïnnerHTML">
             </div>
         </main>
     </div>
 </body>
 
 </html>
+{{ end }}
+
+{{ block "PantryResponseMessage" .}}
+<div class="response-messages">
+    {{ if .SuccessMessage }}
+    <div class="alert alert-success-home">
+        <span class="alert-icon">✓</span>
+        {{ .SuccessMessage }}
+    </div>
+    {{ end }}
+    {{ if .ErrorMessage }}
+    <div class="alert alert-error-home">
+        <span class="alert-icon">✕</span>
+        {{ .ErrorMessage }}
+    </div>
+    {{ end }}
+</div>
 {{ end }}

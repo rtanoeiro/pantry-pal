@@ -63,14 +63,11 @@
                         </div>
 
                         <div class="button-group">
-                            <button type="submit" hx-post="/pantry" hx-target="#responseMessage" hx-swap="innerHTML"
-                                hx-on::after-request="this.reset()" class="btn btn-primary btn-full" id="addItemButton">
+                            <button type="submit" hx-post="/pantry" hx-target="#responseMessage" hx-swap="innerHTML" class="btn btn-primary btn-full">
                                 <span class="btn-icon">+</span>
                                 Add Item to Pantry
                             </button>
-                            <button type="submit" hx-post="/shopping" hx-target="#responseMessage" hx-swap="innerHTML"
-                                hx-on::after-request="this.reset()" class="btn btn-primary btn-full"
-                                id="addShoppingButton">
+                            <button type="submit" hx-post="/shopping" hx-target="#responseMessage" hx-swap="innerHTML" class="btn btn-primary btn-full">
                                 <span class="btn-icon">+</span>
                                 Add Item to Shopping Cart
                             </button>

@@ -60,9 +60,7 @@ func main() {
 	httpServerMux.Handle("POST /pantry/addone/{ItemID}", http.HandlerFunc(config.HandleAddOnePantry))
 	httpServerMux.Handle("POST /pantry/removeone/{ItemID}", http.HandlerFunc(config.HandleRemoveOnePantry))
 	httpServerMux.Handle("GET /expiring", http.HandlerFunc(config.RenderExpiringSoon))
-	// TODO: Properly implement this endpoint
 	httpServerMux.Handle("DELETE /pantry/{ItemID}", http.HandlerFunc(config.DeleteItem))
-	// TODO: Add eendpoints to add and remove items from pantry just like shopping cart
 
 	// Shopping Cart endpoints
 	httpServerMux.Handle("GET /shopping", http.HandlerFunc(config.RenderShoppingCart))
