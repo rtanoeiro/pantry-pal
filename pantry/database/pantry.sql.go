@@ -46,6 +46,32 @@ func (q *Queries) AddItem(ctx context.Context, arg AddItemParams) (Pantry, error
 	return i, err
 }
 
+const findItemByID = `-- name: FindItemByID :one
+SELECT id, user_id, item_name, quantity, added_at, expiry_at
+FROM pantry
+WHERE user_id = ?
+    AND id = ?
+`
+
+type FindItemByIDParams struct {
+	UserID string
+	ID     string
+}
+
+func (q *Queries) FindItemByID(ctx context.Context, arg FindItemByIDParams) (Pantry, error) {
+	row := q.db.QueryRowContext(ctx, findItemByID, arg.UserID, arg.ID)
+	var i Pantry
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.ItemName,
+		&i.Quantity,
+		&i.AddedAt,
+		&i.ExpiryAt,
+	)
+	return i, err
+}
+
 const findItemByName = `-- name: FindItemByName :many
 SELECT id, user_id, item_name, quantity, added_at, expiry_at
 FROM pantry
@@ -126,7 +152,7 @@ func (q *Queries) GetAllItems(ctx context.Context, userID string) ([]Pantry, err
 }
 
 const getExpiringSoon = `-- name: GetExpiringSoon :many
-select item_name, quantity, expiry_at
+select id, item_name, quantity, expiry_at
 from pantry
 where user_id = ?
     and expiry_at >= strftime('%Y-%m-%d','now')
@@ -135,6 +161,7 @@ order by expiry_at asc
 `
 
 type GetExpiringSoonRow struct {
+	ID       string
 	ItemName string
 	Quantity int64
 	ExpiryAt string
@@ -149,7 +176,12 @@ func (q *Queries) GetExpiringSoon(ctx context.Context, userID string) ([]GetExpi
 	var items []GetExpiringSoonRow
 	for rows.Next() {
 		var i GetExpiringSoonRow
-		if err := rows.Scan(&i.ItemName, &i.Quantity, &i.ExpiryAt); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.ItemName,
+			&i.Quantity,
+			&i.ExpiryAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -189,14 +221,12 @@ func (q *Queries) RemoveItem(ctx context.Context, arg RemoveItemParams) (Pantry,
 	return i, err
 }
 
-const updateItemQuantity = `-- name: UpdateItemQuantity :one
+const updateItemQuantity = `-- name: UpdateItemQuantity :exec
 UPDATE pantry
 SET
     quantity = ?
 WHERE id = ?
     AND user_id = ?
-
-RETURNING id, user_id, item_name, quantity, added_at, expiry_at
 `
 
 type UpdateItemQuantityParams struct {
@@ -206,16 +236,7 @@ type UpdateItemQuantityParams struct {
 }
 
 // What'll see in the UI is a list of items, so we can probably use ID
-func (q *Queries) UpdateItemQuantity(ctx context.Context, arg UpdateItemQuantityParams) (Pantry, error) {
-	row := q.db.QueryRowContext(ctx, updateItemQuantity, arg.Quantity, arg.ID, arg.UserID)
-	var i Pantry
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.ItemName,
-		&i.Quantity,
-		&i.AddedAt,
-		&i.ExpiryAt,
-	)
-	return i, err
+func (q *Queries) UpdateItemQuantity(ctx context.Context, arg UpdateItemQuantityParams) error {
+	_, err := q.db.ExecContext(ctx, updateItemQuantity, arg.Quantity, arg.ID, arg.UserID)
+	return err
 }

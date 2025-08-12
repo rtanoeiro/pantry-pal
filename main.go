@@ -57,6 +57,8 @@ func main() {
 	// Pantry endpoints
 	httpServerMux.Handle("POST /pantry", http.HandlerFunc(config.HandleNewItem))
 	httpServerMux.Handle("GET /pantry", http.HandlerFunc(config.GetAllPantryItems))
+	httpServerMux.Handle("POST /pantry/addone/{ItemID}", http.HandlerFunc(config.HandleAddOnePantry))
+	httpServerMux.Handle("POST /pantry/removeone/{ItemID}", http.HandlerFunc(config.HandleRemoveOnePantry))
 	httpServerMux.Handle("GET /expiring", http.HandlerFunc(config.RenderExpiringSoon))
 	// TODO: Properly implement this endpoint
 	httpServerMux.Handle("DELETE /pantry/{ItemID}", http.HandlerFunc(config.DeleteItem))

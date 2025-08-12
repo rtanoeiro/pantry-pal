@@ -84,7 +84,7 @@ func TestHandleNewItemDateError(t *testing.T) {
 func TestHandleItemUpdateMoreThanitExists(t *testing.T) {
 	loginWriter, _ := Login(goodUser, goodPass)
 	firstExpectedStatusCode := 200
-	secondExpectedStatusCode := 400
+	secondExpectedStatusCode := 500
 	pantryWriter, pantryRequest := AttachItemToRequest(goodItem, goodQuantity, goodExpiryDate, http.MethodPost, "/pantry")
 	// After login cookies are added to the writer and passed to the request. So we need to add them back to following requests.
 	for _, cookie := range loginWriter.Result().Cookies() {

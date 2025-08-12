@@ -9,15 +9,31 @@
             {{ if .ExpiringSoon }}
             <div class="item-grid">
                 {{ range .ExpiringSoon }}
+
                 <div class="item-card expiring">
                     <div class="item-header">
                         <span class="item-name">{{ .ItemName }}</span>
-                        <span class="item-quantity">×{{ .Quantity }}</span>
+                        <span class="item-quantity">{{ .Quantity }}</span>
                     </div>
                     <div class="item-footer">
                         <span class="expiry-date">{{ .ExpiryAt }}</span>
                     </div>
+
+                    <div class="item-actions">
+                        <!-- htmx.trigger searchs for the refreshCart tag in the shopping section, and triggers a reload of that section-->
+                        <form hx-post="/pantry/removeone/{{ .ItemID }}" hx-target="#responseMessage" hx-swap="innerHTML"
+                            hx-on::after-request="htmx.trigger('#expiring-section', 'refreshExpiring')">
+                            <input type="hidden" name="itemName" value="{{ .ItemName }}">
+                            <button class="btn btn-sm btn-decrement" type="submit">-</button>
+                        </form>
+                        <form hx-post="/pantry/addone/{{ .ItemID }}" hx-target="#responseMessage" hx-swap="innerHTML"
+                            hx-on::after-request="htmx.trigger('#expiring-section', 'refreshExpiring')">
+                            <input type="hidden" name="itemName" value="{{ .ItemName }}">
+                            <button class="btn btn-sm btn-increment" type="submit">+</button>
+                        </form>
+                    </div>
                 </div>
+
                 {{ end }}
             </div>
             {{ else }}

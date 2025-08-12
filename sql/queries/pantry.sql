@@ -7,15 +7,13 @@ INSERT INTO pantry (
 RETURNING *;
 
 
--- name: UpdateItemQuantity :one
+-- name: UpdateItemQuantity :exec
 -- What'll see in the UI is a list of items, so we can probably use ID
 UPDATE pantry
 SET
     quantity = ?
 WHERE id = ?
-    AND user_id = ?
-
-RETURNING *;
+    AND user_id = ?;
 
 -- name: RemoveItem :one
 DELETE FROM pantry
@@ -29,6 +27,11 @@ FROM pantry
 WHERE user_id = ?
     AND lower(item_name) = ?;
 
+-- name: FindItemByID :one
+SELECT id, user_id, item_name, quantity, added_at, expiry_at
+FROM pantry
+WHERE user_id = ?
+    AND id = ?;
 
 -- name: GetAllItems :many
 SELECT id, user_id, item_name, quantity, added_at, expiry_at
@@ -37,7 +40,7 @@ WHERE user_id = ?
 ORDER BY expiry_at DESC;
 
 -- name: GetExpiringSoon :many
-select item_name, quantity, expiry_at
+select id, item_name, quantity, expiry_at
 from pantry
 where user_id = ?
     and expiry_at >= strftime('%Y-%m-%d','now')
