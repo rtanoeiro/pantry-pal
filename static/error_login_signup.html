@@ -1,0 +1,8 @@
+{{ block "errorSignup" .}}
+{{ if .ErrorMessage }}
+<div class="alert alert-error">
+    <span class="alert-icon">✕</span>
+    {{ .ErrorMessage }}
+</div>
+{{ end }}
+{{ end }}

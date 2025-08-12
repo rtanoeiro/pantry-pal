@@ -24,7 +24,7 @@ func (config *Config) Logout(writer http.ResponseWriter, request *http.Request) 
 	if errUser != nil {
 		returnResponse.ErrorMessage = fmt.Sprintf("Unable to retrieve user data. Error: %s", errUser.Error())
 		writer.WriteHeader(http.StatusBadRequest)
-		_ = config.Renderer.Render(writer, "ResponseMessage", returnResponse)
+		_ = config.Renderer.Render(writer, "HomeResponseMessage", returnResponse)
 		return
 	}
 	http.SetCookie(writer, &http.Cookie{})
@@ -43,16 +43,16 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 
 	if errUser != nil {
 		log.Printf("User %s failed login at %s:", user, time.Now())
-		returnResponse.ErrorMessage = "Invalid Email"
+		returnResponse.ErrorMessage = "Invalid Username"
 		writer.WriteHeader(http.StatusBadRequest)
-		_ = config.Renderer.Render(writer, "errorLogin", returnResponse)
+		_ = config.Renderer.Render(writer, "errorLoginSignup", returnResponse)
 		return
 	}
 	if CheckPasswordHash(password, userData.PasswordHash) != nil {
 		log.Printf("User %s failed login with wrong password at %s:", user, time.Now())
 		returnResponse.ErrorMessage = "Wrong Password"
 		writer.WriteHeader(http.StatusBadRequest)
-		_ = config.Renderer.Render(writer, "errorLogin", returnResponse)
+		_ = config.Renderer.Render(writer, "errorLoginSignup", returnResponse)
 		return
 	}
 
@@ -61,7 +61,7 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 		log.Printf("Failed creating JWT Token at %s:", time.Now())
 		returnResponse.ErrorMessage = "Error request on getting user, please try again"
 		writer.WriteHeader(http.StatusInternalServerError)
-		_ = config.Renderer.Render(writer, "errorLogin", returnResponse)
+		_ = config.Renderer.Render(writer, "errorLoginSignup", returnResponse)
 		return
 	}
 
@@ -82,7 +82,7 @@ func (config *Config) Home(writer http.ResponseWriter, request *http.Request) {
 	if errUser != nil {
 		userInfo.ErrorMessage = fmt.Sprintf("Unable to retrieve user Pantry Items. Error: %s", errUser.Error())
 		writer.WriteHeader(http.StatusUnauthorized)
-		_ = config.Renderer.Render(writer, "ResponseMessage", userInfo)
+		_ = config.Renderer.Render(writer, "HomeResponseMessage", userInfo)
 		return
 	}
 

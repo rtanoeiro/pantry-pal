@@ -3,6 +3,8 @@ test:
 	sh scripts/migrate_down.sh dev
 	sh scripts/migrate_up.sh dev
 	go test ./... --cover -v
+	sh scripts/migrate_down.sh dev
+	sh scripts/migrate_up.sh dev
 
 check-sec:
 	gosec -exclude=G101,G104 ./...
