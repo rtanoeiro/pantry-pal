@@ -203,8 +203,6 @@ func (config *Config) ItemAdd(
 	writer.WriteHeader(http.StatusOK)
 }
 
-// TODO: RIght now when hitting this API, we're returning only portion of the HTML, which is causing CSS issues when rendering it.
-// TODO: Adjust how data is returned when rendering this, so the whole page load doesn't fail.
 func (config *Config) RenderPantryPage(writer http.ResponseWriter, request *http.Request) {
 	var returnPantry SuccessErrorResponse
 	userID, errUser := GetUserIDFromTokenAndValidate(request, config)
