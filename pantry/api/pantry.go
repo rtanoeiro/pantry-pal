@@ -89,14 +89,13 @@ func (config *Config) ItemUpdate(
 		UserID:   toUpdate.UserID,
 	}
 
-	if itemToUpdate.Quantity < 0 {
-		log.Printf("User %s failed to add %d of %s items into pantry at %s. Negative quantity", toUpdate.UserID, toUpdate.QuantityToAdd, toUpdate.ItemName, time.Now())
-		returnPantry.ErrorMessage = "Unable to remove more items than available"
-		writer.WriteHeader(http.StatusBadRequest)
-		_ = config.Renderer.Render(writer, "HomeResponseMessage", returnPantry)
+	if itemToUpdate.Quantity <= 0 {
+		log.Printf("User %s trying to delete %s item from pantry at %s.", toUpdate.UserID, toUpdate.ItemName, time.Now())
+		request.Form.Add("ItemID", toUpdate.ItemID)
+		config.DeleteItem(writer, request)
 		return
 	}
-	updatedItem, errUpdate := config.Db.UpdateItemQuantity(request.Context(), itemToUpdate)
+	errUpdate := config.Db.UpdateItemQuantity(request.Context(), itemToUpdate)
 	if errUpdate != nil {
 		log.Printf("User %s failed to add %d of %s items into pantry at %s. Failed update", toUpdate.UserID, toUpdate.QuantityToAdd, toUpdate.ItemName, time.Now())
 		returnPantry.ErrorMessage = fmt.Sprintf("Failed to update items to Pantry, please try again. Error: %s", errUpdate.Error())
@@ -104,10 +103,68 @@ func (config *Config) ItemUpdate(
 		_ = config.Renderer.Render(writer, "HomeResponseMessage", returnPantry)
 		return
 	}
-	returnPantry.SuccessMessage = fmt.Sprintf(updatedItem.ItemName, " updated on Pantry")
+	returnPantry.SuccessMessage = fmt.Sprintf("%s updated on Pantry", toUpdate.ItemName)
 	writer.WriteHeader(http.StatusOK)
 	log.Printf("User %s successfully updated %d of %s items into pantry at %s.", toUpdate.UserID, toUpdate.QuantityToAdd, toUpdate.ItemName, time.Now())
 	_ = config.Renderer.Render(writer, "HomeResponseMessage", returnPantry)
+}
+
+func (config *Config) HandleAddOnePantry(writer http.ResponseWriter, request *http.Request) {
+	var returnPantry SuccessErrorResponse
+	userID, errUser := GetUserIDFromTokenAndValidate(request, config)
+	if errUser != nil {
+		returnPantry.ErrorMessage = fmt.Sprintf("Unable to retrieve user Pantry Items. Error: %s", errUser.Error())
+		_ = config.Renderer.Render(writer, "HomeResponseMessage", returnPantry)
+		return
+	}
+	itemID := request.PathValue("ItemID")
+	findItem := database.FindItemByIDParams{UserID: userID, ID: itemID}
+	log.Printf("User is trying to add one of ItemID %s", itemID)
+	currentItem, errItem := config.Db.FindItemByID(request.Context(), findItem)
+	if errItem != nil {
+		returnPantry.ErrorMessage = "Failed to get current items in pantry, please try again"
+		_ = config.Renderer.Render(writer, "HomeResponseMessage", returnPantry)
+		return
+	}
+
+	toUpdate := UpdateItemRequest{
+		ItemID:            itemID,
+		UserID:            userID,
+		ItemName:          currentItem.ItemName,
+		QuantityAvailable: currentItem.Quantity,
+		QuantityToAdd:     1,
+		ExpiryAt:          currentItem.ExpiryAt,
+	}
+	config.ItemUpdate(writer, request, toUpdate)
+}
+
+func (config *Config) HandleRemoveOnePantry(writer http.ResponseWriter, request *http.Request) {
+	var returnPantry SuccessErrorResponse
+	userID, errUser := GetUserIDFromTokenAndValidate(request, config)
+	if errUser != nil {
+		returnPantry.ErrorMessage = fmt.Sprintf("Unable to retrieve user Pantry Items. Error: %s", errUser.Error())
+		_ = config.Renderer.Render(writer, "HomeResponseMessage", returnPantry)
+		return
+	}
+	itemID := request.PathValue("ItemID")
+	findItem := database.FindItemByIDParams{UserID: userID, ID: itemID}
+	log.Printf("User is trying to remove one of ItemID %s", itemID)
+	currentItem, errItem := config.Db.FindItemByID(request.Context(), findItem)
+	if errItem != nil {
+		returnPantry.ErrorMessage = "Failed to get current items in pantry, please try again"
+		_ = config.Renderer.Render(writer, "HomeResponseMessage", returnPantry)
+		return
+	}
+
+	toUpdate := UpdateItemRequest{
+		ItemID:            itemID,
+		UserID:            userID,
+		ItemName:          currentItem.ItemName,
+		QuantityAvailable: currentItem.Quantity,
+		QuantityToAdd:     -1,
+		ExpiryAt:          currentItem.ExpiryAt,
+	}
+	config.ItemUpdate(writer, request, toUpdate)
 }
 
 func (config *Config) ItemAdd(
@@ -146,8 +203,8 @@ func (config *Config) ItemAdd(
 	writer.WriteHeader(http.StatusOK)
 }
 
-func (config *Config) GetAllPantryItems(writer http.ResponseWriter, request *http.Request) {
-	var returnPantry PantryItems
+func (config *Config) RenderPantryPage(writer http.ResponseWriter, request *http.Request) {
+	var returnPantry SuccessErrorResponse
 	userID, errUser := GetUserIDFromTokenAndValidate(request, config)
 	if errUser != nil {
 		log.Printf("Unable to retrieve pantry items from user %s at %s. Error on User Token", userID, time.Now())
@@ -156,13 +213,27 @@ func (config *Config) GetAllPantryItems(writer http.ResponseWriter, request *htt
 		_ = config.Renderer.Render(writer, "pantry", returnPantry)
 		return
 	}
+	writer.WriteHeader(http.StatusOK)
+	_ = config.Renderer.Render(writer, "pantry", returnPantry)
+}
+
+func (config *Config) GetPantryItems(writer http.ResponseWriter, request *http.Request) {
+	var returnPantry PantryItems
+	userID, errUser := GetUserIDFromTokenAndValidate(request, config)
+	if errUser != nil {
+		log.Printf("Unable to retrieve pantry items from user %s at %s. Error on User Token", userID, time.Now())
+		returnPantry.ErrorMessage = fmt.Sprintf("Unable to retrieve user Pantry Items. Error: %s", errUser.Error())
+		writer.WriteHeader(http.StatusForbidden)
+		_ = config.Renderer.Render(writer, "pantryItems", returnPantry)
+		return
+	}
 
 	allPantryItems, errAll := config.Db.GetAllItems(request.Context(), userID)
 	if errAll != nil {
 		log.Printf("Unable to retrieve pantry items from user %s at %s. Error on getting items", userID, time.Now())
 		returnPantry.ErrorMessage = fmt.Sprintf("Unable to retrieve user Pantry Items. Error: %s", errAll.Error())
 		writer.WriteHeader(http.StatusInternalServerError)
-		_ = config.Renderer.Render(writer, "pantry", returnPantry)
+		_ = config.Renderer.Render(writer, "pantryItems", returnPantry)
 		return
 	}
 
@@ -178,7 +249,8 @@ func (config *Config) GetAllPantryItems(writer http.ResponseWriter, request *htt
 	}
 	returnPantry.Items = PantrySlice
 	writer.WriteHeader(http.StatusOK)
-	_ = config.Renderer.Render(writer, "pantry", returnPantry)
+	_ = config.Renderer.Render(writer, "pantryItems", returnPantry)
+
 }
 
 func (config *Config) DeleteItem(writer http.ResponseWriter, request *http.Request) {
@@ -237,6 +309,7 @@ func (config *Config) RenderExpiringSoon(writer http.ResponseWriter, request *ht
 	expiringSoonItems := make([]PantryItem, len(expiringSoon))
 	for index, item := range expiringSoon {
 		expiringSoonItems[index] = PantryItem{
+			ItemID:   item.ID,
 			ItemName: item.ItemName,
 			Quantity: int(item.Quantity),
 			ExpiryAt: item.ExpiryAt,
