@@ -93,7 +93,6 @@ func (config *Config) AddItemShopping(writer http.ResponseWriter, request *http.
 	cartInfo.SuccessMessage = fmt.Sprintf("Successfully added x%d - %s", addItem.Quantity, addItem.ItemName)
 	writer.WriteHeader(http.StatusOK)
 	_ = config.Renderer.Render(writer, "HomeResponseMessage", cartInfo)
-	config.RenderShoppingCart(writer, request)
 }
 
 func (config *Config) AddOneItemShopping(writer http.ResponseWriter, request *http.Request) {
