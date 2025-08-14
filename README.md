@@ -7,9 +7,9 @@ PantryPal is a comprehensive, user-friendly application designed to help you man
 ### Core Features
 - **Pantry Management**: Add, remove, or update items in your virtual pantry.
 - **Expiry Tracking**: Monitor items as they approach their expiration date with configurable alerts.
+- **Shopping Cart Integration**: Sync your cart with the pantry to track what's on hand and plan your shopping list.
 
 ### Next Steps for Development
-- **Shopping Cart Integration**: Sync your cart with the pantry to track what's on hand and plan your shopping list.
 - **Recipe Suggestions**: Search and filter recipes based on available ingredients. Generate meal plans using your pantry items.
 - **AI-Powered Meal Planning**: Use your local AI model (LLM) or access an external AI provider to get personalized recipe recommendations. This can be done once the Go SDK MCP package is complete: https://github.com/modelcontextprotocol/go-sdk
 
@@ -23,10 +23,10 @@ PantryPal is a comprehensive, user-friendly application designed to help you man
 You can run PantrPal using Docker, use the docker-compose-template.yml file to set up your container. Make sure to define a port, and to create a JWT Secret before running the container. You can rename your file to pantry-pal.yaml and run the following command:
 
 ```bash
-docker-compose -f pantry-pal.yml up
+docker-compose -d up
 ```
 
-Head over to localhost:8080/login and you should have access to the application. The default user/password is admin/admin, new users by default are not assigned as admin, but if you log into the admin account, you can give admin privileges to any account.
+Head over to localhost:8080/login and you should have access to the application. The default user/password is Admin/admin, new users by default are not assigned as admin, but if you log into the Admin account, you can give admin privileges to any account.
 
 ### Option 2: Binary
 Use this option if you want to run this application without Docker, useful for development purposes, or if you are not familiar with Docker.
@@ -41,7 +41,7 @@ git clone https://github.com/rtanoeiro/pantry-pal.git
 ``` bash
 export PORT=8080
 export DATABASE_URL=data/pantry_pal.db
-# You can create a Secret with the following command ``ècho $(openssl rand -base64 32)```
+# You can create a Secret with the following command ``echo $(openssl rand -base64 32)```
 # Copy the output from the commmand above and paste it in the next line
 export JWT_SECRET=THING_YOU_JUST_COPIED
 ```
@@ -49,13 +49,13 @@ export JWT_SECRET=THING_YOU_JUST_COPIED
 3. After that, you can download all dependencies with:
 
 ```bash
-go mod download
+CGO_ENABLED=1 go build -o pantry_pal
 ```
 
 4. Now, you should be ready to Go! You can run the application with:
 
 ```bash
-go run main.go
+./pantry_pal
 ```
 
 ### Contributing
