@@ -23,7 +23,13 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 		_ = config.Renderer.Render(writer, "errorLoginSignup", userInfo)
 		return
 	}
-	config.validateUniqueName(name, &userInfo, writer)
+
+	if !config.validateUniqueName(name) {
+		userInfo.ErrorMessage = "Name already registered, please try again"
+		writer.WriteHeader(http.StatusBadRequest)
+		_ = config.Renderer.Render(writer, "errorLoginSignup", userInfo)
+		return
+	}
 
 	hashedPassword, errPwd := HashPassword(password)
 	if errPwd != nil {
@@ -55,7 +61,6 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 	writer.WriteHeader(http.StatusOK)
 	writer.Header().Set("HX-Push-Url", "/login")
 	_ = config.Renderer.Render(writer, "index", nil)
-
 }
 
 func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Request) {
@@ -274,12 +279,7 @@ func (config *Config) getUserInformation(userID string, userInfo UserInfoRequest
 	return userInfo
 }
 
-func (config *Config) validateUniqueName(name string, userInfo *UserInfoRequest, writer http.ResponseWriter) {
+func (config *Config) validateUniqueName(name string) bool {
 	_, userError := config.Db.GetUserByName(context.Background(), name)
-	if userError == nil {
-		userInfo.ErrorMessage = "Name already registered, please try again"
-		writer.WriteHeader(http.StatusBadRequest)
-		_ = config.Renderer.Render(writer, "signup", userInfo)
-		return
-	}
+	return userError != nil
 }

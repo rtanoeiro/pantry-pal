@@ -21,12 +21,12 @@
 
                     <div class="item-actions">
                         <!-- htmx.trigger searchs for the refreshCart tag in the shopping section, and triggers a reload of that section-->
-                        <form hx-post="/pantry/removeone/{{ .ItemID }}" hx-target="#responseMessage" hx-swap="innerHTML"
+                        <form hx-post="/pantry/removeone/{{ .ItemID }}" hx-target="#return-responses" hx-target-error="#return-responses" hx-swap="innerHTML"
                             hx-on::after-request="htmx.trigger('#expiring-section', 'refreshExpiring')">
                             <input type="hidden" name="itemName" value="{{ .ItemName }}">
                             <button class="btn btn-sm btn-decrement" type="submit">-</button>
                         </form>
-                        <form hx-post="/pantry/addone/{{ .ItemID }}" hx-target="#responseMessage" hx-swap="innerHTML"
+                        <form hx-post="/pantry/addone/{{ .ItemID }}" hx-target="#return-responses" hx-target-error="#return-responses" hx-swap="innerHTML"
                             hx-on::after-request="htmx.trigger('#expiring-section', 'refreshExpiring')">
                             <input type="hidden" name="itemName" value="{{ .ItemName }}">
                             <button class="btn btn-sm btn-increment" type="submit">+</button>

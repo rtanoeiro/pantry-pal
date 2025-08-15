@@ -8,9 +8,11 @@
     <title>My Pantry - Pantry Pal</title>
     <link rel="stylesheet" href="/css/styles.css">
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.4/dist/ext/response-targets.js"></script>
 </head>
 
-<body hx-boost="true">
+<body hx-boost="true" hx-ext="response-targets">
+    
     <div class="app-container">
         <header class="page-header">
             <div class="header-content">
@@ -20,32 +22,17 @@
                 </button>
             </div>
         </header>
-        <div id="responseMessage" class="response-container">{{ template "PantryResponseMessage" . }}</div>
-
+        
+        <div id="return-responses" class="return-responses"></div>
+        
         <main class="main-content">
             <div id="pantry-container" class="pantry-container" hx-get="/pantry_items" hx-target="#pantry-container"
-                hx-swap="innerHTML" hx-trigger="load, refreshPantry delay:0.25s from:body, click delay:0.25s from:button">
+                hx-swap="innerHTML"
+                hx-trigger="load, refreshPantry delay:0.25s from:body">
             </div>
         </main>
     </div>
 </body>
 
 </html>
-{{ end }}
-
-{{ block "PantryResponseMessage" .}}
-<div class="response-messages">
-    {{ if .SuccessMessage }}
-    <div class="alert alert-success-home">
-        <span class="alert-icon">✓</span>
-        {{ .SuccessMessage }}
-    </div>
-    {{ end }}
-    {{ if .ErrorMessage }}
-    <div class="alert alert-error-home">
-        <span class="alert-icon">✕</span>
-        {{ .ErrorMessage }}
-    </div>
-    {{ end }}
-</div>
 {{ end }}

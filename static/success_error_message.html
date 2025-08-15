@@ -1,0 +1,16 @@
+{{ block "SuccessErrorMessage" .}}
+<div class="response-messages">
+    {{ if .SuccessMessage }}
+    <div class="alert alert-success-home">
+        <span class="alert-icon">✓</span>
+        {{ .SuccessMessage }}
+    </div>
+    {{ end }}
+    {{ if .ErrorMessage }}
+    <div class="alert alert-error-home">
+        <span class="alert-icon">✕</span>
+        {{ .ErrorMessage }}
+    </div>
+    {{ end }}
+</div>
+{{ end }}

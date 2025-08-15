@@ -11,7 +11,7 @@
     <script src="https://unpkg.com/htmx.org@2.0.4/dist/ext/response-targets.js"></script>
 </head>
 
-<body hx-ext="response-targets">
+<body hx-boost="true" hx-ext="response-targets">
     <div class="auth-container">
         <div class="auth-card">
             <div class="auth-header">
@@ -19,7 +19,7 @@
                 <p class="auth-subtitle">Sign in to manage your kitchen smarter</p>
             </div>
 
-            <form id="loginForm" hx-post="/login" hx-target-error="#error-login" hx-swap="innerHTML" class="auth-form">
+            <form id="loginForm" hx-post="/login" hx-target="#return-responses" hx-target-error="#return-responses" hx-swap="innerHTML" class="auth-form">
                 <div class="form-group">
                     <label for="username" class="form-label">Username</label>
                     <input type="username" id="username" name="username" class="form-input"
@@ -32,7 +32,7 @@
                         placeholder="Enter your password" required>
                 </div>
 
-                <div id="error-login" class="response-container"></div>
+                <div id="return-responses" class="response-container"></div>
 
                 <button type="submit" class="btn btn-primary btn-full">Sign In</button>
             </form>

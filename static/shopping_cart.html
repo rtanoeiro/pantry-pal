@@ -17,12 +17,12 @@
 
                     <div class="item-actions">
                         <!-- htmx.trigger searchs for the refreshCart tag in the shopping section, and triggers a reload of that section-->
-                        <form hx-post="/shopping/removeone" hx-target="#responseMessage" hx-swap="innerHTML"
+                        <form hx-post="/shopping/removeone" hx-target="#return-responses" hx-target-error="#return-responses" hx-swap="innerHTML"
                             hx-on::after-request="htmx.trigger('#shopping-section', 'refreshCart')">
                             <input type="hidden" name="itemName" value="{{ .ItemName }}">
                             <button class="btn btn-sm btn-decrement" type="submit">-</button>
                         </form>
-                        <form hx-post="/shopping/addone" hx-target="#responseMessage" hx-swap="innerHTML"
+                        <form hx-post="/shopping/addone" hx-target="#return-responses" hx-target-error="#return-responses" hx-swap="innerHTML"
                             hx-on::after-request="htmx.trigger('#shopping-section', 'refreshCart')">
                             <input type="hidden" name="itemName" value="{{ .ItemName }}">
                             <button class="btn btn-sm btn-increment" type="submit">+</button>

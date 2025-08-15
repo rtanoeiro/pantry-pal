@@ -4,7 +4,6 @@
         <h2 class="card-title">All Items</h2>
         <p class="card-subtitle">{{ len .Items }} items in your pantry</p>
     </div>
-    <div id="responseMessage" class="response-container">{{ template "PantryResponseMessage" . }}</div>
     <div class="card-content">
         {{ if .Items }}
         <div class="item-grid">
@@ -19,13 +18,13 @@
                     <span class="expiry-date">{{ .ExpiryAt }}</span>
                 </div>
                 <div class="item-actions">
-                    <!-- htmx.trigger searchs for the refreshCart tag in the shopping section, and triggers a reload of that section-->
-                    <form hx-post="/pantry/removeone/{{ .ItemID }}" hx-target="#responseMessage" hx-swap="innerHTML"
+                    <!-- htmx.trigger searchs for the refreshPantry tag in the shopping section, and triggers a reload of that section-->
+                    <form hx-post="/pantry/removeone/{{ .ItemID }}" hx-target="#return-responses" hx-swap="innerHTML"
                         hx-on::after-request="htmx.trigger('#pantry-container', 'refreshPantry')">
                         <input type="hidden" name="itemName" value="{{ .ItemName }}">
                         <button class="btn btn-sm btn-decrement" type="submit">-</button>
                     </form>
-                    <form hx-post="/pantry/addone/{{ .ItemID }}" hx-target="#responseMessage" hx-swap="innerHTML"
+                    <form hx-post="/pantry/addone/{{ .ItemID }}" hx-target="#return-responses" hx-swap="innerHTML"
                         hx-on::after-request="htmx.trigger('#pantry-container', 'refreshPantry')">
                         <input type="hidden" name="itemName" value="{{ .ItemName }}">
                         <button class="btn btn-sm btn-increment" type="submit">+</button>
@@ -45,22 +44,5 @@
         </div>
         {{ end }}
     </div>
-</div>
-{{ end }}
-
-{{ block "PantryResponseMessage" .}}
-<div class="response-messages">
-    {{ if .SuccessMessage }}
-    <div class="alert alert-success-home">
-        <span class="alert-icon">✓</span>
-        {{ .SuccessMessage }}
-    </div>
-    {{ end }}
-    {{ if .ErrorMessage }}
-    <div class="alert alert-error-home">
-        <span class="alert-icon">✕</span>
-        {{ .ErrorMessage }}
-    </div>
-    {{ end }}
 </div>
 {{ end }}

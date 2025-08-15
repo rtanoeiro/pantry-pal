@@ -8,9 +8,10 @@
     <title>Pantry Pal - Dashboard</title>
     <link rel="stylesheet" href="/css/styles.css">
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.4/dist/ext/response-targets.js"></script>
 </head>
 
-<body hx-boost="true">
+<body hx-boost="true" hx-ext="response-targets">
     <div class="app-container">
         <!-- Header -->
         <header class="app-header">
@@ -63,18 +64,18 @@
                         </div>
 
                         <div class="button-group">
-                            <button type="submit" hx-post="/pantry" hx-target="#responseMessage" hx-swap="innerHTML" class="btn btn-primary btn-full">
+                            <button type="submit" hx-post="/pantry" hx-target="#return-responses" hx-target-error="#return-responses" hx-swap="innerHTML" class="btn btn-primary btn-full">
                                 <span class="btn-icon">+</span>
                                 Add Item to Pantry
                             </button>
-                            <button type="submit" hx-post="/shopping" hx-target="#responseMessage" hx-swap="innerHTML" class="btn btn-primary btn-full">
+                            <button type="submit" hx-post="/shopping" hx-target="#return-responses" hx-target-error="#return-responses" hx-swap="innerHTML" class="btn btn-primary btn-full">
                                 <span class="btn-icon">+</span>
                                 Add Item to Shopping Cart
                             </button>
                         </div>
                     </form>
 
-                    <div id="responseMessage" class="response-container">{{ template "HomeResponseMessage" . }}</div>
+                    <div id="return-responses"class="return-responses"></div>
                 </div>
             </section>
 
@@ -95,22 +96,4 @@
 </body>
 
 </html>
-{{ end }}
-
-
-{{ block "HomeResponseMessage" .}}
-<div class="response-messages">
-    {{ if .SuccessMessage }}
-    <div class="alert alert-success-home">
-        <span class="alert-icon">✓</span>
-        {{ .SuccessMessage }}
-    </div>
-    {{ end }}
-    {{ if .ErrorMessage }}
-    <div class="alert alert-error-home">
-        <span class="alert-icon">✕</span>
-        {{ .ErrorMessage }}
-    </div>
-    {{ end }}
-</div>
 {{ end }}
