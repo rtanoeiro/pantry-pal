@@ -18,40 +18,11 @@ jobs:
         with:
             go-version: "1.24.2"
 
-      - name: Build
-        run: go build -v ./...
-
-      - name: Install goose
-        run : go install github.com/pressly/goose/v3/cmd/goose@latest
-
-      - name: go test
-        run: make test
-
-      - name: Install gosec
-        run: go install github.com/securego/gosec/v2/cmd/gosec@latest
-
-      - name: gosec
-        run: make check-sec
-
-  Style:
-    name: Style
-    runs-on: ubuntu-latest
-
-    steps:
-
-      - name: Check out code
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - name: Setup Mise
+        uses: jdx/mise-action@v2
         with:
-            go-version: "1.24.2"
+          cache: false
+          experimental: true
 
-      - name: Install GolangCI-Lint
-        run: go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.2.1
-      
-      - name: Style
-        run: test -z $(go fmt ./...)
-
-      - name: Lint
-        run: golangci-lint run ./...
+      - name: Run checks
+        run: mise run checks

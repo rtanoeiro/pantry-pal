@@ -17,19 +17,20 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: "1.24.2"
-    
-      - name: Install goose
-        run: go install github.com/pressly/goose/v3/cmd/goose@latest    
 
+      - name: Setup Mise
+        uses: jdx/mise-action@v2
+        with:
+          cache: false
+          experimental: true
+  
       - name: Migrate DB
-        run: |
-          mkdir data
-          chmod +x ./scripts/migrate_up.sh && sh scripts/migrate_up.sh prod
+        run: mise run migrate_up_prod
 
       - name: Login Docker
         uses: docker/login-action@v3
         with:
-            username: mrramonster
+            username: rtanoeiro
             password: ${{ secrets.DOCKER_HUB_TOKEN }}
         
       - name: Build and push Docker image
@@ -39,4 +40,4 @@ jobs:
             context: .
             file: Dockerfile
             push: true
-            tags: mrramonster/pantry_pal:latest
+            tags: rtanoeiro/pantry_pal:latest
