@@ -18,7 +18,7 @@
                 <p class="auth-subtitle">Join Pantry Pal and start managing your kitchen smarter</p>
             </div>
 
-            <form id="signupForm" action="signup" method="POST" hx-target="#error-signup" hx-swap="innerHTML"
+            <form id="signupForm" hx-post="/signup" hx-target-error="#error-signup" hx-swap="innerHTML"
                 class="auth-form">
                 <div class="form-group">
                     <label for="name" class="form-label">Full Name</label>

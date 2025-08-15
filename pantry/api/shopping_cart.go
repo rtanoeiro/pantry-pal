@@ -129,6 +129,13 @@ func (config *Config) RemoveOneItemShopping(writer http.ResponseWriter, request 
 
 func (config *Config) UpdateItemShopping(writer http.ResponseWriter, request *http.Request, updateItem database.UpdateItemShoppingParams, toAddQuantity int64) {
 	var cartInfo SuccessErrorResponse
+	if updateItem.Quantity < 0 {
+		cartInfo.ErrorMessage = "Invalid final quantity, unable to remove from negative quantity"
+		writer.WriteHeader(http.StatusBadRequest)
+		_ = config.Renderer.Render(writer, "HomeResponseMessage", cartInfo)
+		return
+	}
+
 	errUpdate := config.Db.UpdateItemShopping(request.Context(), updateItem)
 	if errUpdate != nil {
 		cartInfo.ErrorMessage = "Invalid quantity"
