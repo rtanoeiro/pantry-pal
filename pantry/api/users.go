@@ -58,9 +58,7 @@ func (config *Config) CreateUser(writer http.ResponseWriter, request *http.Reque
 		userAdd.ID,
 		userAdd.Name,
 	)
-	writer.WriteHeader(http.StatusOK)
-	writer.Header().Set("HX-Push-Url", "/login")
-	_ = config.Renderer.Render(writer, "index", nil)
+	config.Index(writer, request)
 }
 
 func (config *Config) GetUserInfo(writer http.ResponseWriter, request *http.Request) {
