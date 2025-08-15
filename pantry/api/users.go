@@ -281,8 +281,5 @@ func (config *Config) getUserInformation(userID string, userInfo UserInfoRequest
 
 func (config *Config) validateUniqueName(name string) bool {
 	_, userError := config.Db.GetUserByName(context.Background(), name)
-	if userError == nil {
-		return false
-	}
-	return true
+	return userError != nil
 }

@@ -47,7 +47,7 @@ func (config *Config) Login(writer http.ResponseWriter, request *http.Request) {
 		_ = config.Renderer.Render(writer, "errorLoginSignup", returnResponse)
 		return
 	}
-	
+
 	if CheckPasswordHash(password, userData.PasswordHash) != nil {
 		log.Printf("User %s failed login with wrong password at %s:", user, time.Now())
 		returnResponse.ErrorMessage = "Wrong Password"
