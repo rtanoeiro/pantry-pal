@@ -64,18 +64,19 @@
                         </div>
 
                         <div class="button-group">
-                            <button type="submit" hx-post="/pantry" hx-target="#responseMessage" hx-swap="innerHTML" class="btn btn-primary btn-full">
+                            <button type="submit" hx-post="/pantry" hx-target="#successResponse" hx-target-error="#errorResponse" hx-swap="innerHTML" class="btn btn-primary btn-full">
                                 <span class="btn-icon">+</span>
                                 Add Item to Pantry
                             </button>
-                            <button type="submit" hx-post="/shopping" hx-target="#responseMessage" hx-swap="innerHTML" class="btn btn-primary btn-full">
+                            <button type="submit" hx-post="/shopping" hx-target="#successResponse" hx-target-error="#errorResponse" hx-swap="innerHTML" class="btn btn-primary btn-full">
                                 <span class="btn-icon">+</span>
                                 Add Item to Shopping Cart
                             </button>
                         </div>
                     </form>
 
-                    <div id="responseMessage" class="response-container"></div>
+                    <div id="successResponse" class="response-container"></div>
+                    <div id="errorResponse" class="response-container"></div>
                 </div>
             </section>
 
