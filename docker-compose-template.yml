@@ -1,6 +1,6 @@
 services:
   pantry_pal:
-    image: mrramonster/pantry_pal:latest
+    image: rtanoeiro/pantry_pal:latest
     container_name: pantry_pal
     environment:
       - PORT=8080
@@ -8,4 +8,6 @@ services:
       - JWT_SECRET=my_secret
       # You can create a secret with the following command:
       # echo $(openssl rand -base64 32) or echo $(openssl rand -base64 64), depending on how complex you want your secret to be
+    ports:
+      - 8080:8080
     entrypoint: ['./pantry_pal']
