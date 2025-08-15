@@ -1,0 +1,73 @@
+[tools]
+air = "latest"
+"aqua:golangci/golangci-lint" = "latest"
+"aqua:securego/gosec" = "latest"
+go = "latest"
+golangci-lint = "latest"
+
+[tasks.test]
+description = "Run tests with database migrations"
+run = '''
+mkdir -p data
+sh scripts/migrate_down.sh dev
+sh scripts/migrate_up.sh dev
+go test ./... --cover -v
+sh scripts/migrate_down.sh dev
+sh scripts/migrate_up.sh dev
+'''
+
+[tasks.sec]
+description = "Run security checks"
+run = "gosec -exclude=G101,G104 ./..."
+
+[tasks.fmt]
+description = "Format Go code"
+run = "go fmt ./..."
+
+[tasks.lint]
+description = "Run linter"
+run = "golangci-lint run ./..."
+
+[tasks.checks]
+description = "Run all checks (test, security, format, lint)"
+depends = ["test", "sec", "fmt", "lint"]
+
+[tasks.build_docker]
+description = "Build Docker image"
+run = '''
+mkdir -p data
+chmod +x scripts/migrate_up.sh
+docker build --tag rtanoeiro/pantry_pal:latest .
+'''
+
+[tasks.push_docker]
+description = "Push Docker image"
+run = "docker push rtanoeiro/pantry_pal:latest"
+
+[tasks.migrate_up_prod]
+description = "Run migration up for production database"
+run = '''
+mkdir -p data
+sh scripts/migrate_up.sh prod
+'''
+
+[tasks.migrate_up_dev]
+description = "Run migration up for development database"
+run = '''
+mkdir -p data
+sh scripts/migrate_up.sh dev
+'''
+
+[tasks.build_docker_prod]
+description = "Build Docker image with production database"
+run = '''
+mkdir -p data
+chmod +x scripts/migrate_up.sh
+sh scripts/migrate_up.sh prod
+docker build --tag rtanoeiro/pantry_pal:latest .
+'''
+
+[tasks.build_push]
+description = "Build and push Docker image"
+depends = ["build_docker_prod", "push_docker"]
+
