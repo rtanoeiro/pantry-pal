@@ -19,10 +19,10 @@
                 <p class="auth-subtitle">Join Pantry Pal and start managing your kitchen smarter</p>
             </div>
 
-            <form id="signupForm" hx-post="/signup" hx-target-error="#error-signup" hx-swap="innerHTML"
+            <form id="signupForm" hx-post="/signup" hx-target="#return-responses" hx-target-error="#return-responses" hx-swap="innerHTML"
                 class="auth-form">
                 <div class="form-group">
-                    <label for="name" class="form-label">Full Name</label>
+                    <label for="name" class="form-label">Username</label>
                     <input type="text" id="name" name="name" class="form-input" placeholder="Enter your full name"
                         required>
                 </div>
@@ -33,7 +33,7 @@
                         placeholder="Create a secure password" required>
                 </div>
 
-                {{ template "errorSignup" . }}
+                <div id="return-responses" class="response-container"></div>
 
                 <button type="submit" class="btn btn-primary btn-full">Create Account</button>
             </form>

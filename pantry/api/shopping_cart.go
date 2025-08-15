@@ -39,13 +39,13 @@ func (config *Config) AddItemShopping(writer http.ResponseWriter, request *http.
 	if errQuantity != nil {
 		cartInfo.ErrorMessage = "Invalid quantity"
 		writer.WriteHeader(http.StatusBadRequest)
-		_ = config.Renderer.Render(writer, "HomeResponseMessage", cartInfo)
+		_ = config.Renderer.Render(writer, "SuccessErrorMessage", cartInfo)
 		return
 	}
 	if itemName == "" || itemQuantity == 0 {
 		cartInfo.ErrorMessage = "Please provide valid Name and Quantity for all fields"
 		writer.WriteHeader(http.StatusBadRequest)
-		_ = config.Renderer.Render(writer, "HomeResponseMessage", cartInfo)
+		_ = config.Renderer.Render(writer, "SuccessErrorMessage", cartInfo)
 		return
 	}
 
@@ -53,7 +53,7 @@ func (config *Config) AddItemShopping(writer http.ResponseWriter, request *http.
 	if errUser != nil {
 		cartInfo.ErrorMessage = fmt.Sprintf("Unable to retrieve user. Error: %s", errUser.Error())
 		writer.WriteHeader(http.StatusInternalServerError)
-		_ = config.Renderer.Render(writer, "HomeResponseMessage", cartInfo)
+		_ = config.Renderer.Render(writer, "SuccessErrorMessage", cartInfo)
 		return
 	}
 	log.Printf("User %s is trying to add %d of %s into its shopping cart", userID, itemQuantity, itemName)
@@ -85,14 +85,14 @@ func (config *Config) AddItemShopping(writer http.ResponseWriter, request *http.
 		log.Printf("User %s failed to add items to cart", userID)
 		cartInfo.ErrorMessage = fmt.Sprintf("Unable to add items to your Shopping Cart. Error: %s", errAdd.Error())
 		writer.WriteHeader(http.StatusInternalServerError)
-		_ = config.Renderer.Render(writer, "HomeResponseMessage", cartInfo)
+		_ = config.Renderer.Render(writer, "SuccessErrorMessage", cartInfo)
 		return
 	}
 
 	log.Printf("User %s Successfully added x%d - %s", userID, itemQuantity, itemName)
 	cartInfo.SuccessMessage = fmt.Sprintf("Successfully added x%d - %s", addItem.Quantity, addItem.ItemName)
 	writer.WriteHeader(http.StatusOK)
-	_ = config.Renderer.Render(writer, "HomeResponseMessage", cartInfo)
+	_ = config.Renderer.Render(writer, "SuccessErrorMessage", cartInfo)
 }
 
 func (config *Config) AddOneItemShopping(writer http.ResponseWriter, request *http.Request) {
@@ -102,7 +102,7 @@ func (config *Config) AddOneItemShopping(writer http.ResponseWriter, request *ht
 	if errUser != nil {
 		cartInfo.ErrorMessage = fmt.Sprintf("Unable to retrieve user. Error: %s", errUser.Error())
 		writer.WriteHeader(http.StatusInternalServerError)
-		_ = config.Renderer.Render(writer, "HomeResponseMessage", cartInfo)
+		_ = config.Renderer.Render(writer, "SuccessErrorMessage", cartInfo)
 		return
 	}
 	log.Printf("User %s is trying to add one item of %s", userID, request.FormValue("itemName"))
@@ -118,7 +118,7 @@ func (config *Config) RemoveOneItemShopping(writer http.ResponseWriter, request 
 	if errUser != nil {
 		cartInfo.ErrorMessage = fmt.Sprintf("Unable to retrieve user. Error: %s", errUser.Error())
 		writer.WriteHeader(http.StatusInternalServerError)
-		_ = config.Renderer.Render(writer, "HomeResponseMessage", cartInfo)
+		_ = config.Renderer.Render(writer, "SuccessErrorMessage", cartInfo)
 		return
 	}
 	log.Printf("User %s is trying to remove one item of %s", userID, request.FormValue("itemName"))
@@ -132,7 +132,7 @@ func (config *Config) UpdateItemShopping(writer http.ResponseWriter, request *ht
 	if updateItem.Quantity < 0 {
 		cartInfo.ErrorMessage = "Invalid final quantity, unable to remove from negative quantity"
 		writer.WriteHeader(http.StatusBadRequest)
-		_ = config.Renderer.Render(writer, "HomeResponseMessage", cartInfo)
+		_ = config.Renderer.Render(writer, "SuccessErrorMessage", cartInfo)
 		return
 	}
 
@@ -140,7 +140,7 @@ func (config *Config) UpdateItemShopping(writer http.ResponseWriter, request *ht
 	if errUpdate != nil {
 		cartInfo.ErrorMessage = "Invalid quantity"
 		writer.WriteHeader(http.StatusBadRequest)
-		_ = config.Renderer.Render(writer, "HomeResponseMessage", cartInfo)
+		_ = config.Renderer.Render(writer, "SuccessErrorMessage", cartInfo)
 		return
 	}
 	if toAddQuantity == -1 {
@@ -149,7 +149,7 @@ func (config *Config) UpdateItemShopping(writer http.ResponseWriter, request *ht
 		cartInfo.SuccessMessage = fmt.Sprintf("Added %d items of %s", toAddQuantity, updateItem.ItemName)
 	}
 	writer.WriteHeader(http.StatusOK)
-	_ = config.Renderer.Render(writer, "HomeResponseMessage", cartInfo)
+	_ = config.Renderer.Render(writer, "SuccessErrorMessage", cartInfo)
 }
 
 func (config *Config) RemoveItemShopping(writer http.ResponseWriter, request *http.Request) {
@@ -160,7 +160,7 @@ func (config *Config) RemoveItemShopping(writer http.ResponseWriter, request *ht
 		log.Printf("Error on deleting item from user %s at %s. Invalid token", userID, time.Now())
 		cartInfo.ErrorMessage = fmt.Sprintf("Unable to retrieve user Pantry Items. Error: %s", errUser.Error())
 		writer.WriteHeader(http.StatusForbidden)
-		_ = config.Renderer.Render(writer, "HomeResponseMessage", cartInfo)
+		_ = config.Renderer.Render(writer, "SuccessErrorMessage", cartInfo)
 		return
 	}
 	log.Printf("User %s is trying to remove %s from shopping cart at %s.", userID, itemName, time.Now())
@@ -174,12 +174,12 @@ func (config *Config) RemoveItemShopping(writer http.ResponseWriter, request *ht
 		log.Printf("Error on deleting item %s from user %s shopping cart at %s. Error: %s", removeParams.ItemName, userID, time.Now(), errRemove.Error())
 		cartInfo.ErrorMessage = fmt.Sprintf("Error on deleting item from shopping cart. Error: %s", errRemove.Error())
 		writer.WriteHeader(http.StatusInternalServerError)
-		_ = config.Renderer.Render(writer, "HomeResponseMessage", cartInfo)
+		_ = config.Renderer.Render(writer, "SuccessErrorMessage", cartInfo)
 		return
 	}
 	log.Printf("User %s removed %s from its shopping cart at %s", userID, removeParams.ItemName, time.Now())
 	cartInfo.SuccessMessage = fmt.Sprintf("Successfulyl deleted %s: ", removeParams.ItemName)
 	writer.WriteHeader(http.StatusOK)
-	_ = config.Renderer.Render(writer, "HomeResponseMessage", cartInfo)
+	_ = config.Renderer.Render(writer, "SuccessErrorMessage", cartInfo)
 	writer.Header().Set("HX-Redirect", "/home")
 }
