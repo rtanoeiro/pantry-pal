@@ -4,6 +4,7 @@ air = "latest"
 "aqua:securego/gosec" = "latest"
 go = "latest"
 golangci-lint = "latest"
+"go:github.com/pressly/goose/v3/cmd/goose" = "latest"
 
 [tasks.test]
 description = "Run tests with database migrations"
